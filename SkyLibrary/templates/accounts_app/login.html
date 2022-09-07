@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 login_page %}
+    {% block top_panel %}
+        <button onclick="location.href='{% url 'index' %}'">Home page</button>
+    {% endblock top_panel %}
+    {% block header %}
+        Log in:
+    {% endblock header %}
+    {% block content %}
+        <form method="POST">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                {{ form.non_field_errors }}<br>
+            {% endif %}
+            {% for field in form %}
+                {{ field.label_tag }}<br>
+                {{ field }}<br>
+                {{ field.errors }}
+            {% endfor %}
+            <input type="submit" value="Log in">
+        </form>
+    {% endblock content %}
+{% endcache %}
+</html>

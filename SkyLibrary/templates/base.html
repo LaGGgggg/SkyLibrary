@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load cache %}
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css_styles/main.css' %}">
+    <title>Sky library</title>
+</head>
+<body>
+    <section class="top_panel">{% block top_panel %}{% endblock top_panel %}</section>
+    <h1>{% block header %}{% endblock header %}</h1>
+    <div>{% block content %}{% endblock content %}</div>
+    <!-- 31536000 = one year, it doesn't change -->
+    {% cache 31536000 footer %}
+        <footer>
+            Support: <address style="display: inline;">TulNik0@yandex.ru</address>
+        </footer>
+    {% endcache %}
+</body>
+</html>

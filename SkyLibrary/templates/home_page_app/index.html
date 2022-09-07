@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 home_page %}
+    {% block top_panel %}
+        {% if user.is_authenticated %}
+            <button onclick="location.href='{% url 'profile' %}'">Profile</button>
+        {% else %}
+            <button onclick="location.href='{% url 'login' %}'">Log in</button>
+            <button onclick="location.href='{% url 'sign_up' %}'">Sign up</button>
+        {% endif %}
+    {% endblock top_panel %}
+    {% block header %}
+        Hello!
+    {% endblock header %}
+    {% block content %}
+        It's sky library!!
+    {% endblock content %}
+{% endcache %}
+</html>
