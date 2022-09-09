@@ -16,7 +16,7 @@ import dj_database_url
 from pathlib import Path
 from environ import Env
 
-from .services import not_env_var_set_handler, LOGS_FILE_NAME
+from .services import env_var_not_set_handler, LOGS_FILE_NAME
 
 env = Env()
 Env.read_env()
@@ -35,7 +35,7 @@ if not SECRET_KEY:
 
     SECRET_KEY = os.urandom(32)
 
-    not_env_var_set_handler('SECRET_KEY', context='used random', error_level='WARNING')
+    env_var_not_set_handler('SECRET_KEY', context='used random', error_level='CRITICAL')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=None)
@@ -44,7 +44,7 @@ if not DEBUG:
 
     DEBUG = False
 
-    not_env_var_set_handler('DEBUG', context='used False', error_level='WARNING')
+    env_var_not_set_handler('DEBUG', context='used False', error_level='WARNING')
 
 ALLOWED_HOSTS = []
 INTERNAL_IPS = []
@@ -117,7 +117,7 @@ else:
     }
 
     if not DB_URL:
-        not_env_var_set_handler('DB_URL', error_level='ERROR')
+        env_var_not_set_handler('DB_URL', error_level='CRITICAL')
 
 
 # Password validation
@@ -200,7 +200,7 @@ if CACHE_LOCAL == 'unset':
     sets redis django backend, error in development (where file cache storage is used) is not critical) -->
     set default value (False)
     """
-    not_env_var_set_handler('CACHE_LOCAL', context='used False', error_level='WARNING')
+    env_var_not_set_handler('CACHE_LOCAL', context='used False', error_level='WARNING')
 
 else:
     # needed because env() return string, any string (exclude empty) in bool is True
@@ -213,7 +213,7 @@ if CACHE_LOCATIONS == ['unset']:
     CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
     we don't use cache otherwise other parts of the project don't work
     """
-    not_env_var_set_handler('CACHE_LOCATIONS', context='not used', error_level='WARNING')
+    env_var_not_set_handler('CACHE_LOCATIONS', context='not used', error_level='WARNING')
 
 elif CACHE_LOCAL:
     # Local development cache case
@@ -237,6 +237,30 @@ else:
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'app_main.services.show_debug_toolbar',
 }
+
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)
+
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # needed for not error response
+
+    if not EMAIL_HOST_USER:
+        env_var_not_set_handler('EMAIL_HOST_USER', context='not used', error_level='ERROR')
+
+    if not EMAIL_HOST_PASSWORD:
+        env_var_not_set_handler('EMAIL_HOST_PASSWORD', context='not used', error_level='ERROR')
+
+else:
+
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.yandex.ru'
+    EMAIL_PORT = 465
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    SERVER_EMAIL = EMAIL_HOST_USER
 
 
 # Internationalization

@@ -6,6 +6,7 @@
 {% cache 31536000 profile_page %}
     {% block top_panel %}
         <button onclick="location.href='{% url 'index' %}'">Home page</button>
+        <button onclick="location.href='{% url 'password_change' %}'">Change password</button>
         <button onclick="location.href='{% url 'logout' %}'">Log out</button>
     {% endblock top_panel %}
     {% block header %}
