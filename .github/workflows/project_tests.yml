@@ -9,9 +9,10 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./SkyLibrary
     services:
       postgres:
         image: postgres:latest
@@ -32,11 +33,13 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
+        working-directory: ./
         python -m pip install --upgrade pip
-        pip install -r NeedBuy/requirements.txt
+        pip install -r requirements.txt
+    - name: Run python commands
     - name: Run collectstatic
-      run: python NeedBuy/manage.py collectstatic
+      run: python manage.py collectstatic
     - name: Run migrations
-      run: python NeedBuy/manage.py migrate
+      run: python manage.py migrate
     - name: Run tests
-      run: python NeedBuy/manage.py test
+      run: python manage.py test
