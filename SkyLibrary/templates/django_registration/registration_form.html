@@ -3,7 +3,7 @@
 {% extends 'base.html' %}
 {% load cache %}
 <!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 sign_up_page %}
+{% cache 31536000 registration_form_page %}
     {% block top_panel %}
         <button onclick="location.href='{% url 'index' %}'">Home page</button>
     {% endblock top_panel %}

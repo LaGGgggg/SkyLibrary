@@ -1,15 +1,15 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 
+from django_registration.forms import RegistrationFormUniqueEmail
 
-class SignUpForm(UserCreationForm):
+
+class CustomSignUpForm(RegistrationFormUniqueEmail):
 
     # Don't change the form name(role), it's important for the html page.
     role = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, initial=1)
-    email = forms.CharField(max_length=254)
 
-    class Meta(UserCreationForm.Meta):
+    class Meta(RegistrationFormUniqueEmail.Meta):
 
         model = get_user_model()
-        fields = UserCreationForm.Meta.fields + ('role', 'email')
+        fields = RegistrationFormUniqueEmail.Meta.fields + ['role']

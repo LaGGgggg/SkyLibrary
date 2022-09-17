@@ -4,7 +4,6 @@ from django.views.generic.base import TemplateView
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetCompleteView
 
 from .views import (
-    SignUpView,
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomPasswordChangeView,
@@ -12,7 +11,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path('signup/', SignUpView.as_view(), name='sign_up'),
     path('login/', LoginView.as_view(template_name='accounts_app/login.html'), name='login'),
     path('profile/', view_profile, name='profile'),
     path('logout_successful/', TemplateView.as_view(template_name='accounts_app/logout_successful.html')),
@@ -23,7 +21,7 @@ urlpatterns = [
         name='password_reset_successful',
     ),
     re_path(
-        '^password_reset_confirm/(?P<uidb64>[-\\w]+)/(?P<token>[-\\w]+)/$',
+        '^password_reset_confirm/(?P<uidb64>[-\\w]+)/(?P<token>[-:\\w]+)/$',
         CustomPasswordResetConfirmView.as_view(),
         name='custom_password_reset_confirm',
     ),

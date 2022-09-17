@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 activation_complete_page %}
+    {% block header %}
+       Account activation completed!
+    {% endblock header %}
+    {% block content %}
+        <button onclick="location.href='{% url 'login' %}'">Log in</button>
+    {% endblock content %}
+{% endcache %}
+</html>

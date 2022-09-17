@@ -9,7 +9,7 @@
             <button onclick="location.href='{% url 'profile' %}'">Profile</button>
         {% else %}
             <button onclick="location.href='{% url 'login' %}'">Log in</button>
-            <button onclick="location.href='{% url 'sign_up' %}'">Sign up</button>
+            <button onclick="location.href='{% url 'django_registration_register' %}'">Sign up</button>
         {% endif %}
     {% endblock top_panel %}
     {% block header %}
