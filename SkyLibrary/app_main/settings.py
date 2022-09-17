@@ -98,28 +98,14 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if env('GITHUB_OVERFLOW', default=False):
-    # for GitHub actions autotests
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'postgres',
-            'USER': 'postgres',
-            'PASSWORD': 'postgres',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-        }
-    }
-else:
+DB_URL = env('DB_URL', default=None)
 
-    DB_URL = env('DB_URL', default=None)
+DATABASES = {
+    'default': dj_database_url.config(default=DB_URL)
+}
 
-    DATABASES = {
-        'default': dj_database_url.config(default=DB_URL)
-    }
-
-    if not DB_URL:
-        env_var_not_set_handler('DB_URL', error_level='CRITICAL')
+if not DB_URL:
+    env_var_not_set_handler('DB_URL', error_level='CRITICAL')
 
 
 # Password validation
