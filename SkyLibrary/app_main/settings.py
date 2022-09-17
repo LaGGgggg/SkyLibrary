@@ -18,6 +18,8 @@ from environ import Env
 
 from .services import env_var_not_set_handler, LOGS_FILE_NAME
 
+LOGS_DEBUG_FILE_NAME = 'logs_debug.log'
+
 env = Env()
 Env.read_env()
 
@@ -159,6 +161,9 @@ LOGGING = {
         },
     },
     'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
         },
@@ -176,15 +181,23 @@ LOGGING = {
             'filename': BASE_DIR.joinpath(LOGS_FILE_NAME),
             'formatter': 'verbose',
         },
+        'file_debug': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR.joinpath(LOGS_DEBUG_FILE_NAME),
+            'formatter': 'simple',
+        },
         'mail_admins': {
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file', 'mail_admins'],
+            'handlers': ['console', 'file', 'mail_admins', 'file_debug'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -293,3 +306,4 @@ ROOT_URLCONF = 'app_main.urls'
 PROJECT_ROOT = BASE_DIR.joinpath('apps')
 AUTH_USER_MODEL = 'accounts_app.User'
 LOGOUT_REDIRECT_URL = '/accounts/logout_successful/'
+ACCOUNT_ACTIVATION_DAYS = 10
