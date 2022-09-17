@@ -36,7 +36,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run python commands
     - name: Run collectstatic
       run: python manage.py collectstatic
     - name: Run migrations
