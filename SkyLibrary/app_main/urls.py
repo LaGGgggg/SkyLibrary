@@ -33,3 +33,8 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('home_page_app.urls')),
 ]
+
+handler400 = 'home_page_app.views.handler400'
+handler403 = 'home_page_app.views.handler403'
+handler404 = 'home_page_app.views.handler404'
+handler500 = 'home_page_app.views.handler500'

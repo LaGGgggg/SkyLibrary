@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 403_error_page %}
+    {% block head %}
+        <title>403 error</title>
+    {% endblock head %}
+    {% block header %}
+        403 error
+    {% endblock header %}
+    {% block content %}
+        Oops, you do not have permission to do this
+        <h2><button onclick="location.href='{% url 'index' %}'">Home page</button></h2>
+    {% endblock content %}
+{% endcache %}
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 400_error_page %}
+    {% block head %}
+        <title>400 error</title>
+    {% endblock head %}
+    {% block header %}
+        400 error
+    {% endblock header %}
+    {% block content %}
+        Oops, invalid url
+        <h2><button onclick="location.href='{% url 'index' %}'">Home page</button></h2>
+    {% endblock content %}
+{% endcache %}
+</html>

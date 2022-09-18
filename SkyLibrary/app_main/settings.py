@@ -48,8 +48,25 @@ if not DEBUG:
 
     env_var_not_set_handler('DEBUG', context='used False', error_level='WARNING')
 
-ALLOWED_HOSTS = []
-INTERNAL_IPS = []
+else:
+    DEBUG = DEBUG.lower() == 'true'
+
+
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='unset').split(', ')
+
+if ALLOWED_HOSTS == ['unset']:
+
+    ALLOWED_HOSTS = []
+
+    env_var_not_set_handler('ALLOWED_HOSTS', context='site is not running', error_level='CRITICAL')
+
+INTERNAL_IPS = env('INTERNAL_IPS', default='unset').split(', ')
+
+if INTERNAL_IPS == ['unset']:
+
+    INTERNAL_IPS = []
+
+    env_var_not_set_handler('INTERNAL_IPS', context='not used', error_level='WARNING')
 
 
 # Application definition
@@ -105,7 +122,7 @@ DATABASES = {
 }
 
 if not DB_URL:
-    env_var_not_set_handler('DB_URL', error_level='CRITICAL')
+    env_var_not_set_handler('DB_URL', context='site is not running', error_level='CRITICAL')
 
 
 # Password validation
