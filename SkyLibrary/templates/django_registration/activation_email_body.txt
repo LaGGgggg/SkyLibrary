@@ -1,8 +1,15 @@
+{% spaceless %}
 {% load i18n %}
+{% blocktranslate count expiration_days=expiration_days with site_name=site.name %}
+You have asked to register an account at {{ site_name }}.
+If this wasn't you, please ignore this email.
 
-You have asked to register an account at {{ site.name }}.
+To activate this account, please click the following link within the next {{ expiration_days }} day:
+{% plural %}
+You have asked to register an account at {{ site_name }}.
 If this wasn't you, please ignore this email.
 
 To activate this account, please click the following link within the next {{ expiration_days }} days:
-
+{% endblocktranslate %}
 {{ scheme }}://{{ site.domain }}{% url "django_registration_activate" activation_key=activation_key %}
+{% endspaceless %}

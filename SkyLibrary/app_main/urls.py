@@ -15,12 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
+from django.views.i18n import JavaScriptCatalog
 
 from django_registration.backends.activation.views import RegistrationView
 
 from accounts_app.forms import CustomSignUpForm
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+urlpatterns += i18n_patterns(
     path('__debug__/', include('debug_toolbar.urls')),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts_app.urls')),
@@ -32,7 +40,10 @@ urlpatterns = [
     path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('home_page_app.urls')),
-]
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # needed for correct js translation
+)
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler400 = 'home_page_app.views.handler400'
 handler403 = 'home_page_app.views.handler403'
