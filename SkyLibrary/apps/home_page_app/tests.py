@@ -1,9 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client, RequestFactory
 
 from .views import handler400, handler403, handler404, handler500
 
 
+@override_settings(LANGUAGE_CODE='en-us')
 class HomePageAppTestCase(TestCase):
 
     @classmethod
@@ -17,7 +18,7 @@ class HomePageAppTestCase(TestCase):
 
     def test_index_page(self):
 
-        response = self.client.get('/')
+        response = self.client.get('/en-us/')
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home_page_app/index.html')

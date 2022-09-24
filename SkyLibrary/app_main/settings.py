@@ -225,37 +225,44 @@ else:
     # needed because env() return string, any string (exclude empty) in bool is True
     CACHE_LOCAL = CACHE_LOCAL.lower() == 'true'
 
-CACHE_LOCATIONS = env('CACHE_LOCATIONS', default='unset').split(', ')
+if CACHE_LOCAL:
 
-if CACHE_LOCATIONS == ['unset']:
-    """
-    CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
-    we don't use cache otherwise other parts of the project don't work
-    """
-    env_var_not_set_handler('CACHE_LOCATIONS', context='not used', error_level='WARNING')
+    CACHE_LOCATION_DB_TABLE_NAME = env('CACHE_LOCATION_DB_TABLE_NAME', default='unset')
 
-elif CACHE_LOCAL:
+    if CACHE_LOCATION_DB_TABLE_NAME == 'unset':
+
+        CACHE_LOCATION_DB_TABLE_NAME = 'cache'
+
+        env_var_not_set_handler('CACHE_LOCATION_DB_TABLE_NAME', context='used "cache" value', error_level='WARNING')
+
     # Local development cache case
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': BASE_DIR.joinpath('.cache'),
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': CACHE_LOCATION_DB_TABLE_NAME,
         }
     }
 
 else:
-    # Production cache case
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': CACHE_LOCATIONS,
+
+    CACHE_REDIS_LOCATIONS = env('CACHE_REDIS_LOCATIONS', default='unset').split(', ')
+
+    if CACHE_REDIS_LOCATIONS == ['unset']:
+        """
+        CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
+        we don't use cache otherwise other parts of the project don't work
+        """
+        env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='WARNING')
+
+    else:
+        # Production cache case
+        CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                'LOCATION': CACHE_REDIS_LOCATIONS,
+            }
         }
-    }
 
-
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': 'app_main.services.show_debug_toolbar',
-}
 
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)

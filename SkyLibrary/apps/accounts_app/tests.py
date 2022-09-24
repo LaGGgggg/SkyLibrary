@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 from django.core import signing, mail
@@ -16,7 +16,8 @@ def next_user_id():
     return user_model.objects.order_by('-id').first().id + 1
 
 
-class AccountsAppRegistrationTestCase(TestCase):
+@override_settings(LANGUAGE_CODE='en-us')
+class AccountsAppTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -100,8 +101,9 @@ class AccountsAppRegistrationTestCase(TestCase):
         response = self.client.post(reverse('login'), self.user_credentials, follow=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['user'].is_authenticated)
         self.assertTemplateUsed(response, 'accounts_app/profile.html')
+
+        self.assertTrue(response.context['user'].is_authenticated)
 
         self.client.logout()
 

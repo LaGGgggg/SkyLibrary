@@ -6,6 +6,7 @@ env:
   SECRET_KEY: django-secret-key-for-test
   DB_URL: postgres://postgres:postgres@localhost:5432/github_actions_db
   DEBUG: False
+  CACHE_LOCAL: True
 
 jobs:
   build:

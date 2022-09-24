@@ -6,7 +6,7 @@ LOGS_FILE_NAME = 'logs.log'
 ERROR_LEVELS = ('ERROR', 'WARNING', 'CRITICAL')
 
 
-def env_var_not_set_handler(variable_name: str, context='not context', error_level='WARNING') -> None:
+def env_var_not_set_handler(variable_name: str, context='no context', error_level='WARNING') -> None:
 
     error_level = error_level.upper()
 
@@ -33,7 +33,3 @@ def env_var_not_set_handler(variable_name: str, context='not context', error_lev
     # write in logs file:
     with open(LOGS_FILE_NAME, 'a+') as logs_file:
         logs_file.write(error_message)
-
-
-def show_debug_toolbar(request) -> bool:
-    return not request.user.is_anonymous and request.user.role == 4  # 4 - superuser
