@@ -235,7 +235,6 @@ if CACHE_LOCAL:
 
         env_var_not_set_handler('CACHE_LOCATION_DB_TABLE_NAME', context='used "cache" value', error_level='WARNING')
 
-    # Local development cache case
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
@@ -252,10 +251,9 @@ else:
         CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
         we don't use cache otherwise other parts of the project don't work
         """
-        env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='WARNING')
+        env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='ERROR')
 
     else:
-        # Production cache case
         CACHES = {
             'default': {
                 'BACKEND': 'django.core.cache.backends.redis.RedisCache',
@@ -333,5 +331,5 @@ WSGI_APPLICATION = 'app_main.wsgi.application'
 ROOT_URLCONF = 'app_main.urls'
 PROJECT_ROOT = BASE_DIR.joinpath('apps')
 AUTH_USER_MODEL = 'accounts_app.User'
-LOGOUT_REDIRECT_URL = '/accounts/logout_successful/'
+LOGOUT_REDIRECT_URL = 'logout_successful'
 ACCOUNT_ACTIVATION_DAYS = 10

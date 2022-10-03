@@ -13,7 +13,10 @@ from .views import (
 urlpatterns = [
     path('login/', LoginView.as_view(template_name='accounts_app/login.html'), name='login'),
     path('profile/', view_profile, name='profile'),
-    path('logout_successful/', TemplateView.as_view(template_name='accounts_app/logout_successful.html')),
+    path(
+        'logout_successful/', TemplateView.as_view(template_name='accounts_app/logout_successful.html'),
+        name='logout_successful'
+    ),
     path('password_reset/', CustomPasswordResetView.as_view(), name='password_reset'),
     path(
         'password_reset_successful/',

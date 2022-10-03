@@ -1,4 +1,4 @@
-version: "3.10"
+version: "3.9"
 
 services:
   db:
@@ -21,3 +21,6 @@ services:
       - db
     env_file:
       - ./SkyLibrary/app_main/.env.dev
+
+volumes:
+  db:
