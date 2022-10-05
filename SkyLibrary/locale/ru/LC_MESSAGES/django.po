@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-24 18:19+0400\n"
+"POT-Creation-Date: 2022-10-05 17:17+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,8 +20,85 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
+#: .\apps\accounts_app\forms.py:11
+msgid "role"
+msgstr ""
+
 #: .\apps\accounts_app\models.py:44
 msgid "email address"
+msgstr ""
+
+#: .\templates\accounts_app\login.html:9
+#: .\templates\accounts_app\logout_successful.html:12
+#: .\templates\accounts_app\password_change.html:9
+#: .\templates\accounts_app\password_change_successful.html:12
+#: .\templates\accounts_app\password_reset.html:9
+#: .\templates\accounts_app\password_reset_confirm.html:9
+#: .\templates\accounts_app\password_reset_successful.html:12
+#: .\templates\accounts_app\profile.html:9
+#: .\templates\django_registration\activation_failed.html:13
+#: .\templates\django_registration\registration_closed.html:12
+#: .\templates\django_registration\registration_complete.html:12
+#: .\templates\django_registration\registration_form.html:9
+#: .\templates\errors\400.html:16 .\templates\errors\403.html:16
+#: .\templates\errors\404.html:16 .\templates\errors\500.html:16
+msgid "Home page"
+msgstr ""
+
+#: .\templates\accounts_app\login.html:12
+msgid "Log in:"
+msgstr ""
+
+#: .\templates\accounts_app\login.html:25
+#: .\templates\accounts_app\password_reset_complete.html:12
+#: .\templates\django_registration\activation_complete.html:12
+#: .\templates\home_page_app\index.html:12
+msgid "Log in"
+msgstr ""
+
+#: .\templates\accounts_app\login.html:27
+msgid "password recovery"
+msgstr ""
+
+#: .\templates\accounts_app\logout_successful.html:9
+msgid "Logout successful!"
+msgstr ""
+
+#: .\templates\accounts_app\password_change.html:12
+msgid "Change password:"
+msgstr ""
+
+#: .\templates\accounts_app\password_change.html:25
+#: .\templates\accounts_app\password_reset_confirm.html:30
+#: .\templates\accounts_app\profile.html:10
+msgid "Change password"
+msgstr ""
+
+#: .\templates\accounts_app\password_change_successful.html:9
+#: .\templates\accounts_app\password_reset_complete.html:9
+msgid "Password changed successfully!"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset.html:12
+msgid "Reset password:"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset.html:25
+msgid "Reset password"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset_confirm.html:13
+msgid "Please enter your new password twice:"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset_confirm.html:15
+msgid "Invalid link!"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset_confirm.html:33
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used. Please request a new password reset."
 msgstr ""
 
 #: .\templates\accounts_app\password_reset_email.html:4
@@ -32,6 +109,23 @@ msgid ""
 "below:\n"
 "%(protocol)s://%(domain)s%(password_reset_confirm)s\n"
 "Your username, in case you've forgotten: %(user_get_username)s\n"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset_successful.html:9
+#: .\templates\django_registration\registration_complete.html:9
+msgid "Check your email."
+msgstr ""
+
+#: .\templates\accounts_app\profile.html:11
+msgid "Log out"
+msgstr ""
+
+#: .\templates\base.html:18
+msgid "Support:"
+msgstr ""
+
+#: .\templates\django_registration\activation_complete.html:9
+msgid "Account activation completed!"
 msgstr ""
 
 #: .\templates\django_registration\activation_email_body.txt:3
@@ -55,4 +149,45 @@ msgstr[1] ""
 
 #: .\templates\django_registration\activation_email_subject.txt:2
 msgid "account activation."
+msgstr ""
+
+#: .\templates\django_registration\activation_failed.html:9
+msgid "Account activation failed!"
+msgstr ""
+
+#: .\templates\django_registration\registration_closed.html:9
+msgid "Sorry, you can`t register."
+msgstr ""
+
+#: .\templates\django_registration\registration_form.html:12
+#: .\templates\django_registration\registration_form.html:26
+#: .\templates\home_page_app\index.html:13
+msgid "Sign up"
+msgstr ""
+
+#: .\templates\errors\400.html:9 .\templates\errors\400.html:12
+#: .\templates\errors\403.html:9 .\templates\errors\403.html:12
+#: .\templates\errors\404.html:9 .\templates\errors\404.html:12
+#: .\templates\errors\500.html:9 .\templates\errors\500.html:12
+msgid "error"
+msgstr ""
+
+#: .\templates\errors\400.html:15
+msgid "Oops, invalid url"
+msgstr ""
+
+#: .\templates\errors\403.html:15
+msgid "Oops, you do not have permission to do this"
+msgstr ""
+
+#: .\templates\errors\404.html:15
+msgid "Oops, page not found"
+msgstr ""
+
+#: .\templates\errors\500.html:15
+msgid "Oops, server error"
+msgstr ""
+
+#: .\templates\home_page_app\index.html:10
+msgid "Profile"
 msgstr ""

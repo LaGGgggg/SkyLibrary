@@ -2,6 +2,7 @@
 <html lang="en">
 {% load static %}
 {% load cache %}
+{% load i18n %}
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -14,7 +15,7 @@
     <!-- 31536000 = one year, it doesn't change -->
     {% cache 31536000 footer %}
         <footer>
-            Support: <address style="display: inline;">TulNik0@yandex.ru</address>
+            {% translate 'Support:' %} <address style="display: inline;">TulNik0@yandex.ru</address>
         </footer>
     {% endcache %}
 </body>

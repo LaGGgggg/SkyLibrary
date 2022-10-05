@@ -2,13 +2,14 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 registration_closed_page %}
     {% block header %}
-        Sorry, you can't register.
+        {% translate 'Sorry, you can`t register.' %}
     {% endblock header %}
     {% block content %}
-        <button onclick="location.href='{% url 'index' %}'">Home page</button>
+        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
     {% endblock content %}
 {% endcache %}
 </html>

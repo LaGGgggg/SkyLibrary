@@ -300,15 +300,12 @@ LOCALE_PATHS = (
 )
 
 
+USE_I18N = True
 LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
 USE_TZ = True
+TIME_ZONE = 'UTC'
+USE_L10N = True
 
 
 APPS_DIR = str(BASE_DIR.joinpath('apps'))

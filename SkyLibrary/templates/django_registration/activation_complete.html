@@ -2,13 +2,14 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 activation_complete_page %}
     {% block header %}
-       Account activation completed!
+       {% translate 'Account activation completed!' %}
     {% endblock header %}
     {% block content %}
-        <button onclick="location.href='{% url 'login' %}'">Log in</button>
+        <button onclick="location.href='{% url 'login' %}'">{% translate 'Log in' %}</button>
     {% endblock content %}
 {% endcache %}
 </html>

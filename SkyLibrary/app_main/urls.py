@@ -29,7 +29,6 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
-    path('__debug__/', include('debug_toolbar.urls')),
     path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # needed for correct js translation
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts_app.urls')),
@@ -41,6 +40,7 @@ urlpatterns += i18n_patterns(
     path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('home_page_app.urls')),
+    path('__debug__/', include('debug_toolbar.urls')),
 )
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

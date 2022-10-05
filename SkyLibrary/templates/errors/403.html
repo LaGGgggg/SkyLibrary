@@ -2,17 +2,18 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 403_error_page %}
     {% block head %}
-        <title>403 error</title>
+        <title>403 {% translate 'error' %}</title>
     {% endblock head %}
     {% block header %}
-        403 error
+        403 {% translate 'error' %}
     {% endblock header %}
     {% block content %}
-        Oops, you do not have permission to do this
-        <h2><button onclick="location.href='{% url 'index' %}'">Home page</button></h2>
+        {% translate 'Oops, you do not have permission to do this' %}
+        <h2><button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button></h2>
     {% endblock content %}
 {% endcache %}
 </html>

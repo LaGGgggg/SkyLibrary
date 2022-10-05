@@ -2,17 +2,18 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 500_error_page %}
     {% block head %}
-        <title>500 error</title>
+        <title>500 {% translate 'error' %}</title>
     {% endblock head %}
     {% block header %}
-        500 error
+        500 {% translate 'error' %}
     {% endblock header %}
     {% block content %}
-        Oops, server error
-        <h2><button onclick="location.href='{% url 'index' %}'">Home page</button></h2>
+        {% translate 'Oops, server error' %}
+        <h2><button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button></h2>
     {% endblock content %}
 {% endcache %}
 </html>

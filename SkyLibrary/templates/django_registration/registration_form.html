@@ -2,13 +2,14 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 registration_form_page %}
     {% block top_panel %}
-        <button onclick="location.href='{% url 'index' %}'">Home page</button>
+        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
     {% endblock top_panel %}
     {% block header %}
-        Sign up:
+        {% translate 'Sign up' %}:
     {% endblock header %}
     {% block content %}
         <form method="POST">
@@ -22,7 +23,7 @@
                     {{ field }}
                 {% endif %}
             {% endfor %}
-            <input type="submit" value="Sign up">
+            <input type="submit" value="{% translate 'Sign up' %}">
         </form>
     {% endblock content %}
 {% endcache %}
