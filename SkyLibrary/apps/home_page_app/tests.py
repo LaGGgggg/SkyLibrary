@@ -48,7 +48,7 @@ class HomePageAppTestCase(TestCase):
         with self.assertTemplateUsed('errors/404.html'):
             response = handler404(request, exception=None)
 
-        self.assertContains(response, 'Oops, object not found', status_code=404)
+        self.assertContains(response, 'Oops, page not found', status_code=404)
 
     def test_500_error_page(self):
 
