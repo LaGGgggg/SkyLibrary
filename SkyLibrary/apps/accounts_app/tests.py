@@ -7,13 +7,22 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
+from typing import Generator
+
 from django_registration.backends.activation.views import REGISTRATION_SALT
 
 user_model = get_user_model()
 
 
-def next_user_id():
-    return user_model.objects.order_by('-id').first().id + 1
+def get_next_user_id_generator() -> Generator[int, None, None]:
+
+    base_new_user_id = user_model.objects.order_by('-id').first().id
+
+    while True:
+        yield base_new_user_id + 1
+
+
+next_user_id_generator = get_next_user_id_generator()
 
 
 @override_settings(LANGUAGE_CODE='en-us')
@@ -39,9 +48,9 @@ class AccountsAppTestCase(TestCase):
 
         mails_before_request = len(mail.outbox)
 
-        username = f"test_user_{next_user_id()}"
+        username = f"test_user_{next(next_user_id_generator)}"
         user_password = 'test_password_2'
-        user_email = f"test_email_{next_user_id()}@mail.com"
+        user_email = f"test_email_{next(next_user_id_generator)}@mail.com"
 
         user_credentials = {
             'username': username,
@@ -166,7 +175,7 @@ class AccountsAppTestCase(TestCase):
             'username': 'test_username',
             'password1': 'TeSt_pASSw00rd',
             'password2': 'TeSt_pASSw00rd',
-            'email': f'test_mail{next_user_id()}@gmail.com',
+            'email': f'test_mail{next(next_user_id_generator)}@gmail.com',
         }
 
         response = self.client.post(reverse('django_registration_register'), correct_sign_up_post_data, follow=True)
@@ -198,7 +207,7 @@ class AccountsAppTestCase(TestCase):
             'username': 'test_username_2',
             'password1': 'TeSt_pASSw00rd',
             'password2': 'TeSt_pASSw00rd',
-            'email': f'test_mail_{next_user_id()}@gmail.com',
+            'email': f'test_mail_{next(next_user_id_generator)}@gmail.com',
         }
 
         self.client.post(reverse('django_registration_register'), sign_up_post_data, follow=True)
@@ -249,7 +258,7 @@ class AccountsAppTestCase(TestCase):
         user_credentials = {
             'username': 'test_user_2',
             'password': 'test_password_2',
-            'email': f'test_email_{next_user_id()}@mail.com',
+            'email': f'test_email_{next(next_user_id_generator)}@mail.com',
             'role': 1,
         }
 
@@ -287,7 +296,7 @@ class AccountsAppTestCase(TestCase):
         user_credentials = {
             'username': 'test_user_2',
             'password': 'test_password_2',
-            'email': f'test_email_{next_user_id()}@mail.com',
+            'email': f'test_email_{next(next_user_id_generator)}@mail.com',
             'role': 1,
         }
 

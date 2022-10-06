@@ -14,14 +14,23 @@ class HomePageAppTestCase(TestCase):
 
         cls.client = Client()
 
-        cls.request_factory = RequestFactory()
-
     def test_index_page(self):
 
         response = self.client.get('/en-us/')
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home_page_app/index.html')
+
+
+@override_settings(LANGUAGE_CODE='en-us')
+class ErrorsTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.request_factory = RequestFactory()
 
     def test_400_error_page(self):
 
