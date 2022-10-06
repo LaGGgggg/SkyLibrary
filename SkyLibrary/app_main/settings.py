@@ -307,7 +307,7 @@ USE_I18N = True
 
 LANGUAGE_CODE = env('LANGUAGE_CODE', default='unset')
 
-if not LANGUAGE_CODE:
+if LANGUAGE_CODE == 'unset':
 
     LANGUAGE_CODE = 'en-us'
 

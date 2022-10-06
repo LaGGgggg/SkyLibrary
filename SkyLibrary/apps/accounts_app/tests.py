@@ -25,7 +25,7 @@ def get_next_user_id_generator() -> Generator[int, None, None]:
 next_user_id_generator = get_next_user_id_generator()
 
 
-class AccountsAppTestCase(TestCase):
+class CommonTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -42,39 +42,6 @@ class AccountsAppTestCase(TestCase):
         }
 
         cls.user = user_model.objects.create_user(**cls.user_credentials)
-
-    def get_reset_link_data(self):
-
-        mails_before_request = len(mail.outbox)
-
-        username = f"test_user_{next(next_user_id_generator)}"
-        user_password = 'test_password_2'
-        user_email = f"test_email_{next(next_user_id_generator)}@mail.com"
-
-        user_credentials = {
-            'username': username,
-            'password': user_password,
-            'email': user_email,
-            'role': 1,
-        }
-
-        user = user_model.objects.create_user(**user_credentials)
-
-        password_reset_post_data = {
-            'email': user_credentials['email'],
-        }
-
-        response = self.client.post(reverse('password_reset'), password_reset_post_data, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'accounts_app/password_reset_successful.html')
-
-        self.assertEqual(mails_before_request + 1, len(mail.outbox))  # "+ 1" - because new email should be sent
-
-        token = default_token_generator.make_token(user)
-        uidb64 = urlsafe_base64_encode(force_bytes(user.id))
-
-        return user, user_password, token, uidb64
 
     def test_profile(self):
 
@@ -132,6 +99,16 @@ class AccountsAppTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'accounts_app/logout_successful.html')
         self.assertFalse(response.context['user'].is_authenticated)
+
+
+class RegisterTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.client = Client()
 
     def test_register_get(self):
 
@@ -237,6 +214,25 @@ class AccountsAppTestCase(TestCase):
         for field, error in form_errors.items():
             self.assertFormError(response, 'form', field, error)
 
+
+class PasswordChangeTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.client = Client()
+
+        user_credentials = {
+            'username': 'test_user',
+            'password': 'test_password',
+            'email': 'test_email_1@mail.com',
+            'role': 1,
+        }
+
+        cls.user = user_model.objects.create_user(**user_credentials)
+
     def test_password_change_get(self):
 
         self.client.force_login(self.user)
@@ -319,6 +315,58 @@ class AccountsAppTestCase(TestCase):
         self.assertTrue(user.check_password(password_change_post_correct_data['new_password2']))
 
         self.client.logout()
+
+
+class PasswordResetTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.client = Client()
+
+        user_credentials = {
+            'username': 'test_user',
+            'password': 'test_password',
+            'email': 'test_email_1@mail.com',
+            'role': 1,
+        }
+
+        cls.user = user_model.objects.create_user(**user_credentials)
+
+    def get_reset_link_data(self):
+
+        mails_before_request = len(mail.outbox)
+
+        username = f"test_user_{next(next_user_id_generator)}"
+        user_password = 'test_password_2'
+        user_email = f"test_email_{next(next_user_id_generator)}@mail.com"
+
+        user_credentials = {
+            'username': username,
+            'password': user_password,
+            'email': user_email,
+            'role': 1,
+        }
+
+        user = user_model.objects.create_user(**user_credentials)
+
+        password_reset_post_data = {
+            'email': user_credentials['email'],
+        }
+
+        response = self.client.post(reverse('password_reset'), password_reset_post_data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/password_reset_successful.html')
+
+        self.assertEqual(mails_before_request + 1, len(mail.outbox))  # "+ 1" - because new email should be sent
+
+        token = default_token_generator.make_token(user)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.id))
+
+        return user, user_password, token, uidb64
 
     def test_password_reset_form_get(self):
 

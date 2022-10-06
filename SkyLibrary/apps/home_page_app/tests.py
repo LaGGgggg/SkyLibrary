@@ -4,7 +4,7 @@ from django.test.client import Client, RequestFactory
 from .views import handler400, handler403, handler404, handler500
 
 
-class HomePageAppTestCase(TestCase):
+class CommonTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
