@@ -1,4 +1,4 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth import get_user_model
 from django.core import signing, mail
@@ -25,7 +25,6 @@ def get_next_user_id_generator() -> Generator[int, None, None]:
 next_user_id_generator = get_next_user_id_generator()
 
 
-@override_settings(LANGUAGE_CODE='en-us')
 class AccountsAppTestCase(TestCase):
 
     @classmethod

@@ -1,10 +1,9 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.test.client import Client, RequestFactory
 
 from .views import handler400, handler403, handler404, handler500
 
 
-@override_settings(LANGUAGE_CODE='en-us')
 class HomePageAppTestCase(TestCase):
 
     @classmethod
@@ -22,7 +21,6 @@ class HomePageAppTestCase(TestCase):
         self.assertTemplateUsed(response, 'home_page_app/index.html')
 
 
-@override_settings(LANGUAGE_CODE='en-us')
 class ErrorsTestCase(TestCase):
 
     @classmethod

@@ -46,7 +46,7 @@ if not DEBUG:
 
     DEBUG = False
 
-    env_var_not_set_handler('DEBUG', context='used False', error_level='WARNING')
+    env_var_not_set_handler('DEBUG', context=f'used {DEBUG}', error_level='WARNING')
 
 else:
     DEBUG = DEBUG.lower() == 'true'
@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'accounts_app',
+    'home_page_app',
 ]
 
 MIDDLEWARE = [
@@ -214,12 +215,10 @@ LOGGING = {
 CACHE_LOCAL = env('CACHE_LOCAL', default='unset')
 
 if CACHE_LOCAL == 'unset':
-    """
-    CACHE_LOCAL unset not critical for the project (because redis is used in production and False value in CACHE_LOCAL
-    sets redis django backend, error in development (where file cache storage is used) is not critical) -->
-    set default value (False)
-    """
-    env_var_not_set_handler('CACHE_LOCAL', context='used False', error_level='WARNING')
+
+    CACHE_LOCAL = True
+
+    env_var_not_set_handler('CACHE_LOCAL', context=f'used {CACHE_LOCAL}', error_level='WARNING')
 
 else:
     # needed because env() return string, any string (exclude empty) in bool is True
@@ -233,7 +232,11 @@ if CACHE_LOCAL:
 
         CACHE_LOCATION_DB_TABLE_NAME = 'cache'
 
-        env_var_not_set_handler('CACHE_LOCATION_DB_TABLE_NAME', context='used "cache" value', error_level='WARNING')
+        env_var_not_set_handler(
+            'CACHE_LOCATION_DB_TABLE_NAME',
+            context=f'used "{CACHE_LOCATION_DB_TABLE_NAME}" value',
+            error_level='WARNING',
+        )
 
     CACHES = {
         'default': {
@@ -301,7 +304,15 @@ LOCALE_PATHS = (
 
 
 USE_I18N = True
-LANGUAGE_CODE = 'ru'
+
+LANGUAGE_CODE = env('LANGUAGE_CODE', default='unset')
+
+if not LANGUAGE_CODE:
+
+    LANGUAGE_CODE = 'en-us'
+
+    env_var_not_set_handler('LANGUAGE_CODE', context=f'used {LANGUAGE_CODE}', error_level='WARNING')
+
 
 USE_TZ = True
 TIME_ZONE = 'UTC'
