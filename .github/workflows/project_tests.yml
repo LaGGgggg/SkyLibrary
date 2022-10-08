@@ -7,8 +7,8 @@ env:
   DB_URL: postgres://postgres:postgres@localhost:5432/github_actions_db
   DEBUG: False
   CACHE_LOCAL: True
-  ALLOWED_HOSTS: *
-  INTERNAL_IPS: *
+  ALLOWED_HOSTS: plug
+  INTERNAL_IPS: plug
   USE_CACHE: True
   CACHE_LOCATION_DB_TABLE_NAME: cache
   EMAIL_HOST_USER: plug@yandex.ru
