@@ -7,6 +7,13 @@ env:
   DB_URL: postgres://postgres:postgres@localhost:5432/github_actions_db
   DEBUG: False
   CACHE_LOCAL: True
+  ALLOWED_HOSTS: *
+  INTERNAL_IPS: *
+  USE_CACHE: True
+  CACHE_LOCATION_DB_TABLE_NAME: cache
+  EMAIL_HOST_USER: plug@yandex.ru
+  EMAIL_HOST_PASSWORD: plug
+  LANGUAGE_CODE: en-us
 
 jobs:
   build:
@@ -41,5 +48,7 @@ jobs:
       run: python manage.py collectstatic
     - name: Run migrations
       run: python manage.py migrate
+    - name: Create cache table
+      run: python manage.py createcachetable
     - name: Run tests
       run: python manage.py test
