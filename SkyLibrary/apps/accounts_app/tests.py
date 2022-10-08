@@ -11,12 +11,12 @@ from typing import Generator
 
 from django_registration.backends.activation.views import REGISTRATION_SALT
 
-user_model = get_user_model()
+User = get_user_model()
 
 
 def get_next_user_id_generator() -> Generator[int, None, None]:
 
-    base_new_user_id = user_model.objects.order_by('-id').first().id
+    base_new_user_id = User.objects.order_by('-id').first().id
 
     while True:
         yield base_new_user_id + 1
@@ -41,7 +41,7 @@ class CommonTestCase(TestCase):
             'role': 1,
         }
 
-        cls.user = user_model.objects.create_user(**cls.user_credentials)
+        cls.user = User.objects.create_user(**cls.user_credentials)
 
     def test_profile(self):
 
@@ -131,7 +131,7 @@ class RegisterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'django_registration/registration_form.html')
 
-        self.assertFalse(user_model.objects.filter(username=incorrect_sign_up_post_data['username']))
+        self.assertFalse(User.objects.filter(username=incorrect_sign_up_post_data['username']))
 
         form_errors = {
             'username': 'This field is required.',
@@ -159,7 +159,7 @@ class RegisterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'django_registration/registration_complete.html')
 
-        self.assertFalse(user_model.objects.filter(username=correct_sign_up_post_data['username'])[0].is_active)
+        self.assertFalse(User.objects.filter(username=correct_sign_up_post_data['username'])[0].is_active)
 
         # activate account:
 
@@ -173,7 +173,7 @@ class RegisterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'django_registration/activation_complete.html')
 
-        self.assertTrue(user_model.objects.get(username=correct_sign_up_post_data['username']).is_active)
+        self.assertTrue(User.objects.get(username=correct_sign_up_post_data['username']).is_active)
         
     def test_register_post_duplicate_data(self):
 
@@ -204,7 +204,7 @@ class RegisterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'django_registration/registration_form.html')
 
-        self.assertEqual(1, user_model.objects.filter(username=sign_up_post_data['username']).count())
+        self.assertEqual(1, User.objects.filter(username=sign_up_post_data['username']).count())
 
         form_errors = {
             'username': 'A user with that username already exists.',
@@ -231,7 +231,7 @@ class PasswordChangeTestCase(TestCase):
             'role': 1,
         }
 
-        cls.user = user_model.objects.create_user(**user_credentials)
+        cls.user = User.objects.create_user(**user_credentials)
 
     def test_password_change_get(self):
 
@@ -257,7 +257,7 @@ class PasswordChangeTestCase(TestCase):
             'role': 1,
         }
 
-        user = user_model.objects.create_user(**user_credentials)
+        user = User.objects.create_user(**user_credentials)
 
         self.client.force_login(user)
 
@@ -295,7 +295,7 @@ class PasswordChangeTestCase(TestCase):
             'role': 1,
         }
 
-        user = user_model.objects.create_user(**user_credentials)
+        user = User.objects.create_user(**user_credentials)
 
         self.client.force_login(user)
 
@@ -333,7 +333,7 @@ class PasswordResetTestCase(TestCase):
             'role': 1,
         }
 
-        cls.user = user_model.objects.create_user(**user_credentials)
+        cls.user = User.objects.create_user(**user_credentials)
 
     def get_reset_link_data(self):
 
@@ -350,7 +350,7 @@ class PasswordResetTestCase(TestCase):
             'role': 1,
         }
 
-        user = user_model.objects.create_user(**user_credentials)
+        user = User.objects.create_user(**user_credentials)
 
         password_reset_post_data = {
             'email': user_credentials['email'],
@@ -450,7 +450,7 @@ class PasswordResetTestCase(TestCase):
 
     def test_password_reset_confirm_post_incorrect_data(self):
 
-        active_users_before_get = user_model.objects.filter(is_active=True).count()
+        active_users_before_get = User.objects.filter(is_active=True).count()
 
         uidb64 = urlsafe_base64_encode(force_bytes(1))  # 1 - random primary key
 
@@ -461,7 +461,7 @@ class PasswordResetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'accounts_app/password_reset_confirm.html')
 
-        self.assertEqual(active_users_before_get, user_model.objects.filter(is_active=True).count())
+        self.assertEqual(active_users_before_get, User.objects.filter(is_active=True).count())
 
         self.assertContains(response, 'The password reset link was invalid, possibly because it has already been used. '
                                       'Please request a new password reset.')

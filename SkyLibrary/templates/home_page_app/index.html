@@ -8,6 +8,7 @@
     {% block top_panel %}
         {% if user.is_authenticated %}
             <button onclick="location.href='{% url 'profile' %}'">{% translate 'Profile' %}</button>
+            <button onclick="location.href='{% url 'create_media' %}'">{% translate 'Add new media' %}</button>
         {% else %}
             <button onclick="location.href='{% url 'login' %}'">{% translate 'Log in' %}</button>
             <button onclick="location.href='{% url 'django_registration_register' %}'">{% translate 'Sign up' %}</button>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+{% load i18n %}
+{% load bootstrap4 %}
+{% load crispy_forms_tags %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 create_media_page %}
+    {% block top_panel %}
+        <button onclick="location.href='{% url 'profile' %}'">{% translate 'Profile' %}</button>
+        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
+    {% endblock top_panel %}
+    {% block header %}
+        {% translate 'Create your media!' %}
+    {% endblock header %}
+    {% block content %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">{% translate 'Submit' %}</button>
+        </form>
+    {% endblock content %}
+{% endcache %}
+</html>

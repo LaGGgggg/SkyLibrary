@@ -131,6 +131,7 @@ dmypy.json
 .pyre/
 
 staticfiles
+media
 
 .wakatime-project
 

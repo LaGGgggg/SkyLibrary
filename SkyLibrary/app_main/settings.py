@@ -78,9 +78,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'debug_toolbar',
+    'bootstrap4',
+    'crispy_forms',
+
     'accounts_app',
     'home_page_app',
+    'media_app',
 ]
 
 MIDDLEWARE = [
@@ -211,58 +216,67 @@ LOGGING = {
     },
 }
 
+USE_CACHE = env('USE_CACHE', default='unset')
 
-CACHE_LOCAL = env('CACHE_LOCAL', default='unset')
+if USE_CACHE == 'unset':
 
-if CACHE_LOCAL == 'unset':
+    USE_CACHE = True
 
-    CACHE_LOCAL = True
+    env_var_not_set_handler('USE_CACHE', context=f'used {USE_CACHE}', error_level='WARNING')
 
-    env_var_not_set_handler('CACHE_LOCAL', context=f'used {CACHE_LOCAL}', error_level='WARNING')
+if USE_CACHE:
 
-else:
-    # needed because env() return string, any string (exclude empty) in bool is True
-    CACHE_LOCAL = CACHE_LOCAL.lower() == 'true'
+    CACHE_LOCAL = env('CACHE_LOCAL', default='unset')
 
-if CACHE_LOCAL:
+    if CACHE_LOCAL == 'unset':
 
-    CACHE_LOCATION_DB_TABLE_NAME = env('CACHE_LOCATION_DB_TABLE_NAME', default='unset')
+        CACHE_LOCAL = True
 
-    if CACHE_LOCATION_DB_TABLE_NAME == 'unset':
-
-        CACHE_LOCATION_DB_TABLE_NAME = 'cache'
-
-        env_var_not_set_handler(
-            'CACHE_LOCATION_DB_TABLE_NAME',
-            context=f'used "{CACHE_LOCATION_DB_TABLE_NAME}" value',
-            error_level='WARNING',
-        )
-
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-            'LOCATION': CACHE_LOCATION_DB_TABLE_NAME,
-        }
-    }
-
-else:
-
-    CACHE_REDIS_LOCATIONS = env('CACHE_REDIS_LOCATIONS', default='unset').split(', ')
-
-    if CACHE_REDIS_LOCATIONS == ['unset']:
-        """
-        CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
-        we don't use cache otherwise other parts of the project don't work
-        """
-        env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='ERROR')
+        env_var_not_set_handler('CACHE_LOCAL', context=f'used {CACHE_LOCAL}', error_level='WARNING')
 
     else:
+        # needed because env() return string, any string (exclude empty) in bool is True
+        CACHE_LOCAL = CACHE_LOCAL.lower() == 'true'
+
+    if CACHE_LOCAL:
+
+        CACHE_LOCATION_DB_TABLE_NAME = env('CACHE_LOCATION_DB_TABLE_NAME', default='unset')
+
+        if CACHE_LOCATION_DB_TABLE_NAME == 'unset':
+
+            CACHE_LOCATION_DB_TABLE_NAME = 'cache'
+
+            env_var_not_set_handler(
+                'CACHE_LOCATION_DB_TABLE_NAME',
+                context=f'used "{CACHE_LOCATION_DB_TABLE_NAME}" value',
+                error_level='WARNING',
+            )
+
         CACHES = {
             'default': {
-                'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-                'LOCATION': CACHE_REDIS_LOCATIONS,
+                'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+                'LOCATION': CACHE_LOCATION_DB_TABLE_NAME,
             }
         }
+
+    else:
+
+        CACHE_REDIS_LOCATIONS = env('CACHE_REDIS_LOCATIONS', default='unset').split(', ')
+
+        if CACHE_REDIS_LOCATIONS == ['unset']:
+            """
+            CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
+            we don't use cache otherwise other parts of the project don't work
+            """
+            env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='ERROR')
+
+        else:
+            CACHES = {
+                'default': {
+                    'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                    'LOCATION': CACHE_REDIS_LOCATIONS,
+                }
+            }
 
 
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
@@ -341,3 +355,4 @@ PROJECT_ROOT = BASE_DIR.joinpath('apps')
 AUTH_USER_MODEL = 'accounts_app.User'
 LOGOUT_REDIRECT_URL = 'logout_successful'
 ACCOUNT_ACTIVATION_DAYS = 10
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
