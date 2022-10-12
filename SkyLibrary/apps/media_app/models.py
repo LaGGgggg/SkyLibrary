@@ -40,7 +40,7 @@ class Media(models.Model):
     author = models.CharField(max_length=30)
     pub_date = models.DateField(auto_now_add=True)
     user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media')
-    tags = models.ManyToManyField(MediaTags, related_name='tags_media', null=True)
+    tags = models.ManyToManyField(MediaTags, related_name='tags_media')
     active = models.PositiveSmallIntegerField(choices=active_choices, default=0)
     file = models.FileField(upload_to=get_file_upload)
     cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True)

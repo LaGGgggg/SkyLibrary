@@ -8,7 +8,7 @@ from django.conf import settings
 from PIL import Image
 from shutil import rmtree
 
-from media_app.models import Media
+from media_app.models import Media, MediaTags
 
 User = get_user_model()
 
@@ -47,6 +47,20 @@ class CreateMediaTestCase(TestCase):
             content_type='image/jpeg',
         )
 
+        test_tag_1 = MediaTags.objects.create(
+            name='test tag 1',
+            help_text='test tag 1 help text',
+            user_who_added=cls.user,
+        )
+
+        test_tag_2 = MediaTags.objects.create(
+            name='test tag 1',
+            help_text='test tag 1 help text',
+            user_who_added=cls.user,
+        )
+
+        cls.test_tags = (test_tag_1, test_tag_2)
+
     def test_get(self):
 
         # without login:
@@ -82,6 +96,7 @@ class CreateMediaTestCase(TestCase):
             'title': 'test_too_big_title_dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             'description': 'test_incorrect_data_description',
             'author': 'test_too_big_author_dataaaaaaaa',
+            'tags': 'bad_tag_name'
         }
 
         response = self.client.post(reverse('create_media'), incorrect_post_data)
@@ -95,6 +110,7 @@ class CreateMediaTestCase(TestCase):
             'title': 'Ensure this value has at most 60 characters (it has 61).',
             'author': 'Ensure this value has at most 30 characters (it has 31).',
             'file': 'This field is required.',
+            'tags': 'Select a valid choice. bad_tag_name is not one of the available choices.',
         }
 
         for field, error in incorrect_form_errors.items():
@@ -112,6 +128,7 @@ class CreateMediaTestCase(TestCase):
             'author': 'test_author_data',
             'file': self.test_file,
             'cover': self.test_cover,
+            'tags': self.test_tags,
         }
 
         response = self.client.post(reverse('create_media'), correct_post_data, follow=True)

@@ -281,6 +281,11 @@ if USE_CACHE:
                 }
             }
 
+else:
+    # Needed for correct work
+    MIDDLEWARE.remove('django.middleware.cache.UpdateCacheMiddleware')
+    MIDDLEWARE.remove('django.middleware.cache.FetchFromCacheMiddleware')
+
 
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default=None)
