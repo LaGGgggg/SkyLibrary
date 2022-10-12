@@ -5,12 +5,26 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class MediaTags(models.Model):
+
+    name = models.CharField(max_length=16)
+    help_text = models.CharField(max_length=80)
+    pub_date = models.DateField(auto_now_add=True)
+    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='media_tags')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'media_app_media_tag'
+
+
 def get_file_upload(instance, filename):
-    return f'media_app/{instance.author}/{instance.title}'
+    return f'media_app/{instance.author}/{instance.title}.{filename.split(".")[-1]}'
 
 
 def get_cover_upload(instance, filename):
-    return f'media_app/{instance.author}/{instance.title}_cover'
+    return f'media_app/{instance.author}/{instance.title}_cover.{filename.split(".")[-1]}'
 
 
 class Media(models.Model):
@@ -25,7 +39,8 @@ class Media(models.Model):
     description = models.TextField(unique=True)
     author = models.CharField(max_length=30)
     pub_date = models.DateField(auto_now_add=True)
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='media')
+    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media')
+    tags = models.ManyToManyField(MediaTags, related_name='tags_media', null=True)
     active = models.PositiveSmallIntegerField(choices=active_choices, default=0)
     file = models.FileField(upload_to=get_file_upload)
     cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True)

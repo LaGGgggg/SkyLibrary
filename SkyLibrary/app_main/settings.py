@@ -224,6 +224,9 @@ if USE_CACHE == 'unset':
 
     env_var_not_set_handler('USE_CACHE', context=f'used {USE_CACHE}', error_level='WARNING')
 
+else:
+    USE_CACHE = USE_CACHE.lower() == 'true'
+
 if USE_CACHE:
 
     CACHE_LOCAL = env('CACHE_LOCAL', default='unset')

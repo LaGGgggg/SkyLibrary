@@ -1,12 +1,17 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
 
-from .models import Media
+from .models import Media, MediaTags
 
 
 class CreateMediaForm(forms.ModelForm):
+
+    tags = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        queryset=MediaTags.objects.all(),
+        to_field_name='name',
+    )
 
     def clean_title(self):
 
@@ -56,4 +61,4 @@ class CreateMediaForm(forms.ModelForm):
 
         model = Media
 
-        fields = ['title', 'description', 'author', 'file', 'cover']
+        fields = ['title', 'description', 'author', 'tags', 'file', 'cover']
