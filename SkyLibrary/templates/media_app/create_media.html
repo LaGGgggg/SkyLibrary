@@ -3,16 +3,19 @@
 {% extends 'base.html' %}
 {% load cache %}
 {% load i18n %}
-{% load bootstrap4 %}
 {% load crispy_forms_tags %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 create_media_page %}
     {% block top_panel %}
-        <button onclick="location.href='{% url 'profile' %}'">{% translate 'Profile' %}</button>
-        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
+        <li class="nav-item active">
+            <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
     {% endblock top_panel %}
     {% block header %}
-        {% translate 'Create your media!' %}
+        {% translate 'Create your media' %}!
     {% endblock header %}
     {% block content %}
         <form method="post" enctype="multipart/form-data">

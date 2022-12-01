@@ -80,7 +80,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'debug_toolbar',
-    'bootstrap4',
     'crispy_forms',
 
     'accounts_app',
@@ -326,6 +325,7 @@ LOCALE_PATHS = (
 
 
 USE_I18N = True
+USE_L10N = True
 
 LANGUAGE_CODE = env('LANGUAGE_CODE', default='unset')
 
@@ -338,7 +338,6 @@ if LANGUAGE_CODE == 'unset':
 
 USE_TZ = True
 TIME_ZONE = 'UTC'
-USE_L10N = True
 
 
 APPS_DIR = str(BASE_DIR.joinpath('apps'))
@@ -350,7 +349,7 @@ sys.path.insert(0, APPS_DIR)
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR.joinpath('staticfiles')
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/_media/'
 MEDIA_ROOT = BASE_DIR.joinpath('media')
 
 # Default primary key field type

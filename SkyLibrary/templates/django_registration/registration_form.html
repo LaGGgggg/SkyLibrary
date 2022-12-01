@@ -6,7 +6,9 @@
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 registration_form_page %}
     {% block top_panel %}
-        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
     {% endblock top_panel %}
     {% block header %}
         {% translate 'Sign up' %}:
@@ -23,7 +25,7 @@
                     {{ field }}
                 {% endif %}
             {% endfor %}
-            <input type="submit" value="{% translate 'Sign up' %}">
+            <input type="submit" value="{% translate 'Sign up' %}" class="btn btn-primary">
         </form>
     {% endblock content %}
 {% endcache %}

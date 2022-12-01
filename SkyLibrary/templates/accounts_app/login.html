@@ -3,26 +3,22 @@
 {% extends 'base.html' %}
 {% load cache %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 login_page %}
     {% block top_panel %}
-        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
     {% endblock top_panel %}
     {% block header %}
-        {% translate 'Log in:' %}
+        {% translate 'Log in' %}:
     {% endblock header %}
     {% block content %}
-        <form method="POST">
+        <form method="post">
             {% csrf_token %}
-            {% if form.non_field_errors %}
-                {{ form.non_field_errors }}<br>
-            {% endif %}
-            {% for field in form %}
-                {{ field.label_tag }}<br>
-                {{ field }}<br>
-                {{ field.errors }}
-            {% endfor %}
-            <input type="submit" value="{% translate 'Log in' %}">
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary">{% translate 'Log in' %}</button>
         </form>
         <a href="{% url 'password_reset' %}">{% translate 'password recovery' %}</a>
     {% endblock content %}

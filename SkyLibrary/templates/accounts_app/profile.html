@@ -6,9 +6,18 @@
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 profile_page %}
     {% block top_panel %}
-        <button onclick="location.href='{% url 'index' %}'">{% translate 'Home page' %}</button>
-        <button onclick="location.href='{% url 'password_change' %}'">{% translate 'Change password' %}</button>
-        <button onclick="location.href='{% url 'logout' %}'">{% translate 'Log out' %}</button>
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'password_change' %}" class="nav-link">{% translate 'Change password' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'logout' %}" class="nav-link">{% translate 'Log out' %}</a>
+        </li>
     {% endblock top_panel %}
     {% block header %}
         Profile header!

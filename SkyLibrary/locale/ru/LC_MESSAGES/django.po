@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-05 17:17+0400\n"
+"POT-Creation-Date: 2022-11-20 15:54+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,74 +28,87 @@ msgstr ""
 msgid "email address"
 msgstr ""
 
-#: .\templates\accounts_app\login.html:9
+#: .\apps\media_app\forms.py:20
+msgid "Not a unique title, change it."
+msgstr ""
+
+#: .\apps\media_app\forms.py:30
+msgid "Not a unique description, change it."
+msgstr ""
+
+#: .\apps\media_app\forms.py:45
+#, python-brace-format
+msgid ""
+"{checking_object.name} - is too big (more than {max_cover_size_in_megabytes}"
+"Mb)"
+msgstr ""
+
+#: .\apps\media_app\models.py:86
+msgid "Object with this user and media already exists"
+msgstr ""
+
+#: .\templates\accounts_app\login.html:11
 #: .\templates\accounts_app\logout_successful.html:12
-#: .\templates\accounts_app\password_change.html:9
+#: .\templates\accounts_app\password_change.html:10
 #: .\templates\accounts_app\password_change_successful.html:12
-#: .\templates\accounts_app\password_reset.html:9
-#: .\templates\accounts_app\password_reset_confirm.html:9
+#: .\templates\accounts_app\password_reset.html:10
+#: .\templates\accounts_app\password_reset_confirm.html:10
 #: .\templates\accounts_app\password_reset_successful.html:12
-#: .\templates\accounts_app\profile.html:9
+#: .\templates\accounts_app\profile.html:10
 #: .\templates\django_registration\activation_failed.html:13
 #: .\templates\django_registration\registration_closed.html:12
 #: .\templates\django_registration\registration_complete.html:12
-#: .\templates\django_registration\registration_form.html:9
+#: .\templates\django_registration\registration_form.html:10
 #: .\templates\errors\400.html:16 .\templates\errors\403.html:16
 #: .\templates\errors\404.html:16 .\templates\errors\500.html:16
+#: .\templates\media_app\create_media.html:14
+#: .\templates\media_app\create_media_successful.html:13
+#: .\templates\media_app\view_media.html:18
 msgid "Home page"
 msgstr ""
 
-#: .\templates\accounts_app\login.html:12
-msgid "Log in:"
-msgstr ""
-
-#: .\templates\accounts_app\login.html:25
+#: .\templates\accounts_app\login.html:15
+#: .\templates\accounts_app\login.html:21
 #: .\templates\accounts_app\password_reset_complete.html:12
 #: .\templates\django_registration\activation_complete.html:12
-#: .\templates\home_page_app\index.html:12
+#: .\templates\home_page_app\index.html:18
 msgid "Log in"
 msgstr ""
 
-#: .\templates\accounts_app\login.html:27
+#: .\templates\accounts_app\login.html:23
 msgid "password recovery"
 msgstr ""
 
 #: .\templates\accounts_app\logout_successful.html:9
-msgid "Logout successful!"
+msgid "Logout successful"
 msgstr ""
 
-#: .\templates\accounts_app\password_change.html:12
-msgid "Change password:"
-msgstr ""
-
-#: .\templates\accounts_app\password_change.html:25
-#: .\templates\accounts_app\password_reset_confirm.html:30
-#: .\templates\accounts_app\profile.html:10
+#: .\templates\accounts_app\password_change.html:14
+#: .\templates\accounts_app\password_change.html:27
+#: .\templates\accounts_app\password_reset_confirm.html:32
+#: .\templates\accounts_app\profile.html:16
 msgid "Change password"
 msgstr ""
 
 #: .\templates\accounts_app\password_change_successful.html:9
 #: .\templates\accounts_app\password_reset_complete.html:9
-msgid "Password changed successfully!"
+msgid "Password changed successfully"
 msgstr ""
 
-#: .\templates\accounts_app\password_reset.html:12
-msgid "Reset password:"
-msgstr ""
-
-#: .\templates\accounts_app\password_reset.html:25
+#: .\templates\accounts_app\password_reset.html:14
+#: .\templates\accounts_app\password_reset.html:27
 msgid "Reset password"
 msgstr ""
 
-#: .\templates\accounts_app\password_reset_confirm.html:13
-msgid "Please enter your new password twice:"
-msgstr ""
-
 #: .\templates\accounts_app\password_reset_confirm.html:15
-msgid "Invalid link!"
+msgid "Please enter your new password twice"
 msgstr ""
 
-#: .\templates\accounts_app\password_reset_confirm.html:33
+#: .\templates\accounts_app\password_reset_confirm.html:17
+msgid "Invalid link"
+msgstr ""
+
+#: .\templates\accounts_app\password_reset_confirm.html:35
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used. Please request a new password reset."
@@ -113,19 +126,25 @@ msgstr ""
 
 #: .\templates\accounts_app\password_reset_successful.html:9
 #: .\templates\django_registration\registration_complete.html:9
-msgid "Check your email."
+msgid "Check your email"
 msgstr ""
 
-#: .\templates\accounts_app\profile.html:11
+#: .\templates\accounts_app\profile.html:13
+#: .\templates\home_page_app\index.html:14
+#: .\templates\media_app\view_media.html:21
+msgid "Add new media"
+msgstr ""
+
+#: .\templates\accounts_app\profile.html:19
 msgid "Log out"
 msgstr ""
 
-#: .\templates\base.html:18
-msgid "Support:"
+#: .\templates\base.html:25
+msgid "Support"
 msgstr ""
 
 #: .\templates\django_registration\activation_complete.html:9
-msgid "Account activation completed!"
+msgid "Account activation completed"
 msgstr ""
 
 #: .\templates\django_registration\activation_email_body.txt:3
@@ -148,20 +167,20 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: .\templates\django_registration\activation_email_subject.txt:2
-msgid "account activation."
+msgid "account activation"
 msgstr ""
 
 #: .\templates\django_registration\activation_failed.html:9
-msgid "Account activation failed!"
+msgid "Account activation failed"
 msgstr ""
 
 #: .\templates\django_registration\registration_closed.html:9
-msgid "Sorry, you can`t register."
+msgid "Sorry, you can`t register"
 msgstr ""
 
-#: .\templates\django_registration\registration_form.html:12
-#: .\templates\django_registration\registration_form.html:26
-#: .\templates\home_page_app\index.html:13
+#: .\templates\django_registration\registration_form.html:14
+#: .\templates\django_registration\registration_form.html:28
+#: .\templates\home_page_app\index.html:21
 msgid "Sign up"
 msgstr ""
 
@@ -188,6 +207,36 @@ msgstr ""
 msgid "Oops, server error"
 msgstr ""
 
-#: .\templates\home_page_app\index.html:10
+#: .\templates\home_page_app\index.html:11
+#: .\templates\media_app\create_media.html:11
+#: .\templates\media_app\view_media.html:15
 msgid "Profile"
+msgstr ""
+
+#: .\templates\media_app\create_media.html:18
+msgid "Create your media"
+msgstr ""
+
+#: .\templates\media_app\create_media.html:24
+msgid "Submit"
+msgstr ""
+
+#: .\templates\media_app\create_media_successful.html:10
+msgid "Your media has been successfully created and submitted for moderation"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:55
+msgid "Author"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:56
+msgid "Added by"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:62
+msgid "Download file"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:70
+msgid "Downloads"
 msgstr ""
