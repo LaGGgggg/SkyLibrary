@@ -1,38 +1,50 @@
 from django.db import models
 from django.db.models import Avg, Count
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language
 
 User = get_user_model()
 
 
 class MediaTags(models.Model):
 
-    name = models.CharField(max_length=16)
-    help_text = models.CharField(max_length=80)
+    name_en_us = models.CharField(max_length=16, unique=True)
+    help_text_en_us = models.CharField(max_length=80, unique=True)
+
+    name_ru = models.CharField(max_length=16, unique=True)
+    help_text_ru = models.CharField(max_length=80, unique=True)
+
     pub_date = models.DateField(auto_now_add=True)
     user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='media_tags')
 
     def __str__(self):
-        return self.name
+
+        if get_language() == 'ru':
+            return str(self.name_ru)
+
+        else:
+            return str(self.name_en_us)
 
     class Meta:
         db_table = 'media_app_media_tag'
 
 
-def get_file_upload(instance, filename):
+def get_file_upload(instance, filename: str) -> str:
     return f'media_app/{instance.author}/{instance.title}.{filename.split(".")[-1]}'
 
 
-def get_cover_upload(instance, filename):
+def get_cover_upload(instance, filename: str) -> str:
     return f'media_app/{instance.author}/{instance.title}_cover.{filename.split(".")[-1]}'
 
 
 class Media(models.Model):
 
     active_choices = (
-        (0, 'In moderation'),
+        (0, 'Inactive'),
         (1, 'Active'),
-        (2, 'Inactive'),
+        (2, 'Not valid'),
     )
 
     title = models.CharField(max_length=60, unique=True)
@@ -48,10 +60,10 @@ class Media(models.Model):
     def __str__(self):
         return self.title
 
-    def get_downloads_number(self):
+    def get_downloads_number(self) -> int:
         return self.media_media_download.aggregate(Count('download'))['download__count']
 
-    def get_rating(self):
+    def get_rating(self) -> float | int:
         return round(self.media_media_rating.aggregate(Avg('rating'))['rating__avg'] or 0, 2)
 
 
@@ -66,6 +78,23 @@ class MediaDownload(models.Model):
     user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media_download')
     pub_date = models.DateField(auto_now_add=True)
     download = models.SmallIntegerField(choices=download_choices, default=1)
+
+    def clean(self, *args, **kwargs):
+
+        try:
+            if MediaDownload.objects.get(media=self.media, user_who_added=self.user_who_added):
+                raise ValidationError({NON_FIELD_ERRORS: [_('Object with this user and media already exists')]})
+
+        except MediaDownload.DoesNotExist:
+            pass
+
+        super().clean(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+
+        self.full_clean()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.media.title}_download({self.download})'

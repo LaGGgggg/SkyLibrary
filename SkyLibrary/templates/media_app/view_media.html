@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
+{% load cache %}
+{% load i18n %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 create_media_page %}
+    {% block head_extra %}
+        <link rel="stylesheet" href="{% static 'css/view_media.css' %}">
+        <link rel="stylesheet" href="{% static 'css/rating.css' %}">
+    {% endblock head_extra %}
+    {% block top_panel %}
+        <li class="nav-item active">
+            <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
+        </li>
+    {% endblock top_panel %}
+    {% block header %}
+        {{ media.title }}
+    {% endblock header %}
+    {% block content %}
+        <img src="{{ media.cover.url }}" class="float-right cover_image">
+        <section class="list-group flex-row align-items-baseline">
+            <section class="d-flex align-items-end  rating mr-2">
+                <section class="position-relative rating__stars_body">
+                    <section class="position-absolute rating__stars"></section>
+                </section>
+                <section class="rating__value">
+                    {{ media.get_rating }}
+                </section>
+            </section>
+            {% get_current_language as LANGUAGE_CODE %}
+            <ul class="list-group flex-row">
+                {% for tag in media.tags.values %}
+                    <li class="list-group-item bg-transparent small border-0 p-1">
+                        {% if LANGUAGE_CODE == 'en-us' %}
+                            <a data-toggle="tooltip" title="{{ tag.help_text_en_us }}" href="">#{{ tag.name_en_us }}</a>
+                        {% elif LANGUAGE_CODE == 'ru' %}
+                            <a data-toggle="tooltip" title="{{ tag.help_text_ru }}" href="">#{{ tag.name_ru }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="lead">
+            {{ media.description }}
+        </section>
+        <section class="float-right text-right small mt-4 mr-4">
+            {% translate 'Author' %}: {{ media.author }}<br>
+            {% translate 'Added by' %}: {{ media.user_who_added }}<br>
+            {{ media.pub_date }}
+        </section>
+        {% if user.is_authenticated %}
+            <section class="mt-3">
+                <a id="download_link" class="btn btn-primary" href="{{ media.file.url }}" download>
+                    {% translate 'Download file' %}
+                    <span class="small" id="downloads_number">
+                        {{ media.get_downloads_number }}
+                    </span>
+                </a>
+            </section>
+        {% else %}
+            <section class="mt-3 small">
+                {% translate 'Downloads' %}: {{ media.get_downloads_number }}
+            </section>
+        {% endif %}
+    {% endblock content %}
+    {% block scripts %}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
+        </script>
+        <script>
+            // preparing for the next script
+            const get_full_path = "{{ request.get_full_path }}"
+            const csrf_token = "{{ csrf_token }}"
+        </script>
+        <script src="{% static 'js/view_media.js' %}"></script>
+        <script src="{% static 'js/rating.js' %}"></script>
+    {% endblock scripts %}
+{% endcache %}
+</html>

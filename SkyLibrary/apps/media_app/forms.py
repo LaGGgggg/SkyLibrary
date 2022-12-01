@@ -10,7 +10,6 @@ class CreateMediaForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         queryset=MediaTags.objects.all(),
-        to_field_name='name',
     )
 
     def clean_title(self):

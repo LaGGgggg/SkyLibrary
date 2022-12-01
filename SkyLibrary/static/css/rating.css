@@ -1,0 +1,20 @@
+.rating {
+    font-size: 120%;
+}
+.rating__stars_body::before {
+    color: #4F80E8;
+    content: '★★★★★';
+}
+.rating__stars {
+    top: 0;
+    width: 0;
+    height: 100%;
+    overflow: hidden;
+}
+.rating__stars::before {
+    content: '★★★★★';
+}
+.rating__value {
+    font-size: 75%;
+    padding-left: .25em;
+}
