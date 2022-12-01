@@ -1,5 +1,8 @@
 body {
-    margin: 10px;
+    margin: 14px;
+    background: #55FFB1;
+    color: #002AFF;
+    min-height: 100vh;
 }
 div {
     margin: 5px;
@@ -7,6 +10,14 @@ div {
 h1 {
     margin-top: 10px;
 }
-.top_panel {
-    float: right;
+.navbar {
+    background: #34ECFB;
+    border-radius: 30px;
+    border: 1px solid #00C4FF;
+}
+.navbar a {
+    color: #002AFF;
+}
+.navbar-nav {
+    font-size: 1.1em;
 }
