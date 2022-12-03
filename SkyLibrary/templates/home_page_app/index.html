@@ -2,9 +2,13 @@
 <html lang="en">
 {% extends 'base.html' %}
 {% load cache %}
+{% load static %}
 {% load i18n %}
 <!-- 31536000 = one year, it doesn't change -->
 {% cache 31536000 home_page %}
+    {% block head_extra %}
+        <link rel="stylesheet" href="{% static 'css/rating.css' %}">
+    {% endblock head_extra %}
     {% block top_panel %}
         {% if user.is_authenticated %}
             <li class="nav-item active">
@@ -26,7 +30,41 @@
         Hello!
     {% endblock header %}
     {% block content %}
-        It's sky library!!
+        {% translate 'Best media' %}:
+        <ul>
+            {% for media in best_media %}
+                <li>
+                    <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
+                    <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                        <section class="position-relative rating__stars_body">
+                            <section class="position-absolute rating__stars"></section>
+                        </section>
+                        <section class="rating__value">
+                            {{ media.get_rating }}
+                        </section>
+                    </section>
+                </li>
+            {% endfor %}
+        </ul>
+        {% translate 'Recent media' %}:
+        <ul>
+            {% for media in recent_media %}
+                <li>
+                    <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
+                    <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                        <section class="position-relative rating__stars_body">
+                            <section class="position-absolute rating__stars"></section>
+                        </section>
+                        <section class="rating__value">
+                            {{ media.get_rating }}
+                        </section>
+                    </section>
+                </li>
+            {% endfor %}
+        </ul>
     {% endblock content %}
+    {% block scripts %}
+        <script src="{% static 'js/rating.js' %}"></script>
+    {% endblock scripts %}
 {% endcache %}
 </html>

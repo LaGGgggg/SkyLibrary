@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, QuerySet
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
@@ -65,6 +65,10 @@ class Media(models.Model):
 
     def get_rating(self) -> float | int:
         return round(self.media_media_rating.aggregate(Avg('rating'))['rating__avg'] or 0, 2)
+
+
+def get_best_active_media(amount: int) -> list[Media]:
+    return sorted(Media.objects.filter(active=1), key=lambda media: media.get_rating(), reverse=True)[:amount]
 
 
 class MediaDownload(models.Model):
