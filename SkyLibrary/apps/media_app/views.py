@@ -5,11 +5,18 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 from json import dumps
 
 from .models import Media, MediaDownload
 from .forms import CreateMediaForm
+from staff_app.models import ModeratorTask
+from staff_app.views import ViewModeratorPage
+
+
+User = get_user_model()
+ViewModeratorPage = ViewModeratorPage()
 
 
 class ViewCreateMedia(LoginRequiredMixin, CreateView):
@@ -41,6 +48,23 @@ class ViewViewMedia(View):
         except Media.DoesNotExist:
             return None
 
+    @staticmethod
+    def is_moderate(request, media: Media) -> bool:
+
+        if not request.user.is_anonymous and request.user.role == User.MODERATOR:
+
+            try:
+
+                ModeratorTask.objects.get(user_who_added=request.user, media=media)
+
+                return True
+
+            except ModeratorTask.DoesNotExist:
+                return False
+
+        else:
+            return False
+
     def get(self, request, media_id: int):
 
         media = self.get_media(media_id)
@@ -48,11 +72,23 @@ class ViewViewMedia(View):
         if not media:
             return render(request, self.not_found_template_name)
 
-        # media active check
-        if media.active != 1:  # 1 - active
+        if request.user.is_anonymous:
+            user_role = None
+
+        else:
+            user_role = request.user.role
+
+        is_user_moderator = user_role == User.MODERATOR
+
+        is_moderate = self.is_moderate(request, media)
+
+        if media.active != Media.ACTIVE and not is_user_moderator:
             return render(request, self.no_permission_template_name)
 
-        return render(request, self.template_name, {'media': media})
+        elif media.active != Media.ACTIVE and is_user_moderator and not is_moderate:
+            return render(request, self.no_permission_template_name)
+
+        return render(request, self.template_name, {'media': media, 'is_moderate': is_moderate})
 
     def post(self, request, media_id: int):
 
@@ -78,3 +114,6 @@ class ViewViewMedia(View):
                 dumps({'downloads_number': media.get_downloads_number()}),
                 content_type='application/json',
             )
+
+        else:
+            return ViewModeratorPage.post_from_view_page(request, self.get_media(media_id))

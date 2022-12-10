@@ -40,6 +40,7 @@ urlpatterns += i18n_patterns(
     path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('media/', include('media_app.urls')),
+    path('staff/', include('staff_app.urls')),
     path('', include('home_page_app.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
 )

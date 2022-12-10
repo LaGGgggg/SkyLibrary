@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
+{% load cache %}
+{% load i18n %}
+<!-- 31536000 = one year, it doesn't change -->
+{% cache 31536000 moderator_page %}
+    {% block top_panel %}
+        <li class="nav-item active">
+            <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+        </li>
+    {% endblock top_panel %}
+    {% block header %}
+        {% translate 'Moderator page' %}
+    {% endblock header %}
+    {% block content %}
+        <section id="moderator_task_link_no_available" style="display: none;">{% translate 'No tasks available' %}</section>
+        {% if moderator_task %}
+            <section id="moderator_task_link"><a href="{% url 'view_media' media_id=moderator_task.id %}" class="h4 font-italic">{{ moderator_task.title }}</a></section>
+        {% else %}
+            <section id="moderator_task_link"><a></a></section>
+            <button type="submit" class="btn btn-primary mt-1" id="receive_task_button">{% translate 'Receive task' %}</button>
+        {% endif %}
+    {% endblock content %}
+    {% block scripts %}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
+        </script>
+        <script>
+            // preparing for the next script
+            const get_full_path = "{{ request.get_full_path }}"
+            const csrf_token = "{{ csrf_token }}"
+        </script>
+        <script src="{% static 'js/moderator_page.js' %}"></script>
+    {% endblock scripts %}
+{% endcache %}
+</html>

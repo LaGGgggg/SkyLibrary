@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'accounts_app',
     'home_page_app',
     'media_app',
+    'staff_app',
 ]
 
 MIDDLEWARE = [

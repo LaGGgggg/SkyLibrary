@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Avg, Count, QuerySet
+from django.db.models import Avg, Count
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
@@ -41,10 +41,14 @@ def get_cover_upload(instance, filename: str) -> str:
 
 class Media(models.Model):
 
+    INACTIVE = 0
+    ACTIVE = 1
+    NOT_VALID = 2
+
     active_choices = (
-        (0, 'Inactive'),
-        (1, 'Active'),
-        (2, 'Not valid'),
+        (INACTIVE, 'Inactive'),
+        (ACTIVE, 'Active'),
+        (NOT_VALID, 'Not valid'),
     )
 
     title = models.CharField(max_length=60, unique=True)
@@ -73,9 +77,12 @@ def get_best_active_media(amount: int) -> list[Media]:
 
 class MediaDownload(models.Model):
 
+    NOT_DOWNLOADED = 0
+    DOWNLOADED = 1
+
     download_choices = (
-        (0, 'Not downloaded'),
-        (1, 'Downloaded'),
+        (NOT_DOWNLOADED, 'Not downloaded'),
+        (DOWNLOADED, 'Downloaded'),
     )
 
     media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='media_media_download')

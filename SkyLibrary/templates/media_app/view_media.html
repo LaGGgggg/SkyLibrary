@@ -12,20 +12,24 @@
     {% endblock head_extra %}
     {% block top_panel %}
         <li class="nav-item active">
-            <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
-        </li>
-        <li class="nav-item active">
             <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
         </li>
-        <li class="nav-item active">
-            <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
-        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item active">
+                <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+            </li>
+            <li class="nav-item active">
+                <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
+            </li>
+        {% endif %}
     {% endblock top_panel %}
     {% block header %}
         {{ media.title }}
     {% endblock header %}
     {% block content %}
-        <img src="{{ media.cover.url }}" class="float-right cover_image">
+        {% if media.cover %}
+            <img src="{{ media.cover.url }}" class="float-right cover_image">
+        {% endif %}
         <section class="list-group flex-row align-items-baseline">
             <section class="d-flex align-items-end rating mr-2">
                 <section class="position-relative rating__stars_body">
@@ -51,11 +55,6 @@
         <section class="lead">
             {{ media.description }}
         </section>
-        <section class="float-right text-right small mt-4 mr-4">
-            {% translate 'Author' %}: {{ media.author }}<br>
-            {% translate 'Added by' %}: {{ media.user_who_added }}<br>
-            {{ media.pub_date }}
-        </section>
         {% if user.is_authenticated %}
             <section class="mt-3">
                 <a id="download_link" class="btn btn-primary" href="{{ media.file.url }}" download>
@@ -70,11 +69,54 @@
                 {% translate 'Downloads' %}: {{ media.get_downloads_number }}
             </section>
         {% endif %}
+        <section class="small mt-4 mr-4">
+            {% translate 'Author' %}: {{ media.author }}<br>
+            {% translate 'Added by' %}: {{ media.user_who_added }}<br>
+            {{ media.pub_date }}
+        </section>
+        {% if is_moderate %}
+            <section class="border border-danger mt-5 d-inline-block pt-1 pb-1 pr-2 pl-2">
+                <h5 class="text-center">{% translate 'Moderate' %}:</h5>
+                <hr class="mt-2 mb-2 border-danger">
+                <form method="post">
+                    {% csrf_token %}
+                    <section class="form-check">
+                        <input class="form-check-input" type="radio" name="is_approve_radio" id="is_approve_radio_approve" value="approve">
+                        <label class="form-check-label" for="is_approve_radio_approve">
+                            {% translate 'Approve' %}
+                        </label>
+                    </section>
+                    <section class="form-check">
+                        <input class="form-check-input" type="radio" name="is_approve_radio" id="is_approve_radio_disapprove" value="disapprove" checked>
+                        <label class="form-check-label" for="is_approve_radio_disapprove">
+                            {% translate 'Disapprove' %}
+                        </label>
+                    </section>
+                    <button class="btn btn-outline-primary m-2" id="approve_button">{% translate 'Confirm' %}</button>
+                    <hr class="mt-2 mb-2 border-danger">
+                    <section class="form-check">
+                        <input class="form-check-input" type="radio" name="is_auto_next_task" id="is_auto_next_task_true" value="true" checked>
+                        <label class="form-check-label" for="is_auto_next_task_true">
+                            {% translate 'Auto new task' %}
+                        </label>
+                    </section>
+                    <section class="form-check">
+                        <input class="form-check-input" type="radio" name="is_auto_next_task" id="is_auto_next_task_false" value="false">
+                        <label class="form-check-label" for="is_auto_next_task_false">
+                            {% translate 'No auto new task' %}
+                        </label>
+                    </section>
+                </form>
+            </section>
+        {% endif %}
     {% endblock content %}
     {% block scripts %}
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"
                 integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
         </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+                crossorigin="anonymous"></script>
         <script>
             // preparing for the next script
             const get_full_path = "{{ request.get_full_path }}"
