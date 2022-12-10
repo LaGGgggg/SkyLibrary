@@ -41,4 +41,4 @@ class User(AbstractUser):
     )
 
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES)
-    email = models.EmailField(_("email address"), unique=True)
+    email = models.EmailField(_('email address'), unique=True)
