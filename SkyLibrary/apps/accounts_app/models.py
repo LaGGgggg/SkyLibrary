@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(UserManager):
-
     def create_superuser(self, username, email=None, password=None, **extra_fields):
 
         extra_fields.setdefault("is_staff", True)

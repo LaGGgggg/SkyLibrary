@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from django.views.generic import TemplateView
 
 from .views import ViewCreateMedia, ViewViewMedia
@@ -10,5 +10,5 @@ urlpatterns = [
         TemplateView.as_view(template_name='media_app/create_media_successful.html'),
         name='create_media_successful',
     ),
-    re_path('^view/(?P<media_id>\\d+)/$', ViewViewMedia.as_view(), name='view_media'),
+    path('view/<int:media_id>/', ViewViewMedia.as_view(), name='view_media'),
 ]

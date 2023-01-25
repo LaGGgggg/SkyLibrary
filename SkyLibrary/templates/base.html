@@ -3,10 +3,11 @@
 {% load static %}
 {% load cache %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block head_extra %} {% endblock head_extra %}
     <title>Sky library</title>
@@ -20,7 +21,7 @@
     <h1>{% block header %}{% endblock header %}</h1>
     <div>{% block content %}{% endblock content %}</div>
     <!-- 31536000 = one year, it doesn't change -->
-    {% cache 31536000 footer %}
+    {% cache 31536000 footer LANGUAGE_CODE %}
         <footer class="small mt-4">
             {% translate 'Support' %}: <address style="display: inline;">TulNik0@yandex.ru</address>
         </footer>

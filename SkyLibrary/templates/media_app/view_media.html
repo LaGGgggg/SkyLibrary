@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- 31536000 = one year, it doesn't change -->
 {% extends 'base.html' %}
 {% load static %}
 {% load cache %}
 {% load i18n %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 create_media_page %}
-    {% block head_extra %}
-        <link rel="stylesheet" href="{% static 'css/view_media.css' %}">
-        <link rel="stylesheet" href="{% static 'css/rating.css' %}">
-    {% endblock head_extra %}
-    {% block top_panel %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% load app_extra_filters %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/view_media.css' %}">
+    <link rel="stylesheet" href="{% static 'css/rating.css' %}">
+{% endblock head_extra %}
+{% block top_panel %}
+    {% cache 31536000 view_media_page_top_panel LANGUAGE_CODE %}
         <li class="nav-item active">
             <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
         </li>
@@ -22,16 +26,20 @@
                 <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
             </li>
         {% endif %}
-    {% endblock top_panel %}
-    {% block header %}
+    {% endcache %}
+{% endblock top_panel %}
+{% block header %}
+    {% cache 31536000 view_media_page_header LANGUAGE_CODE %}
         {{ media.title }}
-    {% endblock header %}
-    {% block content %}
+    {% endcache %}
+{% endblock header %}
+{% block content %}
+    {% cache 31536000 view_media_page_viewer_content LANGUAGE_CODE %}
         {% if media.cover %}
             <img src="{{ media.cover.url }}" class="float-right cover_image">
         {% endif %}
         <section class="list-group flex-row align-items-baseline">
-            <section class="d-flex align-items-end rating mr-2">
+            <section class="d-flex align-items-end rating">
                 <section class="position-relative rating__stars_body">
                     <section class="position-absolute rating__stars"></section>
                 </section>
@@ -69,12 +77,101 @@
                 {% translate 'Downloads' %}: {{ media.get_downloads_number }}
             </section>
         {% endif %}
-        <section class="small mt-4 mr-4">
+        <section class="small fst-italic mt-4">
             {% translate 'Author' %}: {{ media.author }}<br>
             {% translate 'Added by' %}: {{ media.user_who_added }}<br>
-            {{ media.pub_date }}
+            {{ media.pub_date|naturalday }}
         </section>
-        {% if is_moderate %}
+    {% endcache %}
+    {% if user.is_authenticated %}
+        <section class="mt-4">
+            <!-- 31536000 = one year, it doesn't change -->
+            {% cache 31536000 view_media_page_add_media_comment_1 LANGUAGE_CODE %}
+                <span class="fs-5">{% translate 'Leave a comment' %}:</span>
+            {% endcache %}
+            <ul class="mt-2 text-danger" id="add_comment_messages">
+                {% if messages %}
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">
+                            {{ message|safe }}
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+            {% cache 31536000 view_media_page_add_media_comment_2 LANGUAGE_CODE %}
+                {% crispy form %}
+            {% endcache %}
+        </section>
+    {% endif %}
+    <section id="comments" class="mt-4">
+        {% for comment_dict in comments %}
+            {% for i in comment_dict.nesting|to_range %}
+                <div class="ms-4">
+            {% endfor %}
+            <section data-comment-id="{{ comment_dict.comment.id }}" data-comment-nesting="{{ comment_dict.nesting }}">
+                <section class="mt-4 small fst-italic">
+                    <span class="fw-bold me-1">{{ comment_dict.comment.user_who_added }}</span>
+                    <span class="dot"></span>
+                    <span class="fw-light ms-1">{{ comment_dict.comment.pub_date|naturaltime }}</span>
+                </section>
+                <section class="fs-5 mt-1">
+                    {{ comment_dict.comment.content }}
+                </section>
+                <section class="d-flex flex-row align-items-center">
+                    {% if user.is_authenticated %}
+                        <section class="d-flex flex-column">
+                            {% if not comment_dict.comment.get_current_user_comment_rating %}
+                                <button class="bg-transparent border-0 p-0 vote-button" data-vote-button-type="upvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-up-outline"></ion-icon>
+                                </button>
+                                <button class="bg-transparent border-0 p-0 vote-button" data-vote-button-type="downvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-down-outline"></ion-icon>
+                                </button>
+                            {% elif comment_dict.comment.get_current_user_comment_rating == 1 %}
+                                <button class="bg-transparent border-0 p-0 vote-button vote-button-active" data-vote-button-type="upvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-up-outline"></ion-icon>
+                                </button>
+                                <button class="bg-transparent border-0 p-0 vote-button" data-vote-button-type="downvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-down-outline"></ion-icon>
+                                </button>
+                            {% elif comment_dict.comment.get_current_user_comment_rating == -1 %}
+                                <button class="bg-transparent border-0 p-0 vote-button" data-vote-button-type="upvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-up-outline"></ion-icon>
+                                </button>
+                                <button class="bg-transparent border-0 p-0 vote-button vote-button-active" data-vote-button-type="downvote" data-vote-button-target-id="{{ comment_dict.comment.id }}">
+                                    <ion-icon name="caret-down-outline"></ion-icon>
+                                </button>
+                            {% endif %}
+                        </section>
+                    {% else %}
+                        <section class="d-flex flex-column">
+                            <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
+                                <ion-icon name="caret-up-outline"></ion-icon>
+                            </button>
+                            <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
+                                <ion-icon name="caret-down-outline"></ion-icon>
+                            </button>
+                        </section>
+                    {% endif %}
+                    <section class="ms-2 mt-1" data-vote-rating-section-target-id="{{ comment_dict.comment.id }}">
+                        {{ comment_dict.comment.get_rating }}
+                    </section>
+                    {% if user.is_authenticated %}
+                        <span class="dot ms-2 mt-1"></span>
+                        <button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-reply-button-target-id="{{ comment_dict.comment.id }}">
+                            {% translate 'Reply' %}
+                        </button>
+                    {% endif %}
+                </section>
+                <section class="m-3" data-reply-target-id="{{ comment_dict.comment.id }}"></section>
+            </section>
+            {% for i in comment_dict.nesting|to_range %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </section>
+    {% if is_moderate %}
+        {% cache 31536000 view_media_page_moderator_content LANGUAGE_CODE %}
             <section class="border border-danger mt-5 d-inline-block pt-1 pb-1 pr-2 pl-2">
                 <h5 class="text-center">{% translate 'Moderate' %}:</h5>
                 <hr class="mt-2 mb-2 border-danger">
@@ -92,7 +189,7 @@
                             {% translate 'Disapprove' %}
                         </label>
                     </section>
-                    <button class="btn btn-outline-primary m-2" id="approve_button">{% translate 'Confirm' %}</button>
+                    <button class="btn btn-outline-primary m-2" name="approve_button" id="approve_button">{% translate 'Confirm' %}</button>
                     <hr class="mt-2 mb-2 border-danger">
                     <section class="form-check">
                         <input class="form-check-input" type="radio" name="is_auto_next_task" id="is_auto_next_task_true" value="true" checked>
@@ -108,22 +205,25 @@
                     </section>
                 </form>
             </section>
-        {% endif %}
-    {% endblock content %}
-    {% block scripts %}
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
-        </script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
-        <script>
-            // preparing for the next script
-            const get_full_path = "{{ request.get_full_path }}"
-            const csrf_token = "{{ csrf_token }}"
-        </script>
-        <script src="{% static 'js/view_media.js' %}"></script>
-        <script src="{% static 'js/rating.js' %}"></script>
-    {% endblock scripts %}
-{% endcache %}
+        {% endcache %}
+    {% endif %}
+{% endblock content %}
+{% block scripts %}
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+            crossorigin="anonymous"></script>
+    <script>
+        // preparing for the next scripts
+        const get_full_path = "{{ request.get_full_path }}"
+        const csrf_token = "{{ csrf_token }}"
+        const media_id = "{{ media_id }}"
+    </script>
+    <script src="{% static 'js/view_media.js' %}"></script>
+    <script src="{% static 'js/rating.js' %}"></script>
+{% endblock scripts %}
 </html>

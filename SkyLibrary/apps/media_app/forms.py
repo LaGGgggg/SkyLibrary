@@ -2,6 +2,11 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit
+from crispy_forms.bootstrap import FormActions
+from crispy_bootstrap5.bootstrap5 import FloatingField
+
 from .models import Media, MediaTags
 
 
@@ -61,3 +66,59 @@ class CreateMediaForm(forms.ModelForm):
         model = Media
 
         fields = ['title', 'description', 'author', 'tags', 'file', 'cover']
+
+
+class CreateCommentForm(forms.Form):
+
+    content = forms.CharField(max_length=500, label=_('Comment text'))
+
+    @property
+    def helper(self):
+
+        helper = FormHelper()
+
+        helper.form_show_labels = False
+        helper.form_id = 'create_media_comment_form'
+
+        custom_form_actions_submit_button = Submit('submit', _('Add comment'), css_id='create_media_comment_button')
+
+        # Needed because Submit class automatically sets btn btn-primary class and not remove it if another classes
+        # added.
+        custom_form_actions_submit_button.field_classes = 'btn btn-outline-primary'
+
+        helper.layout = Layout(
+            FloatingField('content', css_class='ml-3 mt-2 bg-light', id='add_media_comment_content_field'),
+            FormActions(
+                custom_form_actions_submit_button,
+            ),
+        )
+
+        return helper
+
+
+class CreateReplyCommentForm(forms.Form):
+
+    content = forms.CharField(max_length=500, label=_('Reply text'))
+
+    @property
+    def helper(self):
+
+        helper = FormHelper()
+
+        helper.form_show_labels = False
+        helper.form_id = 'create_comment_reply_form'
+
+        custom_form_actions_submit_button = Submit('submit', _('Add reply'), css_id='create_comment_reply_button')
+
+        # Needed because Submit class automatically sets btn btn-primary class and not remove it if another classes
+        # added.
+        custom_form_actions_submit_button.field_classes = 'btn btn-outline-primary'
+
+        helper.layout = Layout(
+            FloatingField('content', css_class='ml-3 mt-2 bg-light', id='add_comment_reply_content_field'),
+            FormActions(
+                custom_form_actions_submit_button,
+            ),
+        )
+
+        return helper

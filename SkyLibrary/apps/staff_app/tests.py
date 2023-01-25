@@ -50,28 +50,28 @@ class ModeratorPageTestCase(TestCase):
             'description': 'test_description_1',
             'author': 'test_author',
             'user_who_added': cls.visitor_user,
-            'active': 0,
+            'active': Media.INACTIVE,
         }
         not_active_media_yesterday_date_data = {
             'title': 'not_active_media_yesterday_date_title',
             'description': 'test_description_2',
             'author': 'test_author',
             'user_who_added': cls.visitor_user,
-            'active': 0,
+            'active': Media.INACTIVE,
         }
         active_media_data = {
             'title': 'active_media_title',
             'description': 'test_description_3',
             'author': 'test_author',
             'user_who_added': cls.visitor_user,
-            'active': 1,
+            'active': Media.ACTIVE,
         }
         not_valid_media_data = {
             'title': 'not_valid_media_title',
             'description': 'test_description_4',
             'author': 'test_author',
             'user_who_added': cls.visitor_user,
-            'active': 2,
+            'active': Media.NOT_VALID,
         }
 
         cls.active_media = Media.objects.create(**active_media_data)
@@ -80,14 +80,16 @@ class ModeratorPageTestCase(TestCase):
 
         cls.not_active_media_yesterday_date = Media.objects.create(**not_active_media_yesterday_date_data)
 
-        # Set dates:
+        # Set yesterday date:
         cls.not_active_media_yesterday_date.pub_date = datetime.today() - timedelta(days=1)
 
         cls.not_active_media_yesterday_date.save()
 
     def test_get_without_login(self):
 
-        response = self.client.get(reverse('moderator_page'), follow=True)
+        moderator_page_reverse_kwargs = {'get_next_task': 'false', 'from_view_media_page': 'false'}
+
+        response = self.client.get(reverse('moderator_page', kwargs=moderator_page_reverse_kwargs), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'accounts_app/login.html')
@@ -96,9 +98,11 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.force_login(self.visitor_user)
 
-        response = self.client.get(reverse('moderator_page'), follow=True)
+        moderator_page_reverse_kwargs = {'get_next_task': 'false', 'from_view_media_page': 'false'}
 
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('moderator_page', kwargs=moderator_page_reverse_kwargs), follow=True)
+
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
         self.client.logout()
@@ -107,7 +111,9 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.force_login(self.moderator_user)
 
-        response = self.client.get(reverse('moderator_page'))
+        moderator_page_reverse_kwargs = {'get_next_task': 'false', 'from_view_media_page': 'false'}
+
+        response = self.client.get(reverse('moderator_page', kwargs=moderator_page_reverse_kwargs))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
@@ -125,7 +131,9 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.force_login(self.moderator_user)
 
-        response = self.client.get(reverse('moderator_page'))
+        moderator_page_reverse_kwargs = {'get_next_task': 'false', 'from_view_media_page': 'false'}
+
+        response = self.client.get(reverse('moderator_page', kwargs=moderator_page_reverse_kwargs))
 
         self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
 
@@ -142,7 +150,9 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.force_login(self.moderator_user)
 
-        response = self.client.get(reverse('moderator_page'))
+        moderator_page_reverse_kwargs = {'get_next_task': 'false', 'from_view_media_page': 'false'}
+
+        response = self.client.get(reverse('moderator_page', kwargs=moderator_page_reverse_kwargs))
 
         self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
 
@@ -156,7 +166,7 @@ class ModeratorPageTestCase(TestCase):
     def test_post_without_login(self):
 
         response = self.client.post(
-            reverse('moderator_page'),
+            reverse('moderator_page', kwargs={'get_next_task': 'false', 'from_view_media_page': 'false'}),
             follow=True,
             content_type='application/json',
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
@@ -170,30 +180,47 @@ class ModeratorPageTestCase(TestCase):
         self.client.force_login(self.visitor_user)
 
         response = self.client.post(
-            reverse('moderator_page'),
+            reverse('moderator_page', kwargs={'get_next_task': 'false', 'from_view_media_page': 'false'}),
             follow=True,
             content_type='application/json',
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
         self.client.logout()
 
-    def test_post(self):
+    @staticmethod
+    def _change_media_pub_dates_to_earlier(func):
 
-        # Active and not_valid media shouldn't be in moderator task:
-        self.active_media.pub_date = datetime.today() - timedelta(days=2)
-        self.not_valid_media.pub_date = datetime.today() - timedelta(days=2)
+        def wrapper(*args):
 
-        self.active_media.save()
-        self.not_valid_media.save()
+            self = args[0]
+
+            self.active_media.pub_date = self.active_media.pub_date - timedelta(days=2)
+            self.not_valid_media.pub_date = self.not_valid_media.pub_date - timedelta(days=2)
+
+            self.active_media.save()
+            self.not_valid_media.save()
+
+            func(*args)
+
+            self.active_media.pub_date = self.active_media.pub_date + timedelta(days=2)
+            self.not_valid_media.pub_date = self.not_valid_media.pub_date + timedelta(days=2)
+
+            self.active_media.save()
+            self.not_valid_media.save()
+
+        return wrapper
+
+    @_change_media_pub_dates_to_earlier
+    def test_post_with_exist_not_active_media(self):
 
         self.client.force_login(self.moderator_user)
 
         response = self.client.post(
-            reverse('moderator_page'),
+            reverse('moderator_page', kwargs={'get_next_task': 'false', 'from_view_media_page': 'false'}),
             content_type='application/json',
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
         )
@@ -209,16 +236,53 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.logout()
 
+    @staticmethod
+    def _change_media_actives_to_not_valid(func):
+
+        def wrapper(*args):
+
+            self = args[0]
+
+            self.not_active_media_now_date.active = Media.NOT_VALID
+            self.not_active_media_yesterday_date.active = Media.NOT_VALID
+
+            self.not_active_media_now_date.save()
+            self.not_active_media_yesterday_date.save()
+
+            func(*args)
+
+            self.not_active_media_now_date.active = Media.INACTIVE
+            self.not_active_media_yesterday_date.active = Media.INACTIVE
+
+            self.not_active_media_now_date.save()
+            self.not_active_media_yesterday_date.save()
+
+        return wrapper
+
+    @_change_media_actives_to_not_valid
+    def test_post_without_exist_not_active_media(self):
+
+        self.client.force_login(self.moderator_user)
+
+        response = self.client.post(
+            reverse('moderator_page', kwargs={'get_next_task': 'false', 'from_view_media_page': 'false'}),
+            content_type='application/json',
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.content.decode('utf-8'), '{"moderator_task": null}')
+
+        self.client.logout()
+
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class ViewMediaPageModeratorContentTestCase(TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
 
-        super().setUpClass()
-
-        cls.client = Client()
+        self.client = Client()
 
         visitor_user_credentials = {
             'username': 'test_user_visitor',
@@ -233,8 +297,8 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
             'role': 2,
         }
 
-        cls.visitor_user = User.objects.create(**visitor_user_credentials)
-        cls.moderator_user = User.objects.create(**moderator_user_credentials)
+        self.visitor_user = User.objects.create(**visitor_user_credentials)
+        self.moderator_user = User.objects.create(**moderator_user_credentials)
 
         test_file = SimpleUploadedFile('test_file.pdf', b'file_content', content_type='application/pdf')
 
@@ -242,19 +306,21 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
             'title': 'not_active_media_now_date_title',
             'description': 'test_description_1',
             'author': 'test_author',
-            'user_who_added': cls.visitor_user,
+            'user_who_added': self.visitor_user,
             'active': 0,
         }
         not_active_media_yesterday_date_data = {
             'title': 'not_active_media_yesterday_date_title',
-            'description': 'test_description_2',
+            'description': 'test_description_3',
             'author': 'test_author',
-            'user_who_added': cls.visitor_user,
+            'user_who_added': self.visitor_user,
             'file': test_file,
             'active': 0,
         }
 
-        cls.not_active_media_now_date = Media.objects.create(**not_active_media_now_date_data)  # not for moderator task
+        # not for moderator task
+        self.not_active_media_now_date = Media.objects.create(**not_active_media_now_date_data)
+
         not_active_media_yesterday_date = Media.objects.create(**not_active_media_yesterday_date_data)
 
         # Set yesterday date:
@@ -262,8 +328,8 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
 
         not_active_media_yesterday_date.save()
 
-        cls.moderator_task = \
-            ModeratorTask.objects.create(user_who_added=cls.moderator_user, media=not_active_media_yesterday_date)
+        self.moderator_task = \
+            ModeratorTask.objects.create(user_who_added=self.moderator_user, media=not_active_media_yesterday_date)
 
     def test_get_with_visitor_login(self):
 
@@ -272,7 +338,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         response = \
             self.client.get(reverse('view_media', kwargs={'media_id': self.moderator_task.media.id}), follow=True)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
         self.client.logout()
@@ -284,7 +350,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         response = \
             self.client.get(reverse('view_media', kwargs={'media_id': self.not_active_media_now_date.id}), follow=True)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
         self.client.logout()
@@ -302,7 +368,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
             '<section class="border border-danger mt-5 d-inline-block pt-1 pb-1 pr-2 pl-2">',
             '<form method="post">',
             '<section class="form-check">',
-            '<button class="btn btn-outline-primary m-2" id="approve_button">Confirm</button>',
+            '<button class="btn btn-outline-primary m-2" name="approve_button" id="approve_button">Confirm</button>',
         )
 
         for content in moderator_content:
@@ -320,8 +386,8 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
             follow=True,
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, 'errors/404.html')
 
         self.client.logout()
 
@@ -332,6 +398,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         post_data = {
             'is_approve_radio': 'disapprove',
             'is_auto_next_task': 'false',
+            'approve_button': '',  # this is needed because this is sending the form
         }
 
         moderator_task_media = self.moderator_task.media
@@ -358,6 +425,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         post_data = {
             'is_approve_radio': 'approve',
             'is_auto_next_task': 'false',
+            'approve_button': '',  # this is needed because this is sending the form
         }
 
         moderator_task_media = self.moderator_task.media
@@ -386,6 +454,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         post_data = {
             'is_approve_radio': 'approve',
             'is_auto_next_task': 'false',
+            'approve_button': '',  # this is needed because this is sending the form
         }
 
         response = self.client.post(
@@ -410,6 +479,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         post_data = {
             'is_approve_radio': 'approve',
             'is_auto_next_task': 'true',
+            'approve_button': '',  # this is needed because this is sending the form
         }
 
         response = self.client.post(

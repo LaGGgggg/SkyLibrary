@@ -2,3 +2,29 @@
     max-height: 150%;
     max-width: 150%;
 }
+.asteriskField {
+    display: none;
+}
+.dot {
+    height: 8px;
+    width: 8px;
+    background-color: #00dcff;
+    border-radius: 50%;
+    display: inline-block;
+}
+.vote-button {
+    color: #00c7ff;
+    height: 1em;
+}
+.vote-button:hover {
+    color: #002AFF;
+}
+.vote-button-active {
+    color: #002AFF;
+}
+.reply-button {
+    color: #002AFF;
+}
+.reply-button:hover {
+    font-weight: 400!important;
+}

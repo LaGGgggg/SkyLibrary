@@ -4,12 +4,16 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
-from django.utils.formats import date_format
+from django.contrib.humanize.templatetags.humanize import naturalday, naturaltime
+
+from crispy_forms.utils import render_crispy_form
 
 from PIL import Image
 from shutil import rmtree
+from ast import literal_eval
 
-from media_app.models import Media, MediaTags, MediaDownload, get_cover_upload, get_file_upload
+from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_cover_upload, get_file_upload
+from media_app.forms import CreateReplyCommentForm
 
 User = get_user_model()
 
@@ -197,13 +201,34 @@ class ViewMediaTestCase(TestCase):
         cls.client = Client()
 
         user_credentials = {
-            'username': 'test_user',
+            'username': 'test_user_1',
             'password': 'test_password',
             'email': 'test_email_1@mail.com',
             'role': 1,
         }
+        user_for_media_comment_credentials = {
+            'username': 'test_user_2',
+            'password': 'test_password',
+            'email': 'test_email_2@mail.com',
+            'role': 1,
+        }
+        user_for_media_comment_reply_credentials = {
+            'username': 'test_user_3',
+            'password': 'test_password',
+            'email': 'test_email_3@mail.com',
+            'role': 1,
+        }
+        user_for_comment_reply_reply_credentials = {
+            'username': 'test_user_4',
+            'password': 'test_password',
+            'email': 'test_email_4@mail.com',
+            'role': 1,
+        }
 
         cls.user = User.objects.create_user(**user_credentials)
+        user_for_media_comment = User.objects.create_user(**user_for_media_comment_credentials)
+        user_for_media_comment_reply = User.objects.create_user(**user_for_media_comment_reply_credentials)
+        user_for_comment_reply_reply = User.objects.create_user(**user_for_comment_reply_reply_credentials)
 
         cls.test_file = SimpleUploadedFile('test_file.pdf', b'file_content', content_type='application/pdf')
 
@@ -259,18 +284,45 @@ class ViewMediaTestCase(TestCase):
         cls.media.tags.set(cls.test_tags)
         cls.not_active_media.tags.set(cls.test_tags)
 
+        cls.comment_data = {
+            'content': 'media_comment_content_1',
+            'target_type': Comment.MEDIA_TYPE,
+            'target_id': cls.media.id,
+            'user_who_added': user_for_media_comment,
+        }
+
+        cls.comment = Comment.objects.create(**cls.comment_data)
+
+        cls.comment_reply_data = {
+            'content': 'media_comment_content_2',
+            'target_type': Comment.COMMENT_TYPE,
+            'target_id': cls.comment.id,
+            'user_who_added': user_for_media_comment_reply,
+        }
+
+        cls.comment_reply = Comment.objects.create(**cls.comment_reply_data)
+
+        cls.comment_reply_reply_data = {
+            'content': 'media_comment_content_3',
+            'target_type': Comment.COMMENT_TYPE,
+            'target_id': cls.comment_reply.id,
+            'user_who_added': user_for_comment_reply_reply,
+        }
+
+        cls.comment_reply_reply = Comment.objects.create(**cls.comment_reply_reply_data)
+
     def test_get_not_exist_media(self):
 
         response = self.client.get(reverse('view_media', kwargs={'media_id': 0}), follow=True)  # 0 id does not exist
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, 'errors/404.html')
 
     def test_get_inactive_media(self):
 
         response = self.client.get(reverse('view_media', kwargs={'media_id': self.not_active_media.id}), follow=True)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
     def test_get_active_media_without_login(self):
@@ -299,7 +351,7 @@ class ViewMediaTestCase(TestCase):
         )
 
         # add pub date:
-        page_should_contain.append(date_format(self.media.pub_date, 'DATE_FORMAT'))
+        page_should_contain.append(naturalday(self.media.pub_date))
 
         # add file downloads:
         page_should_contain.append(f'Downloads: {self.media.get_downloads_number()}')
@@ -336,7 +388,7 @@ class ViewMediaTestCase(TestCase):
         )
 
         # add pub date:
-        page_should_contain.append(date_format(self.media.pub_date, 'DATE_FORMAT'))
+        page_should_contain.append(naturalday(self.media.pub_date))
 
         # check all in the list:
         for item in page_should_contain:
@@ -359,9 +411,7 @@ class ViewMediaTestCase(TestCase):
 
         self.client.logout()
 
-    def test_post_download_file(self):
-
-        # without login:
+    def test_post_download_file_without_login(self):
 
         response = self.client.post(
             reverse('view_media', kwargs={'media_id': self.media.id}),
@@ -369,10 +419,10 @@ class ViewMediaTestCase(TestCase):
             **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'errors/403.html')
 
-        # with login:
+    def test_post_download_file_with_login(self):
 
         self.client.force_login(self.user)
 
@@ -394,8 +444,6 @@ class ViewMediaTestCase(TestCase):
 
         # check downloads number:
 
-        self.media.refresh_from_db()
-
         self.assertEqual(downloads_before_request + 1, self.media.get_downloads_number())
 
         # check again, one download from one user:
@@ -405,9 +453,578 @@ class ViewMediaTestCase(TestCase):
             **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
         )
 
-        self.media.refresh_from_db()
-
         self.assertEqual(downloads_before_request + 1, self.media.get_downloads_number())
+
+        self.client.logout()
+
+    def test_get_media_with_comments_without_login(self):
+
+        response = self.client.get(reverse('view_media', kwargs={'media_id': self.media.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/view_media.html')
+
+        page_should_contain = [
+            self.comment_data['content'],
+            self.comment_data['user_who_added'].username,
+            naturaltime(self.comment.pub_date),
+            self.comment.get_rating(),
+        ]
+
+        for item in page_should_contain:
+            self.assertContains(response, item)
+
+        page_should_not_contain = [
+            f'data-reply-button-target-id="{self.comment.id}"',  # reply button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment.id}"',  # upvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment.id}"',  # downvote button
+        ]
+
+        for item in page_should_not_contain:
+            self.assertNotContains(response, item)
+
+    def test_get_media_with_comments_with_login(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('view_media', kwargs={'media_id': self.media.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/view_media.html')
+
+        page_should_contain = [
+            self.comment_data['content'],
+            self.comment_data['user_who_added'].username,
+            naturaltime(self.comment.pub_date),
+            self.comment.get_rating(),
+            f'data-reply-button-target-id="{self.comment.id}"',  # reply button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment.id}"',  # upvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment.id}"',  # downvote button
+        ]
+
+        for item in page_should_contain:
+            self.assertContains(response, item)
+
+        self.client.logout()
+
+    def test_post_add_media_comment_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'create_comment', 'target_type': 'media', 'content': 'content'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_add_media_comment_with_login(self):
+
+        self.client.force_login(self.user)
+
+        added_comment_data = {
+            'content': 'content',
+            'user_who_added': self.user,
+        }
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'create_comment', 'target_type': 'media', 'content': added_comment_data['content']},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        added_comment = Comment.objects.filter(content=added_comment_data['content'])
+
+        self.assertTrue(added_comment.exists())
+
+        added_comment = added_comment[0]
+
+        page_should_contain = {
+            'content': added_comment_data['content'],
+            'user_who_added': added_comment_data['user_who_added'].username,
+            'pub_date': naturaltime(added_comment.pub_date),
+            'target_type': Comment.MEDIA_TYPE,
+            'target_id': self.media.id,
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))['comment']
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        added_comment.delete()
+
+        self.client.logout()
+
+    def test_post_media_comment_upvote_button_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_media_comment_upvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists
+        user_comment_rating = CommentRating.objects.filter(user_who_added=self.user, comment=self.comment)
+
+        if user_comment_rating.exists():
+            user_comment_rating.delete()
+
+        comment_rating_before_post = self.comment.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_rating: int = self.comment.get_rating()
+
+        self.assertEqual(comment_rating_before_post + 1, comment_rating)
+
+        page_should_contain = {
+            'new_rating': comment_rating,
+            'target_id': f'{self.comment.id}',
+            'not_target_type': 'downvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_media_comment_downvote_button_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_media_comment_downvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists
+        user_comment_rating = CommentRating.objects.filter(user_who_added=self.user, comment=self.comment)
+
+        if user_comment_rating.exists():
+            user_comment_rating.delete()
+
+        comment_rating_before_post = self.comment.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_rating: int = self.comment.get_rating()
+
+        self.assertEqual(comment_rating_before_post - 1, comment_rating)
+
+        page_should_contain = {
+            'new_rating': comment_rating,
+            'target_id': f'{self.comment.id}',
+            'not_target_type': 'upvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_get_media_comment_reply_button_without_login(self):
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_comment_reply_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_get_media_comment_reply_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_comment_reply_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'django/forms/widgets/input.html')  # response returns form
+
+        page_should_contain: str = render_crispy_form(CreateReplyCommentForm())
+
+        page_content: str = literal_eval(response.content.decode('utf-8'))['comment_reply_form']
+
+        self.assertEqual(page_content, page_should_contain)
+
+        self.client.logout()
+
+    def test_get_media_comment_with_replies_without_login(self):
+
+        response = self.client.get(reverse('view_media', kwargs={'media_id': self.media.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/view_media.html')
+
+        page_should_contain = [
+            # comment reply:
+            self.comment_reply_data['content'],
+            self.comment_reply_data['user_who_added'].username,
+            naturaltime(self.comment_reply.pub_date),
+            self.comment_reply.get_rating(),
+
+            # comment reply reply:
+            self.comment_reply_reply_data['content'],
+            self.comment_reply_reply_data['user_who_added'].username,
+            naturaltime(self.comment_reply_reply.pub_date),
+            self.comment_reply_reply.get_rating(),
+        ]
+
+        for item in page_should_contain:
+            self.assertContains(response, item)
+
+        page_should_not_contain = [
+            # comment reply:
+            f'data-reply-button-target-id="{self.comment_reply.id}"',  # reply button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply.id}"',  # upvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply.id}"',  # downvote button
+
+            # comment reply reply:
+            f'data-reply-button-target-id="{self.comment_reply_reply.id}"',  # reply button
+            # upvote button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+            # downvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+        ]
+
+        for item in page_should_not_contain:
+            self.assertNotContains(response, item)
+
+    def test_get_media_comment_with_replies_with_login(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('view_media', kwargs={'media_id': self.media.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/view_media.html')
+
+        page_should_contain = [
+            # comment reply:
+            self.comment_reply_data['content'],
+            self.comment_reply_data['user_who_added'].username,
+            naturaltime(self.comment_reply.pub_date),
+            self.comment_reply.get_rating(),
+            f'data-reply-button-target-id="{self.comment_reply.id}"',  # reply button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply.id}"',  # upvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply.id}"',  # downvote button
+
+            # comment reply reply:
+            self.comment_reply_reply_data['content'],
+            self.comment_reply_reply_data['user_who_added'].username,
+            naturaltime(self.comment_reply_reply.pub_date),
+            self.comment_reply_reply.get_rating(),
+            f'data-reply-button-target-id="{self.comment_reply_reply.id}"',  # reply button
+            # upvote button
+            f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+            # downvote button
+            f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+        ]
+
+        for item in page_should_contain:
+            self.assertContains(response, item)
+
+        self.client.logout()
+
+    def test_post_add_reply_comment_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_comment',
+                'target_type': 'comment',
+                'target_id': f'{self.comment.id}',
+                'content': 'content',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_add_reply_comment_with_login(self):
+
+        self.client.force_login(self.user)
+
+        added_comment_data = {
+            'content': 'content',
+            'user_who_added': self.user,
+        }
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_comment',
+                'target_type': 'comment',
+                'target_id': f'{self.comment.id}',
+                'content': added_comment_data['content'],
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        added_comment = Comment.objects.filter(
+            content=added_comment_data['content'], user_who_added=added_comment_data['user_who_added']
+        )
+
+        self.assertTrue(added_comment.exists())
+
+        added_comment = added_comment[0]
+
+        page_should_contain = {
+            'content': added_comment_data['content'],
+            'user_who_added': added_comment_data['user_who_added'].username,
+            'pub_date': naturaltime(added_comment.pub_date),
+            'target_type': Comment.COMMENT_TYPE,
+            'target_id': self.comment.id,
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))['comment']
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        added_comment.delete()
+
+        self.client.logout()
+
+    def test_post_reply_comment_upvote_button_without_login(self):
+
+        # reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        # reply reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment_reply_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_reply_comment_upvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists:
+        user_comment_reply_rating = CommentRating.objects.filter(user_who_added=self.user, comment=self.comment_reply)
+
+        if user_comment_reply_rating.exists():
+            user_comment_reply_rating.delete()
+
+        comment_reply_rating_before_post = self.comment_reply.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_reply_rating: int = self.comment_reply.get_rating()
+
+        self.assertEqual(comment_reply_rating_before_post + 1, comment_reply_rating)
+
+        page_should_contain = {
+            'new_rating': comment_reply_rating,
+            'target_id': f'{self.comment_reply.id}',
+            'not_target_type': 'downvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_reply_reply_comment_upvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists:
+        user_comment_reply_reply_rating = \
+            CommentRating.objects.filter(user_who_added=self.user, comment=self.comment_reply_reply)
+
+        if user_comment_reply_reply_rating.exists():
+            user_comment_reply_reply_rating.delete()
+
+        comment_reply_reply_rating_before_post = self.comment_reply_reply.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'upvote', 'target_id': self.comment_reply_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_reply_reply_rating: int = self.comment_reply_reply.get_rating()
+
+        self.assertEqual(comment_reply_reply_rating_before_post + 1, comment_reply_reply_rating)
+
+        page_should_contain = {
+            'new_rating': comment_reply_reply_rating,
+            'target_id': f'{self.comment_reply_reply.id}',
+            'not_target_type': 'downvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_reply_comment_downvote_button_without_login(self):
+
+        # reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        # reply reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment_reply_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_reply_comment_downvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists:
+        user_comment_reply_rating = CommentRating.objects.filter(user_who_added=self.user, comment=self.comment_reply)
+
+        if user_comment_reply_rating.exists():
+            user_comment_reply_rating.delete()
+
+        comment_reply_rating_before_post = self.comment_reply.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_reply_rating: int = self.comment_reply.get_rating()
+
+        self.assertEqual(comment_reply_rating_before_post - 1, comment_reply_rating)
+
+        page_should_contain = {
+            'new_rating': comment_reply_rating,
+            'target_id': f'{self.comment_reply.id}',
+            'not_target_type': 'upvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_reply_reply_comment_downvote_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing user vote if it exists:
+        user_comment_reply_reply_rating = \
+            CommentRating.objects.filter(user_who_added=self.user, comment=self.comment_reply_reply)
+
+        if user_comment_reply_reply_rating.exists():
+            user_comment_reply_reply_rating.delete()
+
+        comment_reply_reply_rating_before_post = self.comment_reply_reply.get_rating()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'add_comment_vote', 'vote_type': 'downvote', 'target_id': self.comment_reply_reply.id},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        comment_reply_reply_rating: int = self.comment_reply_reply.get_rating()
+
+        self.assertEqual(comment_reply_reply_rating_before_post - 1, comment_reply_reply_rating)
+
+        page_should_contain = {
+            'new_rating': comment_reply_reply_rating,
+            'target_id': f'{self.comment_reply_reply.id}',
+            'not_target_type': 'upvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
 
         self.client.logout()
 

@@ -78,9 +78,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 
     'debug_toolbar',
     'crispy_forms',
+    'crispy_bootstrap5',
 
     'accounts_app',
     'home_page_app',
@@ -363,4 +365,5 @@ PROJECT_ROOT = BASE_DIR.joinpath('apps')
 AUTH_USER_MODEL = 'accounts_app.User'
 LOGOUT_REDIRECT_URL = 'logout_successful'
 ACCOUNT_ACTIVATION_DAYS = 10
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
