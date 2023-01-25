@@ -93,10 +93,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -284,9 +282,11 @@ if USE_CACHE:
             }
 
 else:
-    # Needed for correct work
-    MIDDLEWARE.remove('django.middleware.cache.UpdateCacheMiddleware')
-    MIDDLEWARE.remove('django.middleware.cache.FetchFromCacheMiddleware')
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
 
 
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default=None)
