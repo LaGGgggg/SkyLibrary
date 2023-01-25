@@ -92,6 +92,9 @@ class MediaDownload(models.Model):
     pub_date = models.DateField(auto_now_add=True)
     download = models.SmallIntegerField(choices=download_choices, default=1)
 
+    def __str__(self):
+        return f'{self.media.title}_download({self.download})'
+
     def clean(self, *args, **kwargs):
 
         try:
@@ -108,9 +111,6 @@ class MediaDownload(models.Model):
         self.full_clean()
 
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.media.title}_download({self.download})'
 
     class Meta:
         db_table = 'media_app_media_download'
@@ -132,7 +132,7 @@ class MediaRating(models.Model):
     rating = models.SmallIntegerField(choices=rating_choices)
 
     def __str__(self):
-        return f'{self.media.title}_rating({self.rating})'
+        return f'{self.media.title} rating ({self.rating})'
 
     class Meta:
         db_table = 'media_app_media_rating'
