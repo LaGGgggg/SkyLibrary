@@ -130,9 +130,14 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-staticfiles
-media
+poetry.lock
+pyproject.toml
+
+.idea
 
 .wakatime-project
+
+staticfiles
+media
 
 pg_data
