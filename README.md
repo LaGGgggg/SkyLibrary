@@ -1,3 +1,134 @@
+![GitHub](https://img.shields.io/github/license/LaGGgggg/SkyLibrary?label=License)
+![GitHub watchers](https://img.shields.io/github/watchers/LaGGgggg/SkyLibrary)
+![GitHub last commit](https://img.shields.io/github/last-commit/LaGGgggg/SkyLibrary)
+[![wakatime](https://wakatime.com/badge/user/824414bb-4135-4fbc-abbd-0d007987e855/project/c5bb279e-2962-4a25-b98b-9b09e581de4c.svg)](https://wakatime.com/badge/user/824414bb-4135-4fbc-abbd-0d007987e855/project/c5bb279e-2962-4a25-b98b-9b09e581de4c)
+
 # Sky library
 
-Web library on django
+Web library on django.
+You can upload and download media files (videos, books, webinars...), add to bookmarks, rate and more!
+
+# How to start the project?
+
+### 1. Clone this repository
+
+```bash
+git clone https://github.com/LaGGgggg/SkyLibrary.git
+cd SkyLibrary
+```
+
+### 2. Create the virtualenv:
+
+#### With [pipenv](https://pipenv.pypa.io/en/latest/):
+
+```bash
+pip install --user pipenv
+pipenv shell  # create and activate
+```
+
+#### Or classic:
+
+```bash
+python -m venv .venv  # create
+.venv\Scripts\activate.bat   # activate
+```
+
+### 3. Install python packages
+
+#### With [pip](https://pypi.org/project/pip/):
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Change directory
+
+```bash
+cd SkyLibrary
+```
+
+### 5. Create postgresql database
+
+To create your postgresql database you need:
+1. Install [this](https://www.postgresql.org/download/)
+2. Open pgadmin
+3. Create a new one or use the default database
+
+### 6. Add environment variables
+
+Create file `.env` in `SkyLibrary/app_main`, such it `SkyLibrary/app_main/.env`. Next, paste it in `.env`
+(this is a configuration for development, not for production!):
+
+```dotenv
+SECRET_KEY=<your secret key>
+DEBUG=True
+DB_URL=postgres://<username>:<password>@localhost:5432/<database_name>
+ALLOWED_HOSTS=*
+INTERNAL_IPS=127.0.0.1
+
+USE_CACHE=False
+CACHE_LOCAL=True
+CACHE_LOCATION_DB_TABLE_NAME=cache
+CACHE_REDIS_LOCATIONS=
+
+EMAIL_HOST_USER=<your email adress>
+EMAIL_HOST_PASSWORD=<your email password>
+
+LANGUAGE_CODE=en-us
+```
+**Do not forget to set the DB_URL variable!**
+
+#### More about variables:
+SECRET_KEY - standard [django secret key](https://docs.djangoproject.com/en/4.1/topics/signing/).<br>
+DEBUG - standard [django debug](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-DEBUG).<br>
+DB_URL - argument for [dj_database_url.config(default=)](https://github.com/jazzband/dj-database-url).<br>
+ALLOWED_HOSTS - standard [django allowed hosts](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts).<br>
+INTERNAL_IPS - standard [django internal ips](https://docs.djangoproject.com/en/4.1/ref/settings/#internal-ips).<br>
+
+USE_CACHE - if False, set [django DummyCache](https://docs.djangoproject.com/en/4.1/topics/cache/#dummy-caching-for-development) = no caching.<br>
+CACHE_LOCAL - if True, set [django DatabaseCache](https://docs.djangoproject.com/en/4.1/topics/cache/#database-caching), else [django RedisCache](https://docs.djangoproject.com/en/4.1/topics/cache/#redis).<br>
+CACHE_LOCATION_DB_TABLE_NAME - standard [django DatabaseCache location](https://docs.djangoproject.com/en/4.1/topics/cache/#database-caching).<br>
+CACHE_REDIS_LOCATIONS - standard [django RedisCache location](https://docs.djangoproject.com/en/4.1/topics/cache/#redis),
+can be empty if you are not using Redis caching, can take more than one location, separated  by " ,"
+(for example: "first_location, second_location, third_location").<br>
+
+**Warning!** The project uses **yandex smtp** as [email host variable](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host).<br>
+EMAIL_HOST_USER - standard [django email host user](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-user).<br>
+EMAIL_HOST_PASSWORD - standard [django email host password](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-password).<br>
+
+LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
+
+### 7. Run database migrations
+
+```bash
+python manage.py migrate
+```
+
+### 8. Run createcachetable
+
+```bash
+python manage.py createcachetable
+```
+
+### 9. Run collectstatic _(not required for development server)_ 
+
+```bash
+python manage.py collectstatic
+```
+
+### 10. Run development server
+
+```bash
+python manage.py runserver
+```
+
+# Current project structure
+
+Soon......
+
+# Contacts
+
+For any questions:<br>
+TulNik0@yandex.ru
+
+# [License](LICENSE)
