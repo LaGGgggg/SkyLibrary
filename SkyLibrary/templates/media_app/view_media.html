@@ -108,7 +108,7 @@
             {% for i in comment_dict.nesting|to_range %}
                 <div class="ms-4">
             {% endfor %}
-            <section data-comment-id="{{ comment_dict.comment.id }}" data-comment-nesting="{{ comment_dict.nesting }}">
+            <section id="comment_{{ comment_dict.comment.id }}" data-comment-nesting="{{ comment_dict.nesting }}">
                 <section class="mt-4 small fst-italic">
                     <span class="fw-bold me-1">{{ comment_dict.comment.user_who_added }}</span>
                     <span class="dot"></span>
@@ -162,6 +162,10 @@
                             {% translate 'Reply' %}
                         </button>
                     {% endif %}
+                    <span class="dot ms-2 mt-1"></span>
+                    <a href="#comment_{{ comment_dict.comment.id }}" class="ms-2 mt-1">
+                        <ion-icon name="pin-outline" style="font-size: 14px;"></ion-icon>
+                    </a>
                 </section>
                 <section class="m-3" data-reply-target-id="{{ comment_dict.comment.id }}"></section>
             </section>

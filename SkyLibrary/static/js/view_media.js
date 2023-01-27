@@ -22,7 +22,7 @@ $(document).ready(function() {
     function getCommentHTML (comment, comment_nesting) {
 
         /* start comment */
-        let new_comment = `<section data-comment-id="${comment.id}" data-comment-nesting="${comment_nesting}">`;
+        let new_comment = `<section id="comment_${comment.id}" data-comment-nesting="${comment_nesting}">`;
 
         /* start nesting */
         for (let i = 0; i < comment_nesting; i++) {
@@ -68,10 +68,18 @@ $(document).ready(function() {
         new_comment += `${comment.reply_translate}`;
         new_comment += '</button>';
 
+        /* dot part */
+        new_comment += '<span class="dot ms-2 mt-1"></span>';
+
+        /* add url fragment link */
+        new_comment += `<a href="#comment_${comment.id}" class="ms-2 mt-1">`;
+        new_comment += '<ion-icon name="pin-outline" style="font-size: 14px;"></ion-icon>';
+        new_comment += '</a>';
+
         /* close bottom line */
         new_comment += '</section>';
 
-        /* add section for reply form and messages */
+        /* add the section for reply form and messages */
         new_comment += `<section class="m-3" data-reply-target-id="${comment.id}"></section>`;
 
         /* close comment */
@@ -108,7 +116,7 @@ $(document).ready(function() {
 
                     let messages = '';
 
-                    for (message of response.messages) {
+                    for (let message of response.messages) {
                         messages += `<li class="${message.tags}">${message.message}</li>`;
                     }
 
@@ -121,7 +129,7 @@ $(document).ready(function() {
 
                 let messages = '';
 
-                for (message of response.messages) {
+                for (let message of response.messages) {
                     messages += `<li class="${message.tags}">${message.message}</li>`;
                 }
 
@@ -149,7 +157,7 @@ $(document).ready(function() {
 
                     let messages = '';
 
-                    for (message of response.messages) {
+                    for (let message of response.messages) {
                         messages += `${message.message}\n`;
                     }
 
@@ -186,8 +194,8 @@ $(document).ready(function() {
             },
             success: function (response) {
 
-                create_comment_reply_form_element = $('#create_comment_reply_form');
-                create_comment_reply_form_messages_element = $('#create_comment_reply_form_messages');
+                let create_comment_reply_form_element = $('#create_comment_reply_form');
+                let create_comment_reply_form_messages_element = $('#create_comment_reply_form_messages');
 
                 if (create_comment_reply_form_element.html()) {
 
@@ -195,11 +203,11 @@ $(document).ready(function() {
                     create_comment_reply_form_messages_element.remove();
                 }
 
-                messages_ul = '<ul class="mt-2 text-danger" id="create_comment_reply_form_messages"></ul>'
+                let messages_ul = '<ul class="mt-2 text-danger" id="create_comment_reply_form_messages"></ul>'
 
-                target_id = $(this.triggeredButton).attr('data-reply-button-target-id');
+                let target_id = $(this.triggeredButton).attr('data-reply-button-target-id');
 
-                reply_section_tag = $(`section[data-reply-target-id="${target_id}"]`);
+                let reply_section_tag = $(`section[data-reply-target-id="${target_id}"]`);
 
                 reply_section_tag.html(reply_section_tag.html() + messages_ul + response.comment_reply_form);
             },
@@ -224,7 +232,7 @@ $(document).ready(function() {
 
                 if (response.comment) {
 
-                    target_comment_position = $(`#comments section[data-comment-id="${this.targetId}"]`);
+                    let target_comment_position = $(`#comments section[id="comment_${this.targetId}"]`);
 
                     for (let i = 0; i < this.targetNesting; i++) {
                         target_comment_position = target_comment_position.parent();
@@ -233,7 +241,7 @@ $(document).ready(function() {
                     target_comment_position.after(getCommentHTML(response.comment, this.targetNesting + 1));
                 }
 
-                reply_messages_tag = $('#create_comment_reply_form_messages');
+                let reply_messages_tag = $('#create_comment_reply_form_messages');
 
                 reply_messages_tag.text('');
 
@@ -241,7 +249,7 @@ $(document).ready(function() {
 
                     let messages = '';
 
-                    for (message of response.messages) {
+                    for (let message of response.messages) {
                         messages += `<li class="${message.tags}">${message.message}</li>`;
                     }
 
@@ -250,13 +258,13 @@ $(document).ready(function() {
             },
             error: function (response) {
 
-                reply_messages_tag = $('#create_comment_reply_form_messages');
+                let reply_messages_tag = $('#create_comment_reply_form_messages');
 
                 reply_messages_tag.text('');
 
                 let messages = '';
 
-                for (message of response.messages) {
+                for (let message of response.messages) {
                     messages += `<li class="${message.tags}">${message.message}</li>`;
                 }
 
