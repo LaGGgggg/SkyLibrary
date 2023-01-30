@@ -99,7 +99,10 @@ class MediaDownload(models.Model):
 
         try:
             if MediaDownload.objects.get(media=self.media, user_who_added=self.user_who_added):
-                raise ValidationError({NON_FIELD_ERRORS: [_('Object with this user and media already exists')]})
+                raise ValidationError(
+                    {NON_FIELD_ERRORS: [_('Object with this user and media already exists')]},
+                    code='duplicate',
+                )
 
         except MediaDownload.DoesNotExist:
             pass
@@ -172,7 +175,10 @@ class Comment(models.Model):
             ).order_by('-pub_date')[0].pub_date
 
             if datetime.now(latest_user_comment_pub_date.tzinfo) - latest_user_comment_pub_date < timedelta(seconds=30):
-                raise ValidationError({NON_FIELD_ERRORS: [_('Too frequent comments, please wait and try again')]})
+                raise ValidationError(
+                    {NON_FIELD_ERRORS: [_('Too frequent comments, please wait and try again')]},
+                    code='too_frequent_comments',
+                )
 
         except IndexError:
             # IndexError means what no objects in database (with needed type, id and user)
