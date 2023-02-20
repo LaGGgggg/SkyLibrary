@@ -13,8 +13,10 @@ $(document).ready(function() {
 
                 $('#downloads_number').text(response.downloads_number);
 
-                $('#download_link').addClass('btn-success');
-                $('#download_link').removeClass('btn-primary');
+                let download_link_element = $('#download_link');
+
+                download_link_element.addClass('btn-success');
+                download_link_element.removeClass('btn-primary');
             },
         });
     });
@@ -22,12 +24,14 @@ $(document).ready(function() {
     function getCommentHTML (comment, comment_nesting) {
 
         /* start comment */
-        let new_comment = `<section id="comment_${comment.id}" data-comment-nesting="${comment_nesting}">`;
+        let new_comment = '';
 
         /* start nesting */
         for (let i = 0; i < comment_nesting; i++) {
             new_comment += '<div class="ms-4">'
         }
+
+        new_comment += `<section id="comment_${comment.id}" data-comment-nesting="${comment_nesting}">`;
 
         /* top line */
         new_comment += '<section class="mt-4 small fst-italic">';
@@ -64,23 +68,28 @@ $(document).ready(function() {
         new_comment += '<span class="dot ms-2 mt-1"></span>';
 
         /* add reply part */
-        new_comment += `<button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-reply-button-target-id="${comment.id}">`;
+        new_comment += `<button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-form-adder-button-target-id="${comment.id}" data-requested-form-type="reply">`;
         new_comment += `${comment.reply_translate}`;
         new_comment += '</button>';
 
         /* dot part */
         new_comment += '<span class="dot ms-2 mt-1"></span>';
 
-        /* add url fragment link */
-        new_comment += `<a href="#comment_${comment.id}" class="ms-2 mt-1">`;
-        new_comment += '<ion-icon name="pin-outline" style="font-size: 14px;"></ion-icon>';
+        /* add report part */
+        new_comment += `<button class="bg-transparent border-0 p-0 ms-2 mt-2 report-button" data-form-adder-button-target-id="${comment.id}" data-requested-form-type="report">`;
+        new_comment += '<ion-icon name="alert-circle-outline"></ion-icon>';
+        new_comment += '</button>';
+
+        /* add uri fragment link */
+        new_comment += `<a href="#comment_${comment.id}" class="ms-1 mt-2">`;
+        new_comment += '<ion-icon name="pin-outline"></ion-icon>';
         new_comment += '</a>';
 
         /* close bottom line */
         new_comment += '</section>';
 
-        /* add the section for reply form and messages */
-        new_comment += `<section class="m-3" data-reply-target-id="${comment.id}"></section>`;
+        /* add the section for reply or report form and messages */
+        new_comment += `<section class="m-3" data-section-for-form-under-comment-target-id="${comment.id}"></section>`;
 
         /* close comment */
         new_comment += '</section>';
@@ -183,50 +192,88 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on('click', '.reply-button', function () {
+    function removeUnderCommentAndMediaFormsAndMessages () {
+
+        let under_comment_form_element = $('#under_comment_form');
+
+        if (under_comment_form_element.html()) {
+
+            under_comment_form_element.remove();
+            $('#under_comment_form_messages').remove();
+        }
+
+        let media_report_form_element = $('#media_report_form');
+
+        if (media_report_form_element.html()) {
+
+            media_report_form_element.remove();
+            $('#media_report_form_messages').remove();
+        }
+    }
+
+    $(document).on('click', '.reply-button, .report-button', function () {
         $.ajax({
             url: get_full_path,
             type: 'GET',
             dataType: 'json',
             triggeredButton: this,
             data: {
-                'request_type': 'get_comment_reply_form',
+                'request_type': `get_comment_${$(this).attr('data-requested-form-type')}_form`,
             },
             success: function (response) {
 
-                let create_comment_reply_form_element = $('#create_comment_reply_form');
-                let create_comment_reply_form_messages_element = $('#create_comment_reply_form_messages');
+                removeUnderCommentAndMediaFormsAndMessages();
 
-                if (create_comment_reply_form_element.html()) {
+                let messages_ul = '<ul class="mt-2 text-danger" id="under_comment_form_messages"></ul>';
 
-                    create_comment_reply_form_element.remove();
-                    create_comment_reply_form_messages_element.remove();
-                }
+                let target_id = $(this.triggeredButton).attr('data-form-adder-button-target-id');
 
-                let messages_ul = '<ul class="mt-2 text-danger" id="create_comment_reply_form_messages"></ul>'
+                let section_for_form_under_comment_tag = $(`section[data-section-for-form-under-comment-target-id="${target_id}"]`);
 
-                let target_id = $(this.triggeredButton).attr('data-reply-button-target-id');
-
-                let reply_section_tag = $(`section[data-reply-target-id="${target_id}"]`);
-
-                reply_section_tag.html(reply_section_tag.html() + messages_ul + response.comment_reply_form);
+                section_for_form_under_comment_tag.html(messages_ul + response.under_comment_form);
             },
         });
     });
 
-    $(document).on('submit', '#create_comment_reply_form', function () {
+    $(document).on('click', '.media-report-button', function () {
+       $.ajax({
+           url: get_full_path,
+           type: 'GET',
+           dataType: 'json',
+           data: {
+               'request_type': 'get_media_report_form',
+           },
+           success: function (response) {
+
+               removeUnderCommentAndMediaFormsAndMessages();
+
+               let messages_ul = '<ul class="mt-2 text-danger" id="media_report_form_messages"></ul>'
+
+               let section_for_media_report_form_tag = $('#section_for_media_report_form');
+
+               section_for_media_report_form_tag.html(messages_ul + response.media_report_form);
+           },
+       });
+    });
+
+    $(document).on('submit', '#under_comment_form', function () {
         $.ajax({
             url: get_full_path,
             type: 'POST',
             dataType: 'json',
             targetNesting: parseInt($(this).parent().parent().attr('data-comment-nesting')),
-            targetId: $(this).parent().attr('data-reply-target-id'),
+            targetId: $(this).parent().attr('data-section-for-form-under-comment-target-id'),
             data: {
                 'csrfmiddlewaretoken': csrf_token,
-                'request_type': 'create_comment',
+                'request_type': $(this).attr('data-request-type'),
                 'target_type': 'comment',
-                'target_id': $(this).parent().attr('data-reply-target-id'),
-                'content': $('#add_comment_reply_content_field').val(),
+                'target_id': $(this).parent().attr('data-section-for-form-under-comment-target-id'),
+                'content': $('#under_comment_form_content_field').val(),
+                'report_type': `${$.map($('[name="report_type"]'), function (element) {
+                    if (element.checked) {
+                        return element.value;
+                    }
+                })}`,  // into a string for the correct operation of the backend
             },
             success: function (response) {
 
@@ -239,13 +286,18 @@ $(document).ready(function() {
                     }
 
                     target_comment_position.after(getCommentHTML(response.comment, this.targetNesting + 1));
-                }
 
-                let reply_messages_tag = $('#create_comment_reply_form_messages');
+                } else if (response.report_success_message) {
 
-                reply_messages_tag.text('');
+                    removeUnderCommentAndMediaFormsAndMessages();
 
-                if (response.messages) {
+                    alert(response.report_success_message);
+
+                } else {
+
+                    let under_comment_form_messages_tag = $('#under_comment_form_messages');
+
+                    under_comment_form_messages_tag.text('');
 
                     let messages = '';
 
@@ -253,14 +305,14 @@ $(document).ready(function() {
                         messages += `<li class="${message.tags}">${message.message}</li>`;
                     }
 
-                    reply_messages_tag.html(`${reply_messages_tag.html()}${messages}`);
+                    under_comment_form_messages_tag.html(`${under_comment_form_messages_tag.html()}${messages}`);
                 }
             },
             error: function (response) {
 
-                let reply_messages_tag = $('#create_comment_reply_form_messages');
+                let under_comment_form_messages_tag = $('#under_comment_form_messages');
 
-                reply_messages_tag.text('');
+                under_comment_form_messages_tag.text('');
 
                 let messages = '';
 
@@ -268,7 +320,64 @@ $(document).ready(function() {
                     messages += `<li class="${message.tags}">${message.message}</li>`;
                 }
 
-                reply_messages_tag.html(`${reply_messages_tag.html()}${messages}`);
+                under_comment_form_messages_tag.html(`${under_comment_form_messages_tag.html()}${messages}`);
+            },
+        });
+        return false;
+    });
+
+    $(document).on('submit', '#media_report_form', function () {
+        $.ajax({
+            url: get_full_path,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'csrfmiddlewaretoken': csrf_token,
+                'request_type': 'create_report',
+                'target_type': 'media',
+                'content': $('#media_report_form_content_field').val(),
+                'report_type': `${$.map($('[name="report_type"]'), function (element) {
+                    if (element.checked) {
+                        return element.value;
+                    }
+                })}`,  // into a string for the correct operation of the backend
+            },
+            success: function (response) {
+
+                if (response.report_success_message) {
+
+                    removeUnderCommentAndMediaFormsAndMessages();
+
+                    alert(response.report_success_message);
+
+                } else {
+
+                    let media_report_form_messages_tag = $('#media_report_form_messages');
+
+                    media_report_form_messages_tag.text('');
+
+                    let messages = '';
+
+                    for (let message of response.messages) {
+                        messages += `<li class="${message.tags}">${message.message}</li>`;
+                    }
+
+                    media_report_form_messages_tag.html(`${media_report_form_messages_tag.html()}${messages}`);
+                }
+            },
+            error: function (response) {
+
+                let media_report_form_messages_tag = $('#media_report_form_messages');
+
+                media_report_form_messages_tag.text('');
+
+                let messages = '';
+
+                for (let message of response.messages) {
+                    messages += `<li class="${message.tags}">${message.message}</li>`;
+                }
+
+                media_report_form_messages_tag.html(`${media_report_form_messages_tag.html()}${messages}`);
             },
         });
         return false;

@@ -12,8 +12,9 @@ from PIL import Image
 from shutil import rmtree
 from ast import literal_eval
 
-from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_cover_upload, get_file_upload
-from media_app.forms import CreateReplyCommentForm
+from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_cover_upload,\
+    get_file_upload, Report, ReportType
+from media_app.forms import CreateReplyCommentForm, CreateReportCommentForm, CreateReportMediaForm
 
 User = get_user_model()
 
@@ -311,6 +312,19 @@ class ViewMediaTestCase(TestCase):
 
         cls.comment_reply_reply = Comment.objects.create(**cls.comment_reply_reply_data)
 
+        test_report_type_1 = ReportType.objects.create(
+            name_en_us='test report type 1',
+            name_ru='test report type 1 ru',
+            user_who_added=cls.user,
+        )
+        test_report_type_2 = ReportType.objects.create(
+            name_en_us='test report type 2',
+            name_ru='test report type 2 ru',
+            user_who_added=cls.user,
+        )
+
+        cls.test_report_types = (test_report_type_1, test_report_type_2)
+
     def test_get_not_exist_media(self):
 
         response = self.client.get(reverse('view_media', kwargs={'media_id': 0}), follow=True)  # 0 id does not exist
@@ -457,6 +471,144 @@ class ViewMediaTestCase(TestCase):
 
         self.client.logout()
 
+    def test_get_media_report_button_without_login(self):
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_media_report_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_get_media_report_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_media_report_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'django/forms/widgets/input.html')  # response returns form
+
+        page_should_contain: str = render_crispy_form(CreateReportMediaForm())
+
+        page_content: str = literal_eval(response.content.decode('utf-8'))['media_report_form']
+
+        self.assertEqual(page_content, page_should_contain)
+
+        self.client.logout()
+
+    def test_post_media_report_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'media',
+                'content': 'good content',
+                'report_type': '1',
+            },  # 1 - form field value
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_media_report_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing the user report if it exists
+        user_comment_report = Report.objects.filter(
+            user_who_added=self.user, target_type=Report.MEDIA_TYPE, target_id=self.media.id
+        )
+
+        if user_comment_report.exists():
+            user_comment_report.delete()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'media',
+                'content': 'good content',
+                'report_type': '1,2',
+            },  # 1, 2 - form field values
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(
+            Report.objects.filter(
+                user_who_added=self.user, target_type=Report.MEDIA_TYPE, target_id=self.media.id
+            ).exists()
+        )
+
+        page_should_contain = {
+            'report_success_message': 'Your report has been successfully created!',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_media_report_duplicate_data(self):
+
+        self.client.force_login(self.user)
+
+        duplicate_report_data = {
+            'content': 'duplicate report content',
+            'target_type': Report.MEDIA_TYPE,
+            'target_id': self.media.id,
+            'user_who_added': self.user,
+        }
+
+        Report.objects.create(**duplicate_report_data)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'media',
+                'content': duplicate_report_data['content'],
+                'report_type': '1,2',
+            },  # 1, 2 - form field values
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        user_media_reports = Report.objects.filter(
+            user_who_added=self.user, target_type=Report.MEDIA_TYPE, target_id=self.media.id
+        )
+
+        self.assertEqual(1, user_media_reports.count())
+
+        page_should_contain = {
+            'messages': [{
+                'level': 40,
+                'message': 'You can not create one more report on the same media/comment',
+                'tags': 'error',
+            }],
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
     def test_get_media_with_comments_without_login(self):
 
         response = self.client.get(reverse('view_media', kwargs={'media_id': self.media.id}))
@@ -475,7 +627,7 @@ class ViewMediaTestCase(TestCase):
             self.assertContains(response, item)
 
         page_should_not_contain = [
-            f'data-reply-button-target-id="{self.comment.id}"',  # reply button
+            f'data-form-adder-button-target-id="{self.comment.id}" data-requested-form-type="reply"',  # reply button
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment.id}"',  # upvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment.id}"',  # downvote button
         ]
@@ -497,7 +649,7 @@ class ViewMediaTestCase(TestCase):
             self.comment_data['user_who_added'].username,
             naturaltime(self.comment.pub_date),
             self.comment.get_rating(),
-            f'data-reply-button-target-id="{self.comment.id}"',  # reply button
+            f'data-form-adder-button-target-id="{self.comment.id}" data-requested-form-type="reply"',  # reply button
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment.id}"',  # upvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment.id}"',  # downvote button
         ]
@@ -683,7 +835,7 @@ class ViewMediaTestCase(TestCase):
 
         page_should_contain: str = render_crispy_form(CreateReplyCommentForm())
 
-        page_content: str = literal_eval(response.content.decode('utf-8'))['comment_reply_form']
+        page_content: str = literal_eval(response.content.decode('utf-8'))['under_comment_form']
 
         self.assertEqual(page_content, page_should_contain)
 
@@ -715,16 +867,22 @@ class ViewMediaTestCase(TestCase):
 
         page_should_not_contain = [
             # comment reply:
-            f'data-reply-button-target-id="{self.comment_reply.id}"',  # reply button
+            # reply button
+            f'data-form-adder-button-target-id="{self.comment_reply.id}" data-requested-form-type="reply"',
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply.id}"',  # upvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply.id}"',  # downvote button
+            # report button
+            f'data-form-adder-button-target-id="{self.comment_reply.id}" data-requested-form-type="report"',
 
             # comment reply reply:
-            f'data-reply-button-target-id="{self.comment_reply_reply.id}"',  # reply button
+            # reply button
+            f'data-form-adder-button-target-id="{self.comment_reply_reply.id}" data-requested-form-type="reply"',
             # upvote button
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
             # downvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+            # report button
+            f'data-form-adder-button-target-id="{self.comment_reply_reply.id}" data-requested-form-type="report"',
         ]
 
         for item in page_should_not_contain:
@@ -745,20 +903,26 @@ class ViewMediaTestCase(TestCase):
             self.comment_reply_data['user_who_added'].username,
             naturaltime(self.comment_reply.pub_date),
             self.comment_reply.get_rating(),
-            f'data-reply-button-target-id="{self.comment_reply.id}"',  # reply button
+            # reply button
+            f'data-form-adder-button-target-id="{self.comment_reply.id}" data-requested-form-type="reply"',
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply.id}"',  # upvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply.id}"',  # downvote button
+            # report button
+            f'data-form-adder-button-target-id="{self.comment_reply.id}" data-requested-form-type="report"',
 
             # comment reply reply:
             self.comment_reply_reply_data['content'],
             self.comment_reply_reply_data['user_who_added'].username,
             naturaltime(self.comment_reply_reply.pub_date),
             self.comment_reply_reply.get_rating(),
-            f'data-reply-button-target-id="{self.comment_reply_reply.id}"',  # reply button
+            # reply button
+            f'data-form-adder-button-target-id="{self.comment_reply_reply.id}" data-requested-form-type="reply"',
             # upvote button
             f'data-vote-button-type="upvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
             # downvote button
             f'data-vote-button-type="downvote" data-vote-button-target-id="{self.comment_reply_reply.id}"',
+            # report button
+            f'data-form-adder-button-target-id="{self.comment_reply_reply.id}" data-requested-form-type="report"',
         ]
 
         for item in page_should_contain:
@@ -1019,6 +1183,224 @@ class ViewMediaTestCase(TestCase):
             'new_rating': comment_reply_reply_rating,
             'target_id': f'{self.comment_reply_reply.id}',
             'not_target_type': 'upvote',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_get_media_comment_report_button_without_login(self):
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_comment_report_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_get_media_comment_report_button_with_login(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {'request_type': 'get_comment_report_form'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'django/forms/widgets/input.html')  # response returns form
+
+        page_should_contain: str = render_crispy_form(CreateReportCommentForm())
+
+        page_content: str = literal_eval(response.content.decode('utf-8'))['under_comment_form']
+
+        self.assertEqual(page_content, page_should_contain)
+
+        self.client.logout()
+
+    def test_post_media_comment_report_without_login(self):
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': self.comment.id,
+                'content': 'good content',
+                'report_type': '1',
+            },  # 1 - form field value
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_media_comment_report_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing the user report if it exists
+        user_comment_report = Report.objects.filter(
+            user_who_added=self.user, target_type=Report.COMMENT_TYPE, target_id=self.comment.id
+        )
+
+        if user_comment_report.exists():
+            user_comment_report.delete()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': self.comment.id,
+                'content': 'good content',
+                'report_type': '1,2',
+            },  # 1, 2 - form field values
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(
+            Report.objects.filter(
+                user_who_added=self.user, target_type=Report.COMMENT_TYPE, target_id=self.comment.id
+            ).exists()
+        )
+
+        page_should_contain = {
+            'report_success_message': 'Your report has been successfully created!',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_reply_comment_report_without_login(self):
+
+        # reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': self.comment_reply.id,
+                'content': 'good content',
+                'report_type': '1',
+            },  # 1 - form field value
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        # reply reply:
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': self.comment_reply_reply.id,
+                'content': 'good content',
+                'report_type': '1',
+            },  # 1 - form field value
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+    def test_post_reply_comment_report_with_login(self):
+
+        self.client.force_login(self.user)
+
+        # removing the user report if it exists
+        user_comment_report = Report.objects.filter(
+            user_who_added=self.user, target_type=Report.COMMENT_TYPE, target_id=self.comment_reply.id
+        )
+
+        if user_comment_report.exists():
+            user_comment_report.delete()
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': self.comment_reply.id,
+                'content': 'good content',
+                'report_type': '1,2',
+            },  # 1, 2 - form field values
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(
+            Report.objects.filter(
+                user_who_added=self.user, target_type=Report.COMMENT_TYPE, target_id=self.comment_reply.id
+            ).exists()
+        )
+
+        page_should_contain = {
+            'report_success_message': 'Your report has been successfully created!',
+        }
+
+        page_content: dict = literal_eval(response.content.decode('utf-8'))
+
+        for field, value in page_should_contain.items():
+            self.assertEqual(page_content[field], value)
+
+        self.client.logout()
+
+    def test_post_comment_report_duplicate_data(self):
+
+        self.client.force_login(self.user)
+
+        duplicate_report_data = {
+            'content': 'duplicate report content',
+            'target_type': Report.COMMENT_TYPE,
+            'target_id': self.comment.id,
+            'user_who_added': self.user,
+        }
+
+        Report.objects.create(**duplicate_report_data)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': self.media.id}),
+            {
+                'request_type': 'create_report',
+                'target_type': 'comment',
+                'target_id': duplicate_report_data['target_id'],
+                'content': duplicate_report_data['content'],
+                'report_type': '1,2',
+            },  # 1, 2 - form field values
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        user_comment_reports = Report.objects.filter(
+            user_who_added=self.user, target_type=Report.COMMENT_TYPE, target_id=self.comment.id
+        )
+
+        self.assertEqual(1, user_comment_reports.count())
+
+        page_should_contain = {
+            'messages': [{
+                'level': 40,
+                'message': 'You can not create one more report on the same media/comment',
+                'tags': 'error',
+            }],
         }
 
         page_content: dict = literal_eval(response.content.decode('utf-8'))

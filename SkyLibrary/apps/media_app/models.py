@@ -4,8 +4,13 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import get_language
+from django.urls import reverse
 
 from datetime import datetime, timedelta
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 User = get_user_model()
 
@@ -107,7 +112,7 @@ class MediaDownload(models.Model):
         except MediaDownload.DoesNotExist:
             pass
 
-        super().clean(*args, **kwargs)
+        super().clean()
 
     def save(self, *args, **kwargs):
 
@@ -181,10 +186,10 @@ class Comment(models.Model):
                 )
 
         except IndexError:
-            # IndexError means what no objects in database (with needed type, id and user)
+            # IndexError means what no objects in a database (with a needed type, id and user)
             pass
 
-        super().clean(*args, **kwargs)
+        super().clean()
 
     def save(self, *args, **kwargs):
 
@@ -257,7 +262,7 @@ class CommentRating(models.Model):
             # If the user has no ratings (with needed comment id and vote type), they can add a new rating
             pass
 
-        super().clean(*args, **kwargs)
+        super().clean()
 
     def save(self, *args, **kwargs):
 
@@ -267,3 +272,127 @@ class CommentRating(models.Model):
 
     class Meta:
         db_table = 'media_app_comment_rating'
+
+
+def get_page_media_id_by_comment(comment: Comment) -> int:
+
+    if comment.target_type == Comment.MEDIA_TYPE:
+        return comment.target_id
+
+    elif comment.target_type == Comment.COMMENT_TYPE:
+        return get_page_media_id_by_comment(
+            Comment.objects.only('id', 'target_id', 'target_type').get(id=comment.target_id)
+        )
+
+
+class ReportType(models.Model):
+
+    name_en_us = models.CharField(max_length=60, unique=True)
+    name_ru = models.CharField(max_length=60, unique=True)
+    pub_date = models.DateField(auto_now_add=True)
+    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='report_type')
+
+    def __str__(self):
+
+        if get_language() == 'ru':
+            return str(self.name_ru)
+
+        else:
+            return str(self.name_en_us)
+
+    class Meta:
+        db_table = 'media_app_report_type'
+
+
+class Report(models.Model):
+
+    MEDIA_TYPE = 1
+    COMMENT_TYPE = 2
+
+    target_type_choices = (
+        (MEDIA_TYPE, 'Media type'),
+        (COMMENT_TYPE, 'Comment type'),
+    )
+
+    report_type = models.ManyToManyField(ReportType, related_name='report_type_report')
+    content = models.CharField(max_length=300)
+    target_type = models.PositiveSmallIntegerField(choices=target_type_choices)
+    target_id = models.PositiveIntegerField()
+    user_who_added = models.ForeignKey(
+        User, on_delete=models.SET_DEFAULT, related_name='user_who_added_report', default='deleted user'
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+
+        if self.target_type == self.MEDIA_TYPE:
+            return f'Media report (id: {self.id})'
+
+        elif self.target_type == self.COMMENT_TYPE:
+            return f'Comment report (id: {self.id})'
+
+    def clean(self, *args, **kwargs):
+
+        if Report.objects.filter(
+                user_who_added=self.user_who_added,
+                target_type=self.target_type,
+                target_id=self.target_id,
+        ).exists():
+            raise ValidationError(
+                {NON_FIELD_ERRORS: [_('You can not create one more report on the same media/comment')]},
+                code='second_report_on_the_same_media_or_comment',
+            )
+
+        try:
+
+            latest_user_report_pub_date: datetime = Report.objects.filter(
+                user_who_added=self.user_who_added
+            ).order_by('-pub_date')[0].pub_date
+
+            if datetime.now(latest_user_report_pub_date.tzinfo) - latest_user_report_pub_date < timedelta(seconds=30):
+                raise ValidationError(
+                    {NON_FIELD_ERRORS: [_('Too frequent reports, please wait and try again')]},
+                    code='too_frequent_reports',
+                )
+
+        except IndexError:
+            # IndexError means what no objects in a database (with a needed type, id and user)
+            pass
+
+        super().clean()
+
+    def save(self, *args, **kwargs):
+
+        self.full_clean()
+
+        super().save(*args, **kwargs)
+
+    def get_link_to_target(self) -> str:
+
+        is_media_type: bool = self.target_type == self.MEDIA_TYPE
+        is_comment_type: bool = self.target_type == self.COMMENT_TYPE
+
+        if is_media_type:
+            media_id = self.target_id
+
+        elif is_comment_type:
+            media_id = get_page_media_id_by_comment(
+                Comment.objects.only('id', 'target_id', 'target_type').get(id=self.target_id)
+            )
+
+        else:
+
+            logger.error(f'Unexpected target type - "{self.target_type}"')
+
+            raise ValidationError(
+                _('Error, unexpected value, please try again or contact support (code: 3.1)'),
+                code='unexpected_target_type',
+            )
+
+        base_link = reverse('view_media', kwargs={'media_id': media_id})
+
+        if is_media_type:
+            return base_link
+
+        elif is_comment_type:
+            return f"{base_link}#comment_{self.target_id}"

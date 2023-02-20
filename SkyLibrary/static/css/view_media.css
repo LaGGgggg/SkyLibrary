@@ -8,13 +8,14 @@
 .dot {
     height: 8px;
     width: 8px;
-    background-color: #00dcff;
+    background-color: #00DCFF;
     border-radius: 50%;
     display: inline-block;
 }
 .vote-button {
-    color: #00c7ff;
+    color: #00C7FF;
     height: 1em;
+    cursor: pointer;
 }
 .vote-button:hover {
     color: #002AFF;
@@ -27,4 +28,13 @@
 }
 .reply-button:hover {
     font-weight: 400!important;
+}
+ion-icon {
+    pointer-events: none;
+}
+.report-button {
+    color: #002AFF;
+}
+.media-report-button {
+    color: #002AFF;
 }

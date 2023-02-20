@@ -38,7 +38,7 @@
         {% if media.cover %}
             <img src="{{ media.cover.url }}" class="float-right cover_image">
         {% endif %}
-        <section class="list-group flex-row align-items-baseline">
+        <section class="list-group flex-row align-items-center">
             <section class="d-flex align-items-end rating">
                 <section class="position-relative rating__stars_body">
                     <section class="position-absolute rating__stars"></section>
@@ -48,7 +48,8 @@
                 </section>
             </section>
             {% get_current_language as LANGUAGE_CODE %}
-            <ul class="list-group flex-row">
+            <span class="dot ms-2 mt-1"></span>
+            <ul class="list-group flex-row ms-1">
                 {% for tag in media.tags.values %}
                     <li class="list-group-item bg-transparent small border-0 p-1">
                         {% if LANGUAGE_CODE == 'en-us' %}
@@ -59,7 +60,16 @@
                     </li>
                 {% endfor %}
             </ul>
+            {% if user.is_authenticated %}
+                <span class="dot ms-1 mt-1"></span>
+                <button class="bg-transparent border-0 p-0 ms-2 mt-2 media-report-button">
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                </button>
+            {% endif %}
         </section>
+        {% if user.is_authenticated %}
+            <section class="m-3" id="section_for_media_report_form"></section>
+        {% endif %}
         <section class="lead">
             {{ media.description }}
         </section>
@@ -156,18 +166,23 @@
                     <section class="ms-2 mt-1" data-vote-rating-section-target-id="{{ comment_dict.comment.id }}">
                         {{ comment_dict.comment.get_rating }}
                     </section>
+                    <span class="dot ms-2 mt-1"></span>
                     {% if user.is_authenticated %}
-                        <span class="dot ms-2 mt-1"></span>
-                        <button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-reply-button-target-id="{{ comment_dict.comment.id }}">
+                        <button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="reply">
                             {% translate 'Reply' %}
                         </button>
+                        <span class="dot ms-2 mt-1"></span>
+                        <button class="bg-transparent border-0 p-0 ms-2 mt-2 report-button" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="report">
+                            <ion-icon name="alert-circle-outline"></ion-icon>
+                        </button>
                     {% endif %}
-                    <span class="dot ms-2 mt-1"></span>
-                    <a href="#comment_{{ comment_dict.comment.id }}" class="ms-2 mt-1">
-                        <ion-icon name="pin-outline" style="font-size: 14px;"></ion-icon>
+                    <a href="#comment_{{ comment_dict.comment.id }}" class="ms-1 mt-2">
+                        <ion-icon name="pin-outline"></ion-icon>
                     </a>
                 </section>
-                <section class="m-3" data-reply-target-id="{{ comment_dict.comment.id }}"></section>
+                {% if user.is_authenticated %}
+                    <section class="m-3" data-section-for-form-under-comment-target-id="{{ comment_dict.comment.id }}"></section>
+                {% endif %}
             </section>
             {% for i in comment_dict.nesting|to_range %}
                 </div>

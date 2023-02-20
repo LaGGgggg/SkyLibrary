@@ -15,8 +15,9 @@ from crispy_forms.utils import render_crispy_form
 
 from json import dumps
 
-from .models import Media, MediaDownload, Comment, CommentRating
-from .forms import CreateMediaForm, CreateCommentForm, CreateReplyCommentForm
+from .models import Media, MediaDownload, Comment, CommentRating, Report
+from .forms import CreateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm,\
+    CreateReportMediaForm
 from staff_app.models import ModeratorTask
 from staff_app.views import ViewModeratorPage
 from home_page_app.views import handler403, handler404
@@ -79,6 +80,10 @@ class ViewViewMedia(View):
             _('Something went wrong with your request, please try again or contact support (code: {error_code})'),
         'bad_comment':
             _('Something went wrong with your comment, please try again or contact support (code: {error_code})'),
+        'bad_report':
+            _('Something went wrong with your report, please try again or contact support (code: {error_code})'),
+        'no_report_type_choice':
+            _('Please select a reason for the report.'),
     }
 
     @staticmethod
@@ -139,20 +144,40 @@ class ViewViewMedia(View):
         if not self.check_user_can_be_on_page(request, media):
             return handler403(request)
 
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
-                request.GET.get('request_type') == 'get_comment_reply_form':
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
 
-            if request.user.is_authenticated:
+            if request.user.is_anonymous:
+                return handler403(request)
+
+            if request.GET.get('request_type') == 'get_comment_reply_form':
 
                 create_reply_comment_form = CreateReplyCommentForm()
 
                 return HttpResponse(
-                    dumps({'comment_reply_form': render_crispy_form(create_reply_comment_form)}),
+                    dumps({'under_comment_form': render_crispy_form(create_reply_comment_form)}),
+                    content_type='application/json',
+                )
+
+            elif request.GET.get('request_type') == 'get_comment_report_form':
+
+                create_report_comment_form = CreateReportCommentForm()
+
+                return HttpResponse(
+                    dumps({'under_comment_form': render_crispy_form(create_report_comment_form)}),
+                    content_type='application/json',
+                )
+
+            elif request.GET.get('request_type') == 'get_media_report_form':
+
+                create_report_media_form = CreateReportMediaForm()
+
+                return HttpResponse(
+                    dumps({'media_report_form': render_crispy_form(create_report_media_form)}),
                     content_type='application/json',
                 )
 
             else:
-                return handler403(request)
+                return handler404(request)
 
         else:
 
@@ -356,6 +381,109 @@ class ViewViewMedia(View):
                 }),
                 content_type='application/json',
             )
+
+        elif request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
+                request.POST.get('request_type') == 'create_report':
+
+            if not request.POST.get('report_type'):
+
+                messages.error(request, f'{self.error_messages.get("no_report_type_choice")}')
+
+                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+            request_post_mutable = request.POST.copy()
+
+            try:
+                request_post_mutable.setlist('report_type', request_post_mutable['report_type'].split(','))
+
+            except KeyError:
+
+                messages.error(request, self.error_messages.get('bad_report').format(error_code='4.2'))
+
+                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+            request_form = CreateReportCommentForm(request_post_mutable)
+
+            if request_form.is_valid():
+
+                target_type: str = request.POST.get('target_type')
+
+                if target_type == 'comment':
+
+                    try:
+
+                        target_id = request.POST.get('target_id')
+
+                        # object existence check
+                        Comment.objects.get(id=target_id)
+
+                    except Comment.DoesNotExist:
+
+                        messages.error(request, self.error_messages.get('bad_request').format(error_code='4.4'))
+
+                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+                    try:
+                        report = Report.objects.create(
+                            content=request_form.cleaned_data['content'],
+                            target_type=Report.COMMENT_TYPE,
+                            target_id=target_id,
+                            user_who_added=request.user,
+                        )
+
+                    except ValidationError as e:
+
+                        if e.messages[0]:  # error message != '', see model clean method for more info
+                            messages.error(request, e.messages)
+
+                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+                    report.report_type.set(request_form.cleaned_data['report_type'])
+
+                    report_success_message: str = f'{_("Your report has been successfully created")}!'
+
+                    return HttpResponse(
+                        dumps({'report_success_message': report_success_message}),
+                        content_type='application/json',
+                    )
+
+                elif target_type == 'media':
+
+                    try:
+                        report = Report.objects.create(
+                            content=request_form.cleaned_data['content'],
+                            target_type=Report.MEDIA_TYPE,
+                            target_id=media_id,
+                            user_who_added=request.user,
+                        )
+
+                    except ValidationError as e:
+
+                        if e.messages[0]:  # error message != '', see model clean method for more info
+                            messages.error(request, e.messages)
+
+                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+                    report.report_type.set(request_form.cleaned_data['report_type'])
+
+                    report_success_message: str = f'{_("Your report has been successfully created")}!'
+
+                    return HttpResponse(
+                        dumps({'report_success_message': report_success_message}),
+                        content_type='application/json',
+                    )
+
+                else:
+
+                    messages.error(request, self.error_messages.get('bad_report').format(error_code='4.3'))
+
+                    return HttpResponse(self.messages_to_json(request), content_type='application/json')
+
+            else:
+
+                messages.error(request, self.error_messages.get('bad_report').format(error_code='4.1'))
+
+                return HttpResponse(self.messages_to_json(request), content_type='application/json')
 
         elif 'approve_button' in request.POST:
             return ViewModeratorPage.post_from_view_page(request, self.get_media(media_id))
