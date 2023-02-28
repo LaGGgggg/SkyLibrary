@@ -77,6 +77,12 @@ class Media(models.Model):
     def get_rating(self) -> float | int:
         return round(self.media_media_rating.aggregate(Avg('rating'))['rating__avg'] or 0, 2)
 
+    class Meta:
+
+        permissions = [
+            ('change_media_active_field', _('Can change the value of the media active field')),
+        ]
+
 
 def get_best_active_media(amount: int) -> list[Media]:
     return sorted(Media.objects.filter(active=1), key=lambda media: media.get_rating(), reverse=True)[:amount]
@@ -220,6 +226,15 @@ class Comment(models.Model):
         ).order_by('-pub_date')
 
         return replies
+
+    class Meta:
+
+        permissions = [
+            (
+                'change_comment_content_field_to_banned',
+                _('Can change the content of the comment to "This comment was banned"')
+            ),
+        ]
 
 
 class CommentRating(models.Model):

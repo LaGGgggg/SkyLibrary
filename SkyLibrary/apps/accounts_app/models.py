@@ -40,4 +40,12 @@ class User(AbstractUser):
     )
 
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES)
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
+
+    class Meta(AbstractUser.Meta):
+
+        permissions = [
+            ('add_moderator', _('Can add a new moderator')),
+            ('change_moderator', _('Can change a moderator data')),
+            ('change_user_active_field', _('Can change the user active field')),
+        ]
