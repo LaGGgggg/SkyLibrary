@@ -7,7 +7,7 @@ from .views import (
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     CustomPasswordChangeView,
-    view_profile
+    view_profile,
 )
 
 urlpatterns = [
