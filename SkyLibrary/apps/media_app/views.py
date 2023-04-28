@@ -64,6 +64,7 @@ def get_all_replies_to_replies(
         result = []
 
     for reply in replies:
+
         result.append({'comment': reply, 'nesting': nesting})
 
         result = get_all_replies_to_replies(reply.get_replies(), result, nesting + 1)

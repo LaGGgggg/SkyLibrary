@@ -15,7 +15,24 @@ admin.site.register(CommentRating)
 
 @admin.register(MediaTags)
 class MediaTagsModelAdmin(admin.ModelAdmin):
+
     readonly_fields = ('user_who_added',)
+
+    def add_view(self, request, form_url="", extra_context=None):
+
+        if request.user.is_superuser:
+            self.readonly_fields = ()
+
+        else:
+            self.fields = ('name_en_us', 'help_text_en_us', 'name_ru', 'help_text_ru')
+
+        return super(MediaTagsModelAdmin, self).add_view(request, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+
+        obj.user_who_added_id = request.user.id
+
+        super(MediaTagsModelAdmin, self).save_model(request, obj, form, change)
 
 
 @admin.register(Media)
@@ -65,7 +82,24 @@ class CommentModelAdmin(admin.ModelAdmin):
 
 @admin.register(ReportType)
 class ReportTypeModelAdmin(admin.ModelAdmin):
+
     readonly_fields = ('user_who_added',)
+
+    def add_view(self, request, form_url="", extra_context=None):
+
+        if request.user.is_superuser:
+            self.readonly_fields = ()
+
+        else:
+            self.fields = ('name_en_us', 'name_ru')
+
+        return super(ReportTypeModelAdmin, self).add_view(request, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+
+        obj.user_who_added_id = request.user.id
+
+        super(ReportTypeModelAdmin, self).save_model(request, obj, form, change)
 
 
 @admin.register(Report)
