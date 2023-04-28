@@ -4,67 +4,64 @@
 {% load cache %}
 {% load static %}
 {% load i18n %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 home_page %}
-    {% block head_extra %}
-        <link rel="stylesheet" href="{% static 'css/rating.css' %}">
-    {% endblock head_extra %}
-    {% block top_panel %}
-        {% if user.is_authenticated %}
-            <li class="nav-item active">
-                <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
-            </li>
-            <li class="nav-item active">
-                <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
-            </li>
-        {% else %}
-            <li class="nav-item active">
-                <a href="{% url 'login' %}" class="nav-link">{% translate 'Log in' %}</a>
-            </li>
-            <li class="nav-item active">
-                <a href="{% url 'django_registration_register' %}" class="nav-link">{% translate 'Sign-up' %}</a>
-            </li>
-        {% endif %}
-    {% endblock top_panel %}
-    {% block header %}
-        Hello!
-    {% endblock header %}
-    {% block content %}
-        {% translate 'Best media' %}:
-        <ul>
-            {% for media in best_media %}
-                <li>
-                    <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
-                    <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
-                        <section class="position-relative rating__stars_body">
-                            <section class="position-absolute rating__stars"></section>
-                        </section>
-                        <section class="rating__value">
-                            {{ media.get_rating }}
-                        </section>
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/rating.css' %}">
+{% endblock head_extra %}
+{% block top_panel %}
+    {% if user.is_authenticated %}
+        <li class="nav-item active">
+            <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
+        </li>
+    {% else %}
+        <li class="nav-item active">
+            <a href="{% url 'login' %}" class="nav-link">{% translate 'Log in' %}</a>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'django_registration_register' %}" class="nav-link">{% translate 'Sign-up' %}</a>
+        </li>
+    {% endif %}
+{% endblock top_panel %}
+{% block header %}
+    {% translate 'Hello, there' %}!
+{% endblock header %}
+{% block content %}
+    {% translate 'Best media' %}:
+    <ul>
+        {% for media in best_media %}
+            <li>
+                <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
+                <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                    <section class="position-relative rating__stars_body">
+                        <section class="position-absolute rating__stars"></section>
                     </section>
-                </li>
-            {% endfor %}
-        </ul>
-        {% translate 'Recent media' %}:
-        <ul>
-            {% for media in recent_media %}
-                <li>
-                    <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
-                    <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
-                        <section class="position-relative rating__stars_body">
-                            <section class="position-absolute rating__stars"></section>
-                        </section>
-                        <section class="rating__value">
-                            {{ media.get_rating }}
-                        </section>
+                    <section class="rating__value">
+                        {{ media.get_rating }}
                     </section>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endblock content %}
-    {% block scripts %}
-        <script src="{% static 'js/rating.js' %}"></script>
-    {% endblock scripts %}
-{% endcache %}
+                </section>
+            </li>
+        {% endfor %}
+    </ul>
+    {% translate 'Recent media' %}:
+    <ul>
+        {% for media in recent_media %}
+            <li>
+                <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
+                <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                    <section class="position-relative rating__stars_body">
+                        <section class="position-absolute rating__stars"></section>
+                    </section>
+                    <section class="rating__value">
+                        {{ media.get_rating }}
+                    </section>
+                </section>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content %}
+{% block scripts %}
+    <script src="{% static 'js/rating.js' %}"></script>
+{% endblock scripts %}
 </html>
