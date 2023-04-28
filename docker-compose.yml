@@ -1,26 +1,68 @@
 version: "3.9"
 
 services:
-  db:
-    image: postgres
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    networks:
+      - backend
     volumes:
-      - ./pg_data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=sky_library_dev
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./SkyLibrary/app_main/.env
     ports:
       - "5432:5432"
+
   web:
     build: .
+    restart: always
+    networks:
+      - backend
     volumes:
-      - .:/code
-    ports:
-      - "8000:8000"
+      - web_media:/code/SkyLibrary/media
+      - web_staticfiles:/code/SkyLibrary/staticfiles
+    expose:
+      - 8000:8000
     depends_on:
-      - db
+      - postgres
     env_file:
-      - ./SkyLibrary/app_main/.env.dev
+      - ./SkyLibrary/app_main/.env
+
+  nginx:
+    build: ./nginx
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - web_media:/code/SkyLibrary/media
+      - web_staticfiles:/code/SkyLibrary/staticfiles
+      - ./nginx/:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - web
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    networks:
+      - backend
+    depends_on:
+      - nginx
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
-  db:
+  postgres_data:
+  web_media:
+  web_staticfiles:
+
+networks:
+  backend:
+    driver: bridge

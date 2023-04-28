@@ -68,6 +68,14 @@ if INTERNAL_IPS == ['unset']:
 
     env_var_not_set_handler('INTERNAL_IPS', context='not used', error_level='WARNING')
 
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS', default='unset').split(', ')
+
+if CSRF_TRUSTED_ORIGINS == ['unset']:
+
+    CSRF_TRUSTED_ORIGINS = []
+
+    env_var_not_set_handler('CSRF_TRUSTED_ORIGINS', context='not used', error_level='WARNING')
+
 
 # Application definition
 
