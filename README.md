@@ -200,20 +200,29 @@ POSTGRES_HOST - standard [POSTGRES_HOST](https://hub.docker.com/_/postgres) envi
 POSTGRES_PORT - standard [POSTGRES_PORT](https://hub.docker.com/_/postgres) environment variable.<br>
 PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variable.<br>
 
-### 5. Run init-letsencrypt.sh
+### 5. Configure init-letsencrypt.sh
+
+Configure it (_8-12 lines in init-letsencrypt.sh file_):
+```bash
+domains=()  # example: (domain.site www.domain.site)
+email=""  # example: "example@yandex.ru"
+staging=0  # 1 - staging on, 0 - off
+```
+
+### 6. Run init-letsencrypt.sh
 
 ```bash
 chmod +x init-letsencrypt.sh
 sudo ./init-letsencrypt.sh
 ```
 
-### 6. Run docker-compose
+### 7. Run docker-compose
 
 ```bash
 docker-compose up -d
 ```
 
-### 7. Check the server
+### 8. Check the server
 
 ```bash
 docker-compose logs -f
@@ -221,7 +230,52 @@ docker-compose logs -f
 
 # Current project structure
 
-Soon......
+- Home page
+  - Navigation bar
+    - User is authenticated
+      - "Profile" link
+      - "Add new media" link
+    - User is not authenticated
+      - "Login" link
+      - "Sign-up" link
+  - Best media
+    - Media title (link to the media page)
+    - Media stars rating
+  - Recent media
+    - Media title (link to the media page)
+    - Media stars rating
+- Profile page
+  - Navigation bar
+    - "Home page" link
+    - "Add new media" link
+    - "Change password" link
+    - "Logout" link
+- Add new media page
+  - Navigation bar
+    - "Profile" link
+    - "Home page" link
+  - Add new media form
+    - Fields
+      - Title
+      - Description
+      - Author
+      - Tags (checkboxes)
+      - File (file input)
+      - Cover (optional)
+- View media page
+  - Navigation bar
+    - "Home page" link
+    - "Profile" link
+    - "Add new media" link
+  - Media content
+    - Title
+    - Cover (if exists)
+    - Rating
+    - Description
+    - Download button (become green if download)
+    - Author
+    - Added by
+    - Publication date
 
 # Contacts
 
