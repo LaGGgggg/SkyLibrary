@@ -230,7 +230,7 @@ docker compose up -d
 docker compose logs -f
 ```
 
-# Current project structure
+# Current project structure _(in progress)_
 
 - Home page
   - Navigation bar
