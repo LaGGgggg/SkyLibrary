@@ -142,7 +142,7 @@ msgid ""
 "Something went wrong with your request, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
-"Что-то пошло не так с вашим запросом, пожалуйста, попробуйте ещё раз или "
+"С вашим запросом что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:83
@@ -151,7 +151,7 @@ msgid ""
 "Something went wrong with your comment, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
-"Что-то пошло не так с вашим комментарием, пожалуйста, попробуйте ещё раз или "
+"С вашим комментарием что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:85
@@ -160,7 +160,7 @@ msgid ""
 "Something went wrong with your report, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
-"Что-то пошло не так с вашей жалобой, пожалуйста, попробуйте ещё раз или "
+"С вашей жалобой что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:87
@@ -202,7 +202,7 @@ msgstr "Войти"
 
 #: .\templates\accounts_app\login.html:23
 msgid "password recovery"
-msgstr "Восстановление пароля"
+msgstr "восстановление пароля"
 
 #: .\templates\accounts_app\logout_successful.html:9
 msgid "Logout successful"
