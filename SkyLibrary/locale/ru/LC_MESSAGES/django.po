@@ -22,55 +22,55 @@ msgstr ""
 
 #: .\apps\accounts_app\admin.py:16
 msgid "Email address"
-msgstr ""
+msgstr "Адрес электронной почты"
 
 #: .\apps\accounts_app\admin.py:27 .\apps\accounts_app\admin.py:44
 msgid "Personal info"
-msgstr ""
+msgstr "Персональная информация"
 
 #: .\apps\accounts_app\admin.py:29 .\apps\accounts_app\admin.py:45
 msgid "Permissions"
-msgstr ""
+msgstr "Разрешения"
 
 #: .\apps\accounts_app\admin.py:40 .\apps\accounts_app\admin.py:46
 msgid "Important dates"
-msgstr ""
+msgstr "Важные даты"
 
 #: .\apps\accounts_app\forms.py:14
 msgid "role"
-msgstr ""
+msgstr "роль"
 
 #: .\apps\accounts_app\models.py:43
 msgid "email address"
-msgstr ""
+msgstr "адрес электронной почты"
 
 #: .\apps\accounts_app\models.py:48
 msgid "Can add a new moderator"
-msgstr ""
+msgstr "Может добавить нового модератора"
 
 #: .\apps\accounts_app\models.py:49
 msgid "Can change a moderator data"
-msgstr ""
+msgstr "Может изменить данные модератора"
 
 #: .\apps\accounts_app\models.py:50
 msgid "Can change the user active field"
-msgstr ""
+msgstr "Может изменить поле активности пользователя"
 
 #: .\apps\media_app\admin.py:62
 msgid "The value of the banned field"
-msgstr ""
+msgstr "Значение заблокированного поля"
 
 #: .\apps\media_app\admin.py:117
 msgid "Link to the target of the report"
-msgstr ""
+msgstr "Ссылка на цель жалобы"
 
 #: .\apps\media_app\forms.py:26
 msgid "Not a unique title, change it."
-msgstr ""
+msgstr "Не уникальное название, измените его."
 
 #: .\apps\media_app\forms.py:36
 msgid "Not a unique description, change it."
-msgstr ""
+msgstr "Не уникальное описание, измените его."
 
 #: .\apps\media_app\forms.py:51
 #, python-brace-format
@@ -78,59 +78,63 @@ msgid ""
 "{checking_object.name} - is too big (more than {max_cover_size_in_megabytes}"
 "Mb)"
 msgstr ""
+"{checking_object.name} - слишком большой (больше чем "
+"{max_cover_size_in_megabytes}Мб)"
 
 #: .\apps\media_app\forms.py:74
 msgid "Comment text"
-msgstr ""
+msgstr "Текст комментария"
 
 #: .\apps\media_app\forms.py:85
 msgid "Add comment"
-msgstr ""
+msgstr "Добавить комментарий"
 
 #: .\apps\media_app\forms.py:102
 msgid "Reply text"
-msgstr ""
+msgstr "Текст ответа"
 
 #: .\apps\media_app\forms.py:113
 msgid "Add reply"
-msgstr ""
+msgstr "Добавить ответ"
 
 #: .\apps\media_app\forms.py:147 .\apps\media_app\forms.py:189
 msgid "Send report"
-msgstr ""
+msgstr "Отправить жалобу"
 
 #: .\apps\media_app\forms.py:172
 msgid "Select the correct report reason choice."
-msgstr ""
+msgstr "Выберите корректный вариант причины жалобы."
 
 #: .\apps\media_app\models.py:83
 msgid "Can change the value of the media active field"
-msgstr ""
+msgstr "Может изменить значение поля активности медиа"
 
 #: .\apps\media_app\models.py:114
 msgid "Object with this user and media already exists"
-msgstr ""
+msgstr "Объект с таким пользователем и медиа уже существует"
 
 #: .\apps\media_app\models.py:190
 msgid "Too frequent comments, please wait and try again"
-msgstr ""
+msgstr "Слишком частые комментарии, пожалуйста, подождите и попрубуйте ещё раз"
 
 #: .\apps\media_app\models.py:235
 msgid "Can change the content of the comment to \"This comment was banned\""
-msgstr ""
+msgstr "Может изменить текст комментария на \"Этот комментарий заблокирован\""
 
 #: .\apps\media_app\models.py:357
 msgid "You can not create one more report on the same media/comment"
-msgstr ""
+msgstr "Вы не можете создать ещё одну жалобу на один/одну комментарий/медиа"
 
 #: .\apps\media_app\models.py:369
 msgid "Too frequent reports, please wait and try again"
-msgstr ""
+msgstr "Слишком частые жалобы, пожалуйста, подождите и попрубуйте ещё раз"
 
 #: .\apps\media_app\models.py:403
 msgid ""
 "Error, unexpected value, please try again or contact support (code: 3.1)"
 msgstr ""
+"Ошибка, неожиданное значение, пожалуйста, попробуйте ещё раз или обратитесь "
+"в поддержку (код: 3.1)"
 
 #: .\apps\media_app\views.py:81
 #, python-brace-format
@@ -138,6 +142,8 @@ msgid ""
 "Something went wrong with your request, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
+"Что-то пошло не так с вашим запросом, пожалуйста, попробуйте ещё раз или "
+"обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:83
 #, python-brace-format
@@ -145,6 +151,8 @@ msgid ""
 "Something went wrong with your comment, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
+"Что-то пошло не так с вашим комментарием, пожалуйста, попробуйте ещё раз или "
+"обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:85
 #, python-brace-format
@@ -152,14 +160,16 @@ msgid ""
 "Something went wrong with your report, please try again or contact support "
 "(code: {error_code})"
 msgstr ""
+"Что-то пошло не так с вашей жалобой, пожалуйста, попробуйте ещё раз или "
+"обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\views.py:87
 msgid "Please select a reason for the report."
-msgstr ""
+msgstr "Пожалуйста, выберите причину жалобы."
 
 #: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:172
 msgid "Reply"
-msgstr ""
+msgstr "Ответить"
 
 #: .\templates\accounts_app\login.html:11
 #: .\templates\accounts_app\logout_successful.html:12
@@ -180,7 +190,7 @@ msgstr ""
 #: .\templates\media_app\view_media.html:19
 #: .\templates\staff_app\moderator_page.html:11
 msgid "Home page"
-msgstr ""
+msgstr "Главная страница"
 
 #: .\templates\accounts_app\login.html:15
 #: .\templates\accounts_app\login.html:21
@@ -188,46 +198,48 @@ msgstr ""
 #: .\templates\django_registration\activation_complete.html:12
 #: .\templates\home_page_app\index.html:20
 msgid "Log in"
-msgstr ""
+msgstr "Войти"
 
 #: .\templates\accounts_app\login.html:23
 msgid "password recovery"
-msgstr ""
+msgstr "Восстановление пароля"
 
 #: .\templates\accounts_app\logout_successful.html:9
 msgid "Logout successful"
-msgstr ""
+msgstr "Выход из аккаунта произведён успешно"
 
 #: .\templates\accounts_app\password_change.html:14
 #: .\templates\accounts_app\password_change.html:27
 #: .\templates\accounts_app\password_reset_confirm.html:32
 #: .\templates\accounts_app\profile.html:16
 msgid "Change password"
-msgstr ""
+msgstr "Изменить пароль"
 
 #: .\templates\accounts_app\password_change_successful.html:9
 #: .\templates\accounts_app\password_reset_complete.html:9
 msgid "Password changed successfully"
-msgstr ""
+msgstr "Пароль изменён успешно"
 
 #: .\templates\accounts_app\password_reset.html:14
 #: .\templates\accounts_app\password_reset.html:27
 msgid "Reset password"
-msgstr ""
+msgstr "Восстановить пароль"
 
 #: .\templates\accounts_app\password_reset_confirm.html:15
 msgid "Please enter your new password twice"
-msgstr ""
+msgstr "Пожалуйста, введите ваш новый пароль дважды"
 
 #: .\templates\accounts_app\password_reset_confirm.html:17
 msgid "Invalid link"
-msgstr ""
+msgstr "Неправильная ссылка"
 
 #: .\templates\accounts_app\password_reset_confirm.html:35
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
 "used. Please request a new password reset."
 msgstr ""
+"Ссылка на восстановление пароля неверна, возможно, она уже была "
+"использована. Пожалуйста, запросите новую ссылку на восстановление пароля."
 
 #: .\templates\accounts_app\password_reset_email.html:4
 #, python-format
@@ -238,29 +250,34 @@ msgid ""
 "%(protocol)s://%(domain)s%(password_reset_confirm)s\n"
 "Your username, in case you've forgotten: %(user_get_username)s\n"
 msgstr ""
+"\n"
+"Кто-то запросил изменение пароля для почты %(email)s. Перейдите по ссылке "
+"ниже:\n"
+"%(protocol)s://%(domain)s%(password_reset_confirm)s\n"
+"Ваше имя пользователя, на случай, если вы его забыли: %(user_get_username)s\n"
 
 #: .\templates\accounts_app\password_reset_successful.html:9
 #: .\templates\django_registration\registration_complete.html:9
 msgid "Check your email"
-msgstr ""
+msgstr "Проверьте свою почту"
 
 #: .\templates\accounts_app\profile.html:13
 #: .\templates\home_page_app\index.html:16
 #: .\templates\media_app\view_media.html:26
 msgid "Add new media"
-msgstr ""
+msgstr "Добавить новую медиа"
 
 #: .\templates\accounts_app\profile.html:19
 msgid "Log out"
-msgstr ""
+msgstr "Выйти"
 
 #: .\templates\base.html:27
 msgid "Support"
-msgstr ""
+msgstr "Поддержка"
 
 #: .\templates\django_registration\activation_complete.html:9
 msgid "Account activation completed"
-msgstr ""
+msgstr "Активация аккаунта завершена"
 
 #: .\templates\django_registration\activation_email_body.txt:3
 #, python-format
@@ -279,137 +296,146 @@ msgid_plural ""
 "To activate this account, please click the following link within the next "
 "%(expiration_days)s days:\n"
 msgstr[0] ""
+"\n"
+"Вы запросили регистрацию аккаунта на: %(site_name)s.\n"
+"Если это не вы, пожалуйста, игнорируйте это письмо.\n"
+"\n"
+"Для активации аккаунта, пожалуйста, перейдите по ссылке ниже в течение "
+"%(expiration_days)s дня:\n"
 msgstr[1] ""
+"\n"
+"Вы запросили регистрацию аккаунта на: %(site_name)s.\n"
+"Если это не вы, пожалуйста, игнорируйте это письмо.\n"
+"\n"
+"Для активации аккаунта, пожалуйста, перейдите по ссылке ниже в течение "
+"%(expiration_days)s дней:\n"
 
 #: .\templates\django_registration\activation_email_subject.txt:2
 msgid "account activation"
-msgstr ""
+msgstr "активация аккаунта"
 
 #: .\templates\django_registration\activation_failed.html:9
 msgid "Account activation failed"
-msgstr ""
+msgstr "Активация аккаунта не удалась"
 
 #: .\templates\django_registration\registration_closed.html:9
 msgid "Sorry, you can`t register"
-msgstr ""
+msgstr "Простите, вы не можете зарегистрироваться"
 
 #: .\templates\django_registration\registration_form.html:14
 #: .\templates\django_registration\registration_form.html:28
+#: .\templates\home_page_app\index.html:23
 msgid "Sign up"
-msgstr ""
+msgstr "Зарегистрироваться"
 
 #: .\templates\errors\400.html:9 .\templates\errors\400.html:12
 #: .\templates\errors\403.html:9 .\templates\errors\403.html:12
 #: .\templates\errors\404.html:9 .\templates\errors\404.html:12
 #: .\templates\errors\500.html:9 .\templates\errors\500.html:12
 msgid "error"
-msgstr ""
+msgstr "ошибка"
 
 #: .\templates\errors\400.html:15
 msgid "Oops, invalid url"
-msgstr ""
+msgstr "Уупс, неправильный url"
 
 #: .\templates\errors\403.html:15
 msgid "Oops, you do not have permission to do this"
-msgstr ""
+msgstr "Уупс, у вас нет прав делать это"
 
 #: .\templates\errors\404.html:15
 msgid "Oops, page not found"
-msgstr ""
+msgstr "Уупс, страница не найдена"
 
 #: .\templates\errors\500.html:15
 msgid "Oops, server error"
-msgstr ""
+msgstr "Уупс, ошибка сервера"
 
 #: .\templates\home_page_app\index.html:13
 #: .\templates\media_app\create_media.html:11
 #: .\templates\media_app\view_media.html:23
 #: .\templates\staff_app\moderator_page.html:14
 msgid "Profile"
-msgstr ""
+msgstr "Профиль"
 
-#: .\templates\home_page_app\index.html:23
-msgid "Sign-up"
-msgstr ""
-
-#: .\templates\home_page_app\index.html:28
+#: .\templates\home_page_app\index.html:29
 msgid "Hello, there"
-msgstr ""
+msgstr "Приветствуем"
 
-#: .\templates\home_page_app\index.html:31
+#: .\templates\home_page_app\index.html:34
 msgid "Best media"
-msgstr ""
+msgstr "Лучшие медиа"
 
-#: .\templates\home_page_app\index.html:47
+#: .\templates\home_page_app\index.html:50
 msgid "Recent media"
-msgstr ""
+msgstr "Недавние медиа"
 
 #: .\templates\media_app\create_media.html:18
 msgid "Create your media"
-msgstr ""
+msgstr "Создайте своё медиа"
 
 #: .\templates\media_app\create_media.html:24
 msgid "Submit"
-msgstr ""
+msgstr "Подтвердить"
 
 #: .\templates\media_app\create_media_successful.html:10
 msgid "Your media has been successfully created and submitted for moderation"
-msgstr ""
+msgstr "Ваше медиа успешно создано и отправлено на модерацию"
 
 #: .\templates\media_app\view_media.html:79
 msgid "Download file"
-msgstr ""
+msgstr "Скачать файл"
 
 #: .\templates\media_app\view_media.html:87
 msgid "Downloads"
-msgstr ""
+msgstr "Скачиваний"
 
 #: .\templates\media_app\view_media.html:91
 msgid "Author"
-msgstr ""
+msgstr "Автор"
 
 #: .\templates\media_app\view_media.html:92
 msgid "Added by"
-msgstr ""
+msgstr "Добавлено"
 
 #: .\templates\media_app\view_media.html:100
 msgid "Leave a comment"
-msgstr ""
+msgstr "Оставить комментарий"
 
 #: .\templates\media_app\view_media.html:195
 msgid "Moderate"
-msgstr ""
+msgstr "Модерация"
 
 #: .\templates\media_app\view_media.html:202
 msgid "Approve"
-msgstr ""
+msgstr "Одобрить"
 
 #: .\templates\media_app\view_media.html:208
 msgid "Disapprove"
-msgstr ""
+msgstr "Не одобрять"
 
 #: .\templates\media_app\view_media.html:211
 msgid "Confirm"
-msgstr ""
+msgstr "Подтвердить"
 
 #: .\templates\media_app\view_media.html:216
 msgid "Auto new task"
-msgstr ""
+msgstr "Автоматически новую задачу"
 
 #: .\templates\media_app\view_media.html:222
 msgid "No auto new task"
-msgstr ""
+msgstr "Нет автоматически новой задачи"
 
 #: .\templates\staff_app\moderator_page.html:18
 msgid "Moderator page"
-msgstr ""
+msgstr "Страница модератора"
 
 #: .\templates\staff_app\moderator_page.html:23
 #: .\templates\staff_app\moderator_page.html:27
 #: .\templates\staff_app\moderator_page.html:29
 msgid "No tasks available"
-msgstr ""
+msgstr "Нет доступных задач"
 
 #: .\templates\staff_app\moderator_page.html:30
 msgid "Receive task"
-msgstr ""
+msgstr "Получить задачу"
