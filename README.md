@@ -202,20 +202,20 @@ POSTGRES_HOST - standard [POSTGRES_HOST](https://hub.docker.com/_/postgres) envi
 POSTGRES_PORT - standard [POSTGRES_PORT](https://hub.docker.com/_/postgres) environment variable.<br>
 PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variable.<br>
 
-### 6. Configure init-letsencrypt.sh
+### 6. Configure docker-compose-init.sh
 
-Configure it (_3-7 lines in init-letsencrypt.sh file_):
+Configure it (_3-5 lines in docker-compose-init.sh file_):
 ```bash
 domains=()  # example: (domain.site www.domain.site)
 email=""  # example: "example@yandex.ru"
 staging=0  # 1 - staging on, 0 - off
 ```
 
-### 7. Run init-letsencrypt.sh
+### 7. Run docker-compose-init.sh
 
 ```bash
-chmod +x init-letsencrypt.sh
-sudo ./init-letsencrypt.sh
+chmod +x docker-compose-init.sh
+sudo ./docker-compose-init.sh
 ```
 
 ### 8. Run docker-compose

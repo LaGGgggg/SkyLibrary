@@ -1,10 +1,10 @@
 #!/bin/bash
 
 domains=()  # example: (domain.site www.domain.site)
-rsa_key_size=4096
-data_path="./data/certbot"
 email=""  # example: "example@yandex.ru"
 staging=0  # 1 - staging on, 0 - off
+rsa_key_size=4096
+data_path="./data/certbot"
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
@@ -34,7 +34,7 @@ echo
 
 
 echo "### Starting nginx ..."
-docker compose up --force-recreate -d nginx
+docker compose up -d --force-recreate nginx
 echo
 
 echo "### Deleting dummy certificate for $domains ..."
@@ -71,5 +71,7 @@ docker compose run --rm --entrypoint "\
     --force-renewal" certbot
 echo
 
-echo "### Reloading nginx ..."
-docker compose exec nginx nginx -s reload
+echo "### Recreate containers ..."
+docker compose up -d --force-recreate
+
+echo "### docker-compose-init script is completed"

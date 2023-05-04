@@ -15,7 +15,9 @@ services:
       - "5432:5432"
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-web
     restart: always
     networks:
       - backend
