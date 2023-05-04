@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-20 15:54+0400\n"
+"POT-Creation-Date: 2023-05-04 07:53+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,31 +20,145 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: .\apps\accounts_app\forms.py:11
+#: .\apps\accounts_app\admin.py:16
+msgid "Email address"
+msgstr ""
+
+#: .\apps\accounts_app\admin.py:27 .\apps\accounts_app\admin.py:44
+msgid "Personal info"
+msgstr ""
+
+#: .\apps\accounts_app\admin.py:29 .\apps\accounts_app\admin.py:45
+msgid "Permissions"
+msgstr ""
+
+#: .\apps\accounts_app\admin.py:40 .\apps\accounts_app\admin.py:46
+msgid "Important dates"
+msgstr ""
+
+#: .\apps\accounts_app\forms.py:14
 msgid "role"
 msgstr ""
 
-#: .\apps\accounts_app\models.py:44
+#: .\apps\accounts_app\models.py:43
 msgid "email address"
 msgstr ""
 
-#: .\apps\media_app\forms.py:20
+#: .\apps\accounts_app\models.py:48
+msgid "Can add a new moderator"
+msgstr ""
+
+#: .\apps\accounts_app\models.py:49
+msgid "Can change a moderator data"
+msgstr ""
+
+#: .\apps\accounts_app\models.py:50
+msgid "Can change the user active field"
+msgstr ""
+
+#: .\apps\media_app\admin.py:62
+msgid "The value of the banned field"
+msgstr ""
+
+#: .\apps\media_app\admin.py:117
+msgid "Link to the target of the report"
+msgstr ""
+
+#: .\apps\media_app\forms.py:26
 msgid "Not a unique title, change it."
 msgstr ""
 
-#: .\apps\media_app\forms.py:30
+#: .\apps\media_app\forms.py:36
 msgid "Not a unique description, change it."
 msgstr ""
 
-#: .\apps\media_app\forms.py:45
+#: .\apps\media_app\forms.py:51
 #, python-brace-format
 msgid ""
 "{checking_object.name} - is too big (more than {max_cover_size_in_megabytes}"
 "Mb)"
 msgstr ""
 
-#: .\apps\media_app\models.py:86
+#: .\apps\media_app\forms.py:74
+msgid "Comment text"
+msgstr ""
+
+#: .\apps\media_app\forms.py:85
+msgid "Add comment"
+msgstr ""
+
+#: .\apps\media_app\forms.py:102
+msgid "Reply text"
+msgstr ""
+
+#: .\apps\media_app\forms.py:113
+msgid "Add reply"
+msgstr ""
+
+#: .\apps\media_app\forms.py:147 .\apps\media_app\forms.py:189
+msgid "Send report"
+msgstr ""
+
+#: .\apps\media_app\forms.py:172
+msgid "Select the correct report reason choice."
+msgstr ""
+
+#: .\apps\media_app\models.py:83
+msgid "Can change the value of the media active field"
+msgstr ""
+
+#: .\apps\media_app\models.py:114
 msgid "Object with this user and media already exists"
+msgstr ""
+
+#: .\apps\media_app\models.py:190
+msgid "Too frequent comments, please wait and try again"
+msgstr ""
+
+#: .\apps\media_app\models.py:235
+msgid "Can change the content of the comment to \"This comment was banned\""
+msgstr ""
+
+#: .\apps\media_app\models.py:357
+msgid "You can not create one more report on the same media/comment"
+msgstr ""
+
+#: .\apps\media_app\models.py:369
+msgid "Too frequent reports, please wait and try again"
+msgstr ""
+
+#: .\apps\media_app\models.py:403
+msgid ""
+"Error, unexpected value, please try again or contact support (code: 3.1)"
+msgstr ""
+
+#: .\apps\media_app\views.py:81
+#, python-brace-format
+msgid ""
+"Something went wrong with your request, please try again or contact support "
+"(code: {error_code})"
+msgstr ""
+
+#: .\apps\media_app\views.py:83
+#, python-brace-format
+msgid ""
+"Something went wrong with your comment, please try again or contact support "
+"(code: {error_code})"
+msgstr ""
+
+#: .\apps\media_app\views.py:85
+#, python-brace-format
+msgid ""
+"Something went wrong with your report, please try again or contact support "
+"(code: {error_code})"
+msgstr ""
+
+#: .\apps\media_app\views.py:87
+msgid "Please select a reason for the report."
+msgstr ""
+
+#: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:172
+msgid "Reply"
 msgstr ""
 
 #: .\templates\accounts_app\login.html:11
@@ -63,7 +177,8 @@ msgstr ""
 #: .\templates\errors\404.html:16 .\templates\errors\500.html:16
 #: .\templates\media_app\create_media.html:14
 #: .\templates\media_app\create_media_successful.html:13
-#: .\templates\media_app\view_media.html:18
+#: .\templates\media_app\view_media.html:19
+#: .\templates\staff_app\moderator_page.html:11
 msgid "Home page"
 msgstr ""
 
@@ -71,7 +186,7 @@ msgstr ""
 #: .\templates\accounts_app\login.html:21
 #: .\templates\accounts_app\password_reset_complete.html:12
 #: .\templates\django_registration\activation_complete.html:12
-#: .\templates\home_page_app\index.html:18
+#: .\templates\home_page_app\index.html:20
 msgid "Log in"
 msgstr ""
 
@@ -130,8 +245,8 @@ msgid "Check your email"
 msgstr ""
 
 #: .\templates\accounts_app\profile.html:13
-#: .\templates\home_page_app\index.html:14
-#: .\templates\media_app\view_media.html:21
+#: .\templates\home_page_app\index.html:16
+#: .\templates\media_app\view_media.html:26
 msgid "Add new media"
 msgstr ""
 
@@ -139,7 +254,7 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: .\templates\base.html:25
+#: .\templates\base.html:27
 msgid "Support"
 msgstr ""
 
@@ -180,7 +295,6 @@ msgstr ""
 
 #: .\templates\django_registration\registration_form.html:14
 #: .\templates\django_registration\registration_form.html:28
-#: .\templates\home_page_app\index.html:21
 msgid "Sign up"
 msgstr ""
 
@@ -207,10 +321,27 @@ msgstr ""
 msgid "Oops, server error"
 msgstr ""
 
-#: .\templates\home_page_app\index.html:11
+#: .\templates\home_page_app\index.html:13
 #: .\templates\media_app\create_media.html:11
-#: .\templates\media_app\view_media.html:15
+#: .\templates\media_app\view_media.html:23
+#: .\templates\staff_app\moderator_page.html:14
 msgid "Profile"
+msgstr ""
+
+#: .\templates\home_page_app\index.html:23
+msgid "Sign-up"
+msgstr ""
+
+#: .\templates\home_page_app\index.html:28
+msgid "Hello, there"
+msgstr ""
+
+#: .\templates\home_page_app\index.html:31
+msgid "Best media"
+msgstr ""
+
+#: .\templates\home_page_app\index.html:47
+msgid "Recent media"
 msgstr ""
 
 #: .\templates\media_app\create_media.html:18
@@ -225,18 +356,60 @@ msgstr ""
 msgid "Your media has been successfully created and submitted for moderation"
 msgstr ""
 
-#: .\templates\media_app\view_media.html:55
-msgid "Author"
-msgstr ""
-
-#: .\templates\media_app\view_media.html:56
-msgid "Added by"
-msgstr ""
-
-#: .\templates\media_app\view_media.html:62
+#: .\templates\media_app\view_media.html:79
 msgid "Download file"
 msgstr ""
 
-#: .\templates\media_app\view_media.html:70
+#: .\templates\media_app\view_media.html:87
 msgid "Downloads"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:91
+msgid "Author"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:92
+msgid "Added by"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:100
+msgid "Leave a comment"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:195
+msgid "Moderate"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:202
+msgid "Approve"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:208
+msgid "Disapprove"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:211
+msgid "Confirm"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:216
+msgid "Auto new task"
+msgstr ""
+
+#: .\templates\media_app\view_media.html:222
+msgid "No auto new task"
+msgstr ""
+
+#: .\templates\staff_app\moderator_page.html:18
+msgid "Moderator page"
+msgstr ""
+
+#: .\templates\staff_app\moderator_page.html:23
+#: .\templates\staff_app\moderator_page.html:27
+#: .\templates\staff_app\moderator_page.html:29
+msgid "No tasks available"
+msgstr ""
+
+#: .\templates\staff_app\moderator_page.html:30
+msgid "Receive task"
 msgstr ""
