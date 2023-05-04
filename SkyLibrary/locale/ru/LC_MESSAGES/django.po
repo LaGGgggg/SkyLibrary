@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-04 07:53+0400\n"
+"POT-Creation-Date: 2023-05-04 14:26+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -358,15 +358,15 @@ msgstr "Уупс, ошибка сервера"
 msgid "Profile"
 msgstr "Профиль"
 
-#: .\templates\home_page_app\index.html:29
+#: .\templates\home_page_app\index.html:28
 msgid "Hello, there"
 msgstr "Приветствуем"
 
-#: .\templates\home_page_app\index.html:34
+#: .\templates\home_page_app\index.html:31
 msgid "Best media"
 msgstr "Лучшие медиа"
 
-#: .\templates\home_page_app\index.html:50
+#: .\templates\home_page_app\index.html:47
 msgid "Recent media"
 msgstr "Недавние медиа"
 
