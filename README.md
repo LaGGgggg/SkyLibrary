@@ -218,13 +218,7 @@ chmod +x docker-compose-init.sh
 sudo ./docker-compose-init.sh
 ```
 
-### 8. Run docker-compose
-
-```bash
-docker compose up -d
-```
-
-### 9. Check the server
+### 8. Check the server
 
 ```bash
 docker compose logs -f
