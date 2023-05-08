@@ -11,8 +11,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - ./SkyLibrary/app_main/.env
-    ports:
-      - "5432:5432"
+    expose:
+      - 5432
 
   web:
     build:

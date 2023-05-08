@@ -21,4 +21,4 @@ echo "${PURPLE}Run tests${NO_COLOR}"
 python manage.py test --noinput
 
 echo "${PURPLE}Run server${NO_COLOR}"
-gunicorn app_main.wsgi:application --bind 0.0.0.0:8000
+gunicorn app_main.wsgi:application --workers 3 --timeout 60 --bind 0.0.0.0:8000
