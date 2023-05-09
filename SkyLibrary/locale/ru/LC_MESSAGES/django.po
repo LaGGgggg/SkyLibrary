@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-04 14:26+0400\n"
+"POT-Creation-Date: 2023-05-09 15:49+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgstr "Персональная информация"
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: .\apps\accounts_app\admin.py:40 .\apps\accounts_app\admin.py:46
+#: .\apps\accounts_app\admin.py:40
 msgid "Important dates"
 msgstr "Важные даты"
 
@@ -105,36 +105,124 @@ msgstr "Отправить жалобу"
 msgid "Select the correct report reason choice."
 msgstr "Выберите корректный вариант причины жалобы."
 
-#: .\apps\media_app\models.py:83
+#: .\apps\media_app\models.py:40
+msgid "media tag"
+msgstr "тэг медиа"
+
+#: .\apps\media_app\models.py:41
+msgid "media tags"
+msgstr "тэги медиа"
+
+#: .\apps\media_app\models.py:86
 msgid "Can change the value of the media active field"
 msgstr "Может изменить значение поля активности медиа"
 
-#: .\apps\media_app\models.py:114
+#: .\apps\media_app\models.py:88
+msgid "media"
+msgstr "медиа"
+
+#: .\apps\media_app\models.py:89
+msgid "medias"
+msgstr "медиа"
+
+#: .\apps\media_app\models.py:112
+msgid "download"
+msgstr "скачивание"
+
+#: .\apps\media_app\models.py:119
 msgid "Object with this user and media already exists"
 msgstr "Объект с таким пользователем и медиа уже существует"
 
-#: .\apps\media_app\models.py:190
+#: .\apps\media_app\models.py:137
+msgid "media download"
+msgstr "скачивание медиа"
+
+#: .\apps\media_app\models.py:138
+msgid "media downloads"
+msgstr "скачивания медиа"
+
+#: .\apps\media_app\models.py:157 .\apps\media_app\models.py:274
+msgid "rating"
+msgstr "рейтинг"
+
+#: .\apps\media_app\models.py:162
+msgid "media rating"
+msgstr "рейтинг медиа"
+
+#: .\apps\media_app\models.py:163
+msgid "media ratings"
+msgstr "рейтинги медиа"
+
+#: .\apps\media_app\models.py:186
+msgid "Media type comment"
+msgstr "Комментарий типа медиа"
+
+#: .\apps\media_app\models.py:189
+msgid "Comment type comment"
+msgstr "Комментарий типа комментарий"
+
+#: .\apps\media_app\models.py:201
 msgid "Too frequent comments, please wait and try again"
 msgstr "Слишком частые комментарии, пожалуйста, подождите и попрубуйте ещё раз"
 
-#: .\apps\media_app\models.py:235
+#: .\apps\media_app\models.py:246
 msgid "Can change the content of the comment to \"This comment was banned\""
 msgstr "Может изменить текст комментария на \"Этот комментарий заблокирован\""
 
-#: .\apps\media_app\models.py:357
+#: .\apps\media_app\models.py:249 .\apps\media_app\models.py:274
+msgid "comment"
+msgstr "комментарий"
+
+#: .\apps\media_app\models.py:250
+msgid "comments"
+msgstr "комментарии"
+
+#: .\apps\media_app\models.py:304
+msgid "comment rating"
+msgstr "рейтинг комментария"
+
+#: .\apps\media_app\models.py:305
+msgid "comment ratings"
+msgstr "рейтинги комментария"
+
+#: .\apps\media_app\models.py:337
+msgid "report type"
+msgstr "тип жалобы"
+
+#: .\apps\media_app\models.py:338
+msgid "report types"
+msgstr "типы жалобы"
+
+#: .\apps\media_app\models.py:363
+msgid "Media report"
+msgstr "Жалоба на медиа"
+
+#: .\apps\media_app\models.py:366
+msgid "Comment report"
+msgstr "Жалоба на комментарий"
+
+#: .\apps\media_app\models.py:376
 msgid "You can not create one more report on the same media/comment"
 msgstr "Вы не можете создать ещё одну жалобу на один/одну комментарий/медиа"
 
-#: .\apps\media_app\models.py:369
+#: .\apps\media_app\models.py:388
 msgid "Too frequent reports, please wait and try again"
 msgstr "Слишком частые жалобы, пожалуйста, подождите и попрубуйте ещё раз"
 
-#: .\apps\media_app\models.py:403
+#: .\apps\media_app\models.py:422
 msgid ""
 "Error, unexpected value, please try again or contact support (code: 3.1)"
 msgstr ""
 "Ошибка, неожиданное значение, пожалуйста, попробуйте ещё раз или обратитесь "
 "в поддержку (код: 3.1)"
+
+#: .\apps\media_app\models.py:436
+msgid "report"
+msgstr "жалоба"
+
+#: .\apps\media_app\models.py:437
+msgid "reports"
+msgstr "жалобы"
 
 #: .\apps\media_app\views.py:81
 #, python-brace-format
@@ -167,9 +255,17 @@ msgstr ""
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:172
+#: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:173
 msgid "Reply"
 msgstr "Ответить"
+
+#: .\apps\staff_app\models.py:18 .\apps\staff_app\models.py:23
+msgid "moderator task"
+msgstr "задача модератора"
+
+#: .\apps\staff_app\models.py:24
+msgid "moderator tasks"
+msgstr "задачи модератора"
 
 #: .\templates\accounts_app\login.html:11
 #: .\templates\accounts_app\logout_successful.html:12
@@ -390,39 +486,39 @@ msgstr "Скачать файл"
 msgid "Downloads"
 msgstr "Скачиваний"
 
-#: .\templates\media_app\view_media.html:91
+#: .\templates\media_app\view_media.html:92
 msgid "Author"
 msgstr "Автор"
 
-#: .\templates\media_app\view_media.html:92
+#: .\templates\media_app\view_media.html:93
 msgid "Added by"
 msgstr "Добавлено"
 
-#: .\templates\media_app\view_media.html:100
+#: .\templates\media_app\view_media.html:101
 msgid "Leave a comment"
 msgstr "Оставить комментарий"
 
-#: .\templates\media_app\view_media.html:195
+#: .\templates\media_app\view_media.html:196
 msgid "Moderate"
 msgstr "Модерация"
 
-#: .\templates\media_app\view_media.html:202
+#: .\templates\media_app\view_media.html:203
 msgid "Approve"
 msgstr "Одобрить"
 
-#: .\templates\media_app\view_media.html:208
+#: .\templates\media_app\view_media.html:209
 msgid "Disapprove"
 msgstr "Не одобрять"
 
-#: .\templates\media_app\view_media.html:211
+#: .\templates\media_app\view_media.html:212
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: .\templates\media_app\view_media.html:216
+#: .\templates\media_app\view_media.html:217
 msgid "Auto new task"
 msgstr "Автоматически новую задачу"
 
-#: .\templates\media_app\view_media.html:222
+#: .\templates\media_app\view_media.html:223
 msgid "No auto new task"
 msgstr "Нет автоматически новой задачи"
 

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 from media_app.models import Media
 
@@ -14,7 +15,10 @@ class ModeratorTask(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.media.title}_moderator_task'
+        return f'{self.media.title} %s' % _("moderator task")
 
     class Meta:
+
         db_table = 'staff_app_moderator_task'
+        verbose_name = _('moderator task')
+        verbose_name_plural = _('moderator tasks')

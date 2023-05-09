@@ -35,7 +35,10 @@ class MediaTags(models.Model):
             return str(self.name_en_us)
 
     class Meta:
+
         db_table = 'media_app_media_tag'
+        verbose_name = _('media tag')
+        verbose_name_plural = _('media tags')
 
 
 def get_file_upload(instance, filename: str) -> str:
@@ -82,6 +85,8 @@ class Media(models.Model):
         permissions = [
             ('change_media_active_field', _('Can change the value of the media active field')),
         ]
+        verbose_name = _('media')
+        verbose_name_plural = _('medias')
 
 
 def get_best_active_media(amount: int) -> list[Media]:
@@ -104,7 +109,7 @@ class MediaDownload(models.Model):
     download = models.SmallIntegerField(choices=download_choices, default=1)
 
     def __str__(self):
-        return f'{self.media.title}_download({self.download})'
+        return f'{self.media.title} %s ({self.download})' % _("download")
 
     def clean(self, *args, **kwargs):
 
@@ -127,7 +132,10 @@ class MediaDownload(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
+
         db_table = 'media_app_media_download'
+        verbose_name = _('media download')
+        verbose_name_plural = _('media downloads')
 
 
 class MediaRating(models.Model):
@@ -146,10 +154,13 @@ class MediaRating(models.Model):
     rating = models.SmallIntegerField(choices=rating_choices)
 
     def __str__(self):
-        return f'{self.media.title} rating ({self.rating})'
+        return f'{self.media.title} %s ({self.rating})' % _("rating")
 
     class Meta:
+
         db_table = 'media_app_media_rating'
+        verbose_name = _('media rating')
+        verbose_name_plural = _('media ratings')
 
 
 class Comment(models.Model):
@@ -172,10 +183,10 @@ class Comment(models.Model):
     def __str__(self):
 
         if self.target_type == self.MEDIA_TYPE:
-            return f'Media type comment (id: {self.id})'
+            return f'%s (id: {self.id})' % _("Media type comment")
 
         elif self.target_type == self.COMMENT_TYPE:
-            return f'Comment type comment (id: {self.id})'
+            return f'%s (id: {self.id})' % _("Comment type comment")
 
     def clean(self, *args, **kwargs):
 
@@ -235,6 +246,8 @@ class Comment(models.Model):
                 _('Can change the content of the comment to "This comment was banned"')
             ),
         ]
+        verbose_name = _('comment')
+        verbose_name_plural = _('comments')
 
 
 class CommentRating(models.Model):
@@ -258,7 +271,7 @@ class CommentRating(models.Model):
     pub_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f'comment (id: {self.comment.id}) rating ({self.rating})'
+        return f'%s (id: {self.comment.id}) %s ({self.rating})' % (_("comment"), _("rating"))
 
     def clean(self, *args, **kwargs):
 
@@ -286,7 +299,10 @@ class CommentRating(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
+
         db_table = 'media_app_comment_rating'
+        verbose_name = _('comment rating')
+        verbose_name_plural = _('comment ratings')
 
 
 def get_page_media_id_by_comment(comment: Comment) -> int:
@@ -316,7 +332,10 @@ class ReportType(models.Model):
             return str(self.name_en_us)
 
     class Meta:
+
         db_table = 'media_app_report_type'
+        verbose_name = _('report type')
+        verbose_name_plural = _('report types')
 
 
 class Report(models.Model):
@@ -341,10 +360,10 @@ class Report(models.Model):
     def __str__(self):
 
         if self.target_type == self.MEDIA_TYPE:
-            return f'Media report (id: {self.id})'
+            return f'%s (id: {self.id})' % _("Media report")
 
         elif self.target_type == self.COMMENT_TYPE:
-            return f'Comment report (id: {self.id})'
+            return f'%s (id: {self.id})' % _("Comment report")
 
     def clean(self, *args, **kwargs):
 
@@ -411,3 +430,8 @@ class Report(models.Model):
 
         elif is_comment_type:
             return f"{base_link}#comment_{self.target_id}"
+
+    class Meta:
+
+        verbose_name = _('report')
+        verbose_name_plural = _('reports')
