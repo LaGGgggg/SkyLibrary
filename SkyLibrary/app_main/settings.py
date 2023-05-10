@@ -170,7 +170,6 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            # Format such as: ""
             'format': '[{levelname}] [{asctime}] path - "{pathname}" function - "{funcName}" process - "{process:d}" '
                       'thread - "{thread:d}" message - "{message}"',
             'style': '{',
