@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-09 15:49+0400\n"
+"POT-Creation-Date: 2023-05-11 16:13+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,6 +55,14 @@ msgstr "Может изменить данные модератора"
 #: .\apps\accounts_app\models.py:50
 msgid "Can change the user active field"
 msgstr "Может изменить поле активности пользователя"
+
+#: .\apps\media_app\admin.py:61
+msgid "Current value of the field"
+msgstr "Текущее значение поля"
+
+#: .\apps\media_app\admin.py:62
+msgid "This comment was banned"
+msgstr "Этот комментарий заблокирован"
 
 #: .\apps\media_app\admin.py:62
 msgid "The value of the banned field"
@@ -255,7 +263,7 @@ msgstr ""
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:173
+#: .\apps\media_app\views.py:315 .\templates\media_app\view_media.html:186
 msgid "Reply"
 msgstr "Ответить"
 
@@ -359,7 +367,7 @@ msgstr "Проверьте свою почту"
 
 #: .\templates\accounts_app\profile.html:13
 #: .\templates\home_page_app\index.html:16
-#: .\templates\media_app\view_media.html:26
+#: .\templates\media_app\view_media.html:28
 msgid "Add new media"
 msgstr "Добавить новую медиа"
 
@@ -449,7 +457,7 @@ msgstr "Уупс, ошибка сервера"
 
 #: .\templates\home_page_app\index.html:13
 #: .\templates\media_app\create_media.html:11
-#: .\templates\media_app\view_media.html:23
+#: .\templates\media_app\view_media.html:25
 #: .\templates\staff_app\moderator_page.html:14
 msgid "Profile"
 msgstr "Профиль"
@@ -478,47 +486,47 @@ msgstr "Подтвердить"
 msgid "Your media has been successfully created and submitted for moderation"
 msgstr "Ваше медиа успешно создано и отправлено на модерацию"
 
-#: .\templates\media_app\view_media.html:79
+#: .\templates\media_app\view_media.html:81
 msgid "Download file"
 msgstr "Скачать файл"
 
-#: .\templates\media_app\view_media.html:87
+#: .\templates\media_app\view_media.html:89
 msgid "Downloads"
 msgstr "Скачиваний"
 
-#: .\templates\media_app\view_media.html:92
+#: .\templates\media_app\view_media.html:94
 msgid "Author"
 msgstr "Автор"
 
-#: .\templates\media_app\view_media.html:93
+#: .\templates\media_app\view_media.html:95
 msgid "Added by"
 msgstr "Добавлено"
 
-#: .\templates\media_app\view_media.html:101
+#: .\templates\media_app\view_media.html:103
 msgid "Leave a comment"
 msgstr "Оставить комментарий"
 
-#: .\templates\media_app\view_media.html:196
+#: .\templates\media_app\view_media.html:214
 msgid "Moderate"
 msgstr "Модерация"
 
-#: .\templates\media_app\view_media.html:203
+#: .\templates\media_app\view_media.html:221
 msgid "Approve"
 msgstr "Одобрить"
 
-#: .\templates\media_app\view_media.html:209
+#: .\templates\media_app\view_media.html:227
 msgid "Disapprove"
 msgstr "Не одобрять"
 
-#: .\templates\media_app\view_media.html:212
+#: .\templates\media_app\view_media.html:230
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: .\templates\media_app\view_media.html:217
+#: .\templates\media_app\view_media.html:235
 msgid "Auto new task"
 msgstr "Автоматически новую задачу"
 
-#: .\templates\media_app\view_media.html:223
+#: .\templates\media_app\view_media.html:241
 msgid "No auto new task"
 msgstr "Нет автоматически новой задачи"
 

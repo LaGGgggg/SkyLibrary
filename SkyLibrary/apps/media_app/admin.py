@@ -58,8 +58,8 @@ class CommentModelAdminForm(forms.ModelForm):
         super(CommentModelAdminForm, self).__init__(*args, **kwargs)
 
         content_field_choices = (
-            (self.instance.content, f'{_("Current value of the field")} ({self.instance.content})'),
-            (f'{_("This comment was banned")}.', _('The value of the banned field')),
+            (self.instance.content, f'%s ({self.instance.content})' % _("Current value of the field")),
+            (f'%s.' % _("This comment was banned"), _('The value of the banned field')),
         )
 
         self.fields['content'].choices = content_field_choices
