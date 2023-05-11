@@ -38,7 +38,7 @@
 {% block content %}
     {% cache 31536000 view_media_page_viewer_content_1 media.id LANGUAGE_CODE %}
         {% if media.cover %}
-            <img src="{{ media.cover.url }}" class="float-right cover_image">
+            <img src="{{ media.cover.url }}" class="float-end mb-5 me-5 cover_image">
         {% endif %}
         <section class="list-group flex-row align-items-center">
             <section class="d-flex align-items-end rating">
@@ -112,7 +112,9 @@
                 {% endif %}
             </ul>
             {% cache 31536000 view_media_page_add_media_comment_2 LANGUAGE_CODE %}
-                {% crispy form %}
+                <section style="max-width:60%;">
+                    {% crispy form %}
+                </section>
             {% endcache %}
         </section>
     {% endif %}

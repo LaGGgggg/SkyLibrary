@@ -1,6 +1,6 @@
 .cover_image {
-    max-height: 150%;
-    max-width: 150%;
+    max-height: 35em;
+    max-width: 35em;
 }
 .asteriskField {
     display: none;
