@@ -109,7 +109,7 @@ class MediaDownload(models.Model):
     download = models.SmallIntegerField(choices=download_choices, default=1)
 
     def __str__(self):
-        return f'{self.media.title} %s ({self.download})' % _("download")
+        return f'{self.media.title} %s' % _("download")
 
     def clean(self, *args, **kwargs):
 
