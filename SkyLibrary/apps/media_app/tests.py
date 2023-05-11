@@ -361,7 +361,7 @@ class ViewMediaTestCase(TestCase):
         # add cover:
         page_should_contain.append(
             f'<img src="{settings.MEDIA_URL}{get_cover_upload(self.media, self.media_data["cover"].name)}"'
-            f' class="float-right cover_image">'
+            f' class="float-end mb-5 me-5 cover_image">'
         )
 
         # add pub date:
@@ -398,7 +398,7 @@ class ViewMediaTestCase(TestCase):
         # add cover:
         page_should_contain.append(
             f'<img src="{settings.MEDIA_URL}{get_cover_upload(self.media, self.media_data["cover"].name)}"'
-            f' class="float-right cover_image">'
+            f' class="float-end mb-5 me-5 cover_image">'
         )
 
         # add pub date:
