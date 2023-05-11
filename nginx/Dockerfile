@@ -1,4 +1,4 @@
-FROM nginx:latest
+FROM nginx:stable
 
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d

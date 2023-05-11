@@ -2,6 +2,16 @@ version: "3.9"
 
 services:
 
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      backend:
+    volumes:
+      - redis_data:/data
+    expose:
+      - 6379
+
   postgres:
     image: postgres:latest
     restart: always
@@ -28,6 +38,7 @@ services:
       - 8000:8000
     depends_on:
       - postgres
+      - redis
     env_file:
       - ./SkyLibrary/app_main/.env
 
@@ -50,7 +61,7 @@ services:
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
-    image: certbot/certbot
+    image: certbot/certbot:latest
     networks:
       - backend
     depends_on:
@@ -61,6 +72,7 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
+  redis_data:
   postgres_data:
   web_media:
   web_staticfiles:
