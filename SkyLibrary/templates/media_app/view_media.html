@@ -14,19 +14,21 @@
     <link rel="stylesheet" href="{% static 'css/rating.css' %}">
 {% endblock head_extra %}
 {% block top_panel %}
-    {% cache 31536000 view_media_page_top_panel LANGUAGE_CODE %}
+    {% cache 31536000 view_media_page_top_panel_without_auth LANGUAGE_CODE %}
         <li class="nav-item active">
             <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
         </li>
-        {% if user.is_authenticated %}
+    {% endcache %}
+    {% if user.is_authenticated %}
+        {% cache 31536000 view_media_page_top_panel_with_auth LANGUAGE_CODE %}
             <li class="nav-item active">
                 <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
             </li>
             <li class="nav-item active">
                 <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
             </li>
-        {% endif %}
-    {% endcache %}
+        {% endcache %}
+    {% endif %}
 {% endblock top_panel %}
 {% block header %}
     {% cache 31536000 view_media_page_header media.id LANGUAGE_CODE %}
@@ -116,17 +118,25 @@
     {% endif %}
     <section id="comments" class="mt-4">
         {% for comment_dict in comments %}
-            {% for i in comment_dict.nesting|to_range %}
-                <div class="ms-4">
-            {% endfor %}
-            <section id="comment_{{ comment_dict.comment.id }}" data-comment-nesting="{{ comment_dict.nesting }}">
+            {% cache 31536000 view_media_page_comment_or_reply_1 comment_dict.comment.id %}
+                {% for i in comment_dict.nesting|to_range %}
+                    <div class="ms-4">
+                {% endfor %}
+                <section id="comment_{{ comment_dict.comment.id }}" data-comment-nesting="{{ comment_dict.nesting }}">
+            {% endcache %}
                 <section class="mt-4 small fst-italic">
-                    <span class="fw-bold me-1">{{ comment_dict.comment.user_who_added }}</span>
-                    <span class="dot"></span>
+                    {% cache 604800 view_media_page_comment_or_reply_2 comment_dict.comment.id %}
+                        <span class="fw-bold me-1">{{ comment_dict.comment.user_who_added }}</span>
+                    {% endcache %}
+                    {% cache 31536000 view_media_page_comment_or_reply_3 %}
+                        <span class="dot"></span>
+                    {% endcache %}
                     <span class="fw-light ms-1">{{ comment_dict.comment.pub_date|naturaltime }}</span>
                 </section>
                 <section class="fs-5 mt-1">
-                    {{ comment_dict.comment.content }}
+                    {% cache 86400 view_media_page_comment_or_reply_4 comment_dict.comment.id %}
+                        {{ comment_dict.comment.content }}
+                    {% endcache %}
                 </section>
                 <section class="d-flex flex-row align-items-center">
                     {% if user.is_authenticated %}
@@ -155,39 +165,47 @@
                             {% endif %}
                         </section>
                     {% else %}
-                        <section class="d-flex flex-column">
-                            <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
-                                <ion-icon name="caret-up-outline"></ion-icon>
-                            </button>
-                            <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
-                                <ion-icon name="caret-down-outline"></ion-icon>
-                            </button>
-                        </section>
+                        {% cache 31536000 view_media_page_comment_or_reply_5 %}
+                            <section class="d-flex flex-column">
+                                <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
+                                    <ion-icon name="caret-up-outline"></ion-icon>
+                                </button>
+                                <button class="bg-transparent border-0 p-0 vote-button" disabled="disabled">
+                                    <ion-icon name="caret-down-outline"></ion-icon>
+                                </button>
+                            </section>
+                        {% endcache %}
                     {% endif %}
                     <section class="ms-2 mt-1" data-vote-rating-section-target-id="{{ comment_dict.comment.id }}">
                         {{ comment_dict.comment.get_rating }}
                     </section>
                     <span class="dot ms-2 mt-1"></span>
                     {% if user.is_authenticated %}
-                        <button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="reply">
-                            {% translate 'Reply' %}
-                        </button>
-                        <span class="dot ms-2 mt-1"></span>
-                        <button class="bg-transparent border-0 p-0 ms-2 mt-2 report-button" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="report">
-                            <ion-icon name="alert-circle-outline"></ion-icon>
-                        </button>
+                        {% cache 31536000 view_media_page_comment_or_reply_6 LANGUAGE_CODE comment_dict.comment.id %}
+                            <button class="reply-button bg-transparent border-0 p-0 fw-light ms-2 mt-1" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="reply">
+                                {% translate 'Reply' %}
+                            </button>
+                            <span class="dot ms-2 mt-1"></span>
+                            <button class="bg-transparent border-0 p-0 ms-2 mt-2 report-button" data-form-adder-button-target-id="{{ comment_dict.comment.id }}" data-requested-form-type="report">
+                                <ion-icon name="alert-circle-outline"></ion-icon>
+                            </button>
+                        {% endcache %}
                     {% endif %}
-                    <a href="#comment_{{ comment_dict.comment.id }}" class="ms-1 mt-2">
-                        <ion-icon name="pin-outline"></ion-icon>
-                    </a>
+                    {% cache 31536000 view_media_page_comment_or_reply_7 comment_dict.comment.id %}
+                        <a href="#comment_{{ comment_dict.comment.id }}" class="ms-1 mt-2">
+                            <ion-icon name="pin-outline"></ion-icon>
+                        </a>
+                    {% endcache %}
                 </section>
                 {% if user.is_authenticated %}
                     <section class="m-3" data-section-for-form-under-comment-target-id="{{ comment_dict.comment.id }}"></section>
                 {% endif %}
             </section>
-            {% for i in comment_dict.nesting|to_range %}
-                </div>
-            {% endfor %}
+            {% cache 31536000 view_media_page_comment_or_reply_8 comment_dict.comment.id %}
+                {% for i in comment_dict.nesting|to_range %}
+                    </div>
+                {% endfor %}
+            {% endcache %}
         {% endfor %}
     </section>
     {% if is_moderate %}
