@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 
+    'utils_app',
     'accounts_app',
     'home_page_app',
     'media_app',
