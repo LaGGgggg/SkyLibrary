@@ -9,10 +9,17 @@ User = get_user_model()
 
 class ModeratorTask(models.Model):
 
-    media = models.OneToOneField(Media, on_delete=models.CASCADE, related_name='media_moderator_task', unique=True)
-    user_who_added = \
-        models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_who_added_moderator_task', unique=True)
-    create_date = models.DateTimeField(auto_now_add=True)
+    media = models.OneToOneField(
+        Media, on_delete=models.CASCADE, related_name='media_moderator_task', unique=True, verbose_name=_('media')
+    )
+    user_who_added = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='user_who_added_moderator_task',
+        unique=True,
+        verbose_name=_('user who added'),
+    )
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name=_('create date'))
 
     def __str__(self):
         return f'{self.media.title} %s' % _("moderator task")

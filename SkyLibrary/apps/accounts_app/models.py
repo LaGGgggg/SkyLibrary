@@ -7,18 +7,18 @@ from django.utils.translation import gettext_lazy as _
 class CustomUserManager(UserManager):
     def create_superuser(self, username, email=None, password=None, **extra_fields):
 
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("role", 4)  # 4 - superuser
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', 4)  # 4 - superuser
 
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
 
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
 
-        if extra_fields.get("role") != 4:  # 4 - superuser
-            raise ValueError("Superuser must have role=4.")  # 4 - superuser
+        if extra_fields.get('role') != 4:  # 4 - superuser
+            raise ValueError('Superuser must have role=4.')  # 4 - superuser
 
         return self._create_user(username, email, password, **extra_fields)
 
@@ -33,14 +33,14 @@ class User(AbstractUser):
     SUPERUSER = 4
 
     ROLE_CHOICES = (
-        (VISITOR, 'Visitor'),
-        (MODERATOR, 'Moderator'),
-        (ADMIN, 'Admin'),
-        (SUPERUSER, 'Superuser'),
+        (VISITOR, _('Visitor')),
+        (MODERATOR, _('Moderator')),
+        (ADMIN, _('Admin')),
+        (SUPERUSER, _('Superuser')),
     )
 
-    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES)
-    email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
+    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, verbose_name=_('role'))
+    email = models.EmailField(verbose_name=_('email'), unique=True, blank=False, null=False)
 
     class Meta(AbstractUser.Meta):
 

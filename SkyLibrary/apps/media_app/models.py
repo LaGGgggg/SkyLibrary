@@ -17,14 +17,16 @@ User = get_user_model()
 
 class MediaTags(models.Model):
 
-    name_en_us = models.CharField(max_length=16, unique=True)
-    help_text_en_us = models.CharField(max_length=80, unique=True)
+    name_en_us = models.CharField(max_length=16, unique=True, verbose_name=_('name en-us'))
+    help_text_en_us = models.CharField(max_length=80, unique=True, verbose_name=_('help text en-us'))
 
-    name_ru = models.CharField(max_length=16, unique=True)
-    help_text_ru = models.CharField(max_length=80, unique=True)
+    name_ru = models.CharField(max_length=16, unique=True, verbose_name=_('name ru'))
+    help_text_ru = models.CharField(max_length=80, unique=True, verbose_name=_('help text ru'))
 
-    pub_date = models.DateField(auto_now_add=True)
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='media_tags')
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
+    user_who_added = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='media_tags', verbose_name=_('user who added')
+    )
 
     def __str__(self):
 
@@ -56,20 +58,22 @@ class Media(models.Model):
     NOT_VALID = 2
 
     active_choices = (
-        (INACTIVE, 'Inactive'),
-        (ACTIVE, 'Active'),
-        (NOT_VALID, 'Not valid'),
+        (INACTIVE, _('Inactive')),
+        (ACTIVE, _('Active')),
+        (NOT_VALID, _('Not valid')),
     )
 
-    title = models.CharField(max_length=60, unique=True)
-    description = models.TextField(unique=True)
-    author = models.CharField(max_length=30)
-    pub_date = models.DateField(auto_now_add=True)
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media')
-    tags = models.ManyToManyField(MediaTags, related_name='tags_media')
-    active = models.PositiveSmallIntegerField(choices=active_choices, default=0)
-    file = models.FileField(upload_to=get_file_upload)
-    cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True)
+    title = models.CharField(max_length=60, unique=True, verbose_name=_('title'))
+    description = models.TextField(unique=True, verbose_name=_('description'))
+    author = models.CharField(max_length=30, verbose_name=_('author'))
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
+    user_who_added = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='user_who_added_media', verbose_name=_('user who added')
+    )
+    tags = models.ManyToManyField(MediaTags, related_name='tags_media', verbose_name=_('tags'))
+    active = models.PositiveSmallIntegerField(choices=active_choices, default=0, verbose_name=_('active'))
+    file = models.FileField(upload_to=get_file_upload, verbose_name=_('file'))
+    cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True, verbose_name=_('cover'))
 
     def __str__(self):
         return self.title
@@ -99,14 +103,21 @@ class MediaDownload(models.Model):
     DOWNLOADED = 1
 
     download_choices = (
-        (NOT_DOWNLOADED, 'Not downloaded'),
-        (DOWNLOADED, 'Downloaded'),
+        (NOT_DOWNLOADED, _('Not downloaded')),
+        (DOWNLOADED, _('Downloaded')),
     )
 
-    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='media_media_download')
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media_download')
-    pub_date = models.DateField(auto_now_add=True)
-    download = models.SmallIntegerField(choices=download_choices, default=1)
+    media = models.ForeignKey(
+        Media, on_delete=models.CASCADE, related_name='media_media_download', verbose_name=_('media')
+    )
+    user_who_added = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+        related_name='user_who_added_media_download',
+        verbose_name=_('user who added'),
+    )
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
+    download = models.SmallIntegerField(choices=download_choices, default=1, verbose_name=_('download'))
 
     def __str__(self):
         return f'{self.media.title} %s' % _("download")
@@ -148,10 +159,14 @@ class MediaRating(models.Model):
         (5, 5),
     )
 
-    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='media_media_rating')
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_who_added_media_rating')
-    pub_date = models.DateField(auto_now_add=True)
-    rating = models.SmallIntegerField(choices=rating_choices)
+    media = models.ForeignKey(
+        Media, on_delete=models.CASCADE, related_name='media_media_rating', verbose_name=_('media')
+    )
+    user_who_added = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='user_who_added_media_rating', verbose_name=_('user who added')
+    )
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
+    rating = models.SmallIntegerField(choices=rating_choices, verbose_name=_('rating'))
 
     def __str__(self):
         return f'{self.media.title} %s ({self.rating})' % _("rating")
@@ -169,16 +184,21 @@ class Comment(models.Model):
     COMMENT_TYPE = 2
 
     target_type_choices = (
-        (MEDIA_TYPE, 'Media type'),
-        (COMMENT_TYPE, 'Comment type'),
+        (MEDIA_TYPE, _('Media type')),
+        (COMMENT_TYPE, _('Comment type')),
     )
 
-    content = models.CharField(max_length=500)
-    target_type = models.PositiveSmallIntegerField(choices=target_type_choices)
-    target_id = models.PositiveIntegerField()
-    user_who_added = \
-        models.ForeignKey(User, on_delete=models.SET_DEFAULT, related_name='comment', default='deleted user')
-    pub_date = models.DateTimeField(auto_now_add=True)
+    content = models.CharField(max_length=500, verbose_name=_('content'))
+    target_type = models.PositiveSmallIntegerField(choices=target_type_choices, verbose_name=_('target type'))
+    target_id = models.PositiveIntegerField(verbose_name=_('target id'))
+    user_who_added = models.ForeignKey(
+        User,
+        on_delete=models.SET_DEFAULT,
+        related_name='comment',
+        default='deleted user',
+        verbose_name=_('user who added'),
+    )
+    pub_date = models.DateTimeField(auto_now_add=True, verbose_name=_('publication date'))
 
     def __str__(self):
 
@@ -256,19 +276,22 @@ class CommentRating(models.Model):
     DOWNVOTE = -1
 
     rating_choices = (
-        (UPVOTE, 'Up vote'),
-        (DOWNVOTE, 'Down vote'),
+        (UPVOTE, _('Up vote')),
+        (DOWNVOTE, _('Down vote')),
     )
 
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_comment_rating')
-    rating = models.SmallIntegerField(choices=rating_choices)
+    comment = models.ForeignKey(
+        Comment, on_delete=models.CASCADE, related_name='comment_comment_rating', verbose_name=_('comment')
+    )
+    rating = models.SmallIntegerField(choices=rating_choices, verbose_name=_('rating'))
     user_who_added = models.ForeignKey(
         User,
         on_delete=models.SET_DEFAULT,
         related_name='user_who_added_comment_rating',
         default=0,
+        verbose_name=_('user who added'),
     )
-    pub_date = models.DateField(auto_now_add=True)
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
 
     def __str__(self):
         return f'%s (id: {self.comment.id}) %s ({self.rating})' % (_("comment"), _("rating"))
@@ -318,10 +341,12 @@ def get_page_media_id_by_comment(comment: Comment) -> int:
 
 class ReportType(models.Model):
 
-    name_en_us = models.CharField(max_length=60, unique=True)
-    name_ru = models.CharField(max_length=60, unique=True)
-    pub_date = models.DateField(auto_now_add=True)
-    user_who_added = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='report_type')
+    name_en_us = models.CharField(max_length=60, unique=True, verbose_name=_('name en-us'))
+    name_ru = models.CharField(max_length=60, unique=True, verbose_name=_('name ru'))
+    pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
+    user_who_added = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING, related_name='report_type', verbose_name=_('user who addded')
+    )
 
     def __str__(self):
 
@@ -344,18 +369,22 @@ class Report(models.Model):
     COMMENT_TYPE = 2
 
     target_type_choices = (
-        (MEDIA_TYPE, 'Media type'),
-        (COMMENT_TYPE, 'Comment type'),
+        (MEDIA_TYPE, _('Media type')),
+        (COMMENT_TYPE, _('Comment type')),
     )
 
-    report_type = models.ManyToManyField(ReportType, related_name='report_type_report')
-    content = models.CharField(max_length=300)
-    target_type = models.PositiveSmallIntegerField(choices=target_type_choices)
-    target_id = models.PositiveIntegerField()
+    report_type = models.ManyToManyField(ReportType, related_name='report_type_report', verbose_name=_('report type'))
+    content = models.CharField(max_length=300, verbose_name=_('content'))
+    target_type = models.PositiveSmallIntegerField(choices=target_type_choices, verbose_name=_('target type'))
+    target_id = models.PositiveIntegerField(verbose_name=_('target id'))
     user_who_added = models.ForeignKey(
-        User, on_delete=models.SET_DEFAULT, related_name='user_who_added_report', default='deleted user'
+        User,
+        on_delete=models.SET_DEFAULT,
+        related_name='user_who_added_report',
+        default='deleted user',
+        verbose_name=_('user who added'),
     )
-    pub_date = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(auto_now_add=True, verbose_name=_('publication date'))
 
     def __str__(self):
 
