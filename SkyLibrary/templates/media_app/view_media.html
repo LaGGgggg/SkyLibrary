@@ -20,13 +20,18 @@
         </li>
     {% endcache %}
     {% if user.is_authenticated %}
-        {% cache 31536000 view_media_page_top_panel_with_auth LANGUAGE_CODE %}
+        {% cache 31536000 view_media_page_top_panel_with_auth LANGUAGE_CODE is_user_moderator %}
             <li class="nav-item active">
                 <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
             </li>
             <li class="nav-item active">
                 <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
             </li>
+            {% if is_user_moderator %}
+                <li class="nav-item active">
+                    <a href="{% url 'moderator_page' get_next_task='False' from_view_media_page='False' %}" class="nav-link">{% translate 'Moderator page' %}</a>
+                </li>
+            {% endif %}
         {% endcache %}
     {% endif %}
 {% endblock top_panel %}

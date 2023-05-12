@@ -15,6 +15,11 @@
         <li class="nav-item active">
             <a href="{% url 'create_media' %}" class="nav-link">{% translate 'Add new media' %}</a>
         </li>
+        {% if is_user_moderator %}
+            <li class="nav-item active">
+                <a href="{% url 'moderator_page' get_next_task='False' from_view_media_page='False' %}" class="nav-link">{% translate 'Moderator page' %}</a>
+            </li>
+        {% endif %}
     {% else %}
         <li class="nav-item active">
             <a href="{% url 'login' %}" class="nav-link">{% translate 'Log in' %}</a>

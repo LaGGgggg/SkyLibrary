@@ -198,6 +198,7 @@ class ViewViewMedia(View):
                 'is_moderate': self.is_moderate(request, media),
                 'form': CreateCommentForm(),
                 'comments': media_comments_with_replies,
+                'is_user_moderator': request.user.role == User.MODERATOR if request.user.is_authenticated else 0,
             }
 
             return render(request, self.template_name, render_data)

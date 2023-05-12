@@ -18,6 +18,11 @@
         <li class="nav-item active">
             <a href="{% url 'logout' %}" class="nav-link">{% translate 'Log out' %}</a>
         </li>
+        {% if is_user_moderator %}
+            <li class="nav-item active">
+                <a href="{% url 'moderator_page' get_next_task='False' from_view_media_page='False' %}" class="nav-link">{% translate 'Moderator page' %}</a>
+            </li>
+        {% endif %}
     {% endblock top_panel %}
     {% block header %}
         Profile header!

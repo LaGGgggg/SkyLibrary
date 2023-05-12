@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordChangeView
 
+from accounts_app.models import User
+
 
 class CustomPasswordResetView(PasswordResetView):
 
@@ -25,4 +27,9 @@ class CustomPasswordChangeView(PasswordChangeView):
 
 @login_required()
 def view_profile(request):
-    return render(request, 'accounts_app/profile.html')
+
+    response_data: dict = {
+        'is_user_moderator': request.user.role == User.MODERATOR if request.user.is_authenticated else 0,
+    }
+
+    return render(request, 'accounts_app/profile.html', response_data)

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views import View
 
 from media_app.models import Media, get_best_active_media
+from accounts_app.models import User
 
 
 def handler400(request, exception=None):
@@ -32,6 +33,7 @@ class ViewIndex(View):
         response_data: dict = {
             'recent_media': recent_media,
             'best_media': best_media,
+            'is_user_moderator': request.user.role == User.MODERATOR if request.user.is_authenticated else 0,
         }
 
         return render(request, self.template_name, response_data)
