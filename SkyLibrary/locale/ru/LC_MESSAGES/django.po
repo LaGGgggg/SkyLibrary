@@ -230,7 +230,7 @@ msgstr "Скачано"
 
 #: .\apps\media_app\models.py:120 .\apps\media_app\models.py:123
 msgid "download"
-msgstr "скачать"
+msgstr "скачивание"
 
 #: .\apps\media_app\models.py:130
 msgid "Object with this user and media already exists"
