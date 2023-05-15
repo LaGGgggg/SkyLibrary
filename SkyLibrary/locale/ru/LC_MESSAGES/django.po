@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-14 19:28+0400\n"
+"POT-Creation-Date: 2023-05-15 18:15+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,7 +129,7 @@ msgstr "Отправить жалобу"
 msgid "Select the correct report reason choice."
 msgstr "Выберите корректный вариант причины жалобы."
 
-#: .\apps\media_app\models.py:20 .\apps\media_app\models.py:344
+#: .\apps\media_app\models.py:20 .\apps\media_app\models.py:342
 msgid "name en-us"
 msgstr "название en-us"
 
@@ -137,7 +137,7 @@ msgstr "название en-us"
 msgid "help text en-us"
 msgstr "текст помощи en-us"
 
-#: .\apps\media_app\models.py:23 .\apps\media_app\models.py:345
+#: .\apps\media_app\models.py:23 .\apps\media_app\models.py:343
 msgid "name ru"
 msgstr "название ru"
 
@@ -147,15 +147,15 @@ msgstr "текст помощи ru"
 
 #: .\apps\media_app\models.py:26 .\apps\media_app\models.py:69
 #: .\apps\media_app\models.py:119 .\apps\media_app\models.py:168
-#: .\apps\media_app\models.py:201 .\apps\media_app\models.py:294
-#: .\apps\media_app\models.py:346 .\apps\media_app\models.py:387
+#: .\apps\media_app\models.py:200 .\apps\media_app\models.py:292
+#: .\apps\media_app\models.py:344 .\apps\media_app\models.py:384
 msgid "publication date"
 msgstr "дата публикации"
 
 #: .\apps\media_app\models.py:28 .\apps\media_app\models.py:71
 #: .\apps\media_app\models.py:117 .\apps\media_app\models.py:166
-#: .\apps\media_app\models.py:199 .\apps\media_app\models.py:292
-#: .\apps\media_app\models.py:385 .\apps\staff_app\models.py:20
+#: .\apps\media_app\models.py:198 .\apps\media_app\models.py:290
+#: .\apps\media_app\models.py:382 .\apps\staff_app\models.py:20
 msgid "user who added"
 msgstr "пользователь, который добавил"
 
@@ -245,7 +245,7 @@ msgid "media downloads"
 msgstr "скачивания медиа"
 
 #: .\apps\media_app\models.py:169 .\apps\media_app\models.py:172
-#: .\apps\media_app\models.py:286 .\apps\media_app\models.py:297
+#: .\apps\media_app\models.py:285 .\apps\media_app\models.py:295
 msgid "rating"
 msgstr "рейтинг"
 
@@ -257,107 +257,107 @@ msgstr "рейтинг медиа"
 msgid "media ratings"
 msgstr "рейтинги медиа"
 
-#: .\apps\media_app\models.py:187 .\apps\media_app\models.py:372
+#: .\apps\media_app\models.py:187 .\apps\media_app\models.py:370
 msgid "Media type"
 msgstr "Тип медиа"
 
-#: .\apps\media_app\models.py:188 .\apps\media_app\models.py:373
+#: .\apps\media_app\models.py:188 .\apps\media_app\models.py:371
 msgid "Comment type"
 msgstr "Тип комментарий"
 
-#: .\apps\media_app\models.py:191 .\apps\media_app\models.py:377
+#: .\apps\media_app\models.py:191 .\apps\media_app\models.py:375
 msgid "content"
 msgstr "содержимое"
 
-#: .\apps\media_app\models.py:192 .\apps\media_app\models.py:378
+#: .\apps\media_app\models.py:192 .\apps\media_app\models.py:376
 msgid "target type"
 msgstr "тип цели"
 
-#: .\apps\media_app\models.py:193 .\apps\media_app\models.py:379
+#: .\apps\media_app\models.py:193 .\apps\media_app\models.py:377
 msgid "target id"
 msgstr "id цели"
 
-#: .\apps\media_app\models.py:206
+#: .\apps\media_app\models.py:205
 msgid "Media type comment"
 msgstr "Комментарий типа медиа"
 
-#: .\apps\media_app\models.py:209
+#: .\apps\media_app\models.py:208
 msgid "Comment type comment"
 msgstr "Комментарий типа комментарий"
 
-#: .\apps\media_app\models.py:221
+#: .\apps\media_app\models.py:220
 msgid "Too frequent comments, please wait and try again"
 msgstr "Слишком частые комментарии, пожалуйста, подождите и попрубуйте ещё раз"
 
-#: .\apps\media_app\models.py:266
+#: .\apps\media_app\models.py:265
 msgid "Can change the content of the comment to \"This comment was banned\""
 msgstr "Может изменить текст комментария на \"Этот комментарий заблокирован\""
 
-#: .\apps\media_app\models.py:269 .\apps\media_app\models.py:284
-#: .\apps\media_app\models.py:297
+#: .\apps\media_app\models.py:268 .\apps\media_app\models.py:283
+#: .\apps\media_app\models.py:295
 msgid "comment"
 msgstr "комментарий"
 
-#: .\apps\media_app\models.py:270
+#: .\apps\media_app\models.py:269
 msgid "comments"
 msgstr "комментарии"
 
-#: .\apps\media_app\models.py:279
+#: .\apps\media_app\models.py:278
 msgid "Up vote"
 msgstr "Голос вверх"
 
-#: .\apps\media_app\models.py:280
+#: .\apps\media_app\models.py:279
 msgid "Down vote"
 msgstr "Голос вниз"
 
-#: .\apps\media_app\models.py:327
+#: .\apps\media_app\models.py:325
 msgid "comment rating"
 msgstr "рейтинг комментария"
 
-#: .\apps\media_app\models.py:328
+#: .\apps\media_app\models.py:326
 msgid "comment ratings"
 msgstr "рейтинги комментария"
 
-#: .\apps\media_app\models.py:348
+#: .\apps\media_app\models.py:346
 msgid "user who addded"
 msgstr "пользователь, который добавил"
 
-#: .\apps\media_app\models.py:362 .\apps\media_app\models.py:376
+#: .\apps\media_app\models.py:360 .\apps\media_app\models.py:374
 msgid "report type"
 msgstr "тип жалобы"
 
-#: .\apps\media_app\models.py:363
+#: .\apps\media_app\models.py:361
 msgid "report types"
 msgstr "типы жалобы"
 
-#: .\apps\media_app\models.py:392
+#: .\apps\media_app\models.py:389
 msgid "Media report"
 msgstr "Жалоба на медиа"
 
-#: .\apps\media_app\models.py:395
+#: .\apps\media_app\models.py:392
 msgid "Comment report"
 msgstr "Жалоба на комментарий"
 
-#: .\apps\media_app\models.py:405
+#: .\apps\media_app\models.py:402
 msgid "You can not create one more report on the same media/comment"
 msgstr "Вы не можете создать ещё одну жалобу на один/одну комментарий/медиа"
 
-#: .\apps\media_app\models.py:417
+#: .\apps\media_app\models.py:414
 msgid "Too frequent reports, please wait and try again"
 msgstr "Слишком частые жалобы, пожалуйста, подождите и попрубуйте ещё раз"
 
-#: .\apps\media_app\models.py:451
+#: .\apps\media_app\models.py:448
 msgid ""
 "Error, unexpected value, please try again or contact support (code: 3.1)"
 msgstr ""
 "Ошибка, неожиданное значение, пожалуйста, попробуйте ещё раз или обратитесь "
 "в поддержку (код: 3.1)"
 
-#: .\apps\media_app\models.py:465
+#: .\apps\media_app\models.py:462
 msgid "report"
 msgstr "жалоба"
 
-#: .\apps\media_app\models.py:466
+#: .\apps\media_app\models.py:463
 msgid "reports"
 msgstr "жалобы"
 
@@ -392,7 +392,11 @@ msgstr ""
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:316 .\templates\media_app\view_media.html:193
+#: .\apps\media_app\views.py:303
+msgid "code"
+msgstr "код"
+
+#: .\apps\media_app\views.py:316 .\templates\media_app\view_media.html:201
 msgid "Reply"
 msgstr "Ответить"
 
@@ -641,47 +645,47 @@ msgstr "Подтвердить"
 msgid "Your media has been successfully created and submitted for moderation"
 msgstr "Ваше медиа успешно создано и отправлено на модерацию"
 
-#: .\templates\media_app\view_media.html:86
+#: .\templates\media_app\view_media.html:94
 msgid "Download file"
 msgstr "Скачать файл"
 
-#: .\templates\media_app\view_media.html:94
+#: .\templates\media_app\view_media.html:102
 msgid "Downloads"
 msgstr "Скачиваний"
 
-#: .\templates\media_app\view_media.html:99
+#: .\templates\media_app\view_media.html:107
 msgid "Author"
 msgstr "Автор"
 
-#: .\templates\media_app\view_media.html:100
+#: .\templates\media_app\view_media.html:108
 msgid "Added by"
 msgstr "Добавлено"
 
-#: .\templates\media_app\view_media.html:108
+#: .\templates\media_app\view_media.html:116
 msgid "Leave a comment"
 msgstr "Оставить комментарий"
 
-#: .\templates\media_app\view_media.html:221
+#: .\templates\media_app\view_media.html:229
 msgid "Moderate"
 msgstr "Модерация"
 
-#: .\templates\media_app\view_media.html:228
+#: .\templates\media_app\view_media.html:236
 msgid "Approve"
 msgstr "Одобрить"
 
-#: .\templates\media_app\view_media.html:234
+#: .\templates\media_app\view_media.html:242
 msgid "Disapprove"
 msgstr "Не одобрять"
 
-#: .\templates\media_app\view_media.html:237
+#: .\templates\media_app\view_media.html:245
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: .\templates\media_app\view_media.html:242
+#: .\templates\media_app\view_media.html:250
 msgid "Auto new task"
 msgstr "Автоматически новую задачу"
 
-#: .\templates\media_app\view_media.html:248
+#: .\templates\media_app\view_media.html:256
 msgid "No auto new task"
 msgstr "Нет автоматически новой задачи"
 

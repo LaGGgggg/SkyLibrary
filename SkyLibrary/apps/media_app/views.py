@@ -300,7 +300,7 @@ class ViewViewMedia(View):
 
                 except ValidationError as e:
 
-                    messages_with_code = [f'{message} (code: 1.3)' for message in e.messages]
+                    messages_with_code = [f'{message} (%s: 1.3)' % _('code') for message in e.messages]
 
                     messages.error(request, messages_with_code)
 
