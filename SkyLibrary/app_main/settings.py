@@ -26,6 +26,8 @@ Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+LOGS_DIR = BASE_DIR.joinpath('logs')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -198,14 +200,14 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR.joinpath(LOGS_FILE_NAME),
+            'filename': LOGS_DIR.joinpath(LOGS_FILE_NAME),
             'formatter': 'verbose',
         },
         'file_debug': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR.joinpath(LOGS_DEBUG_FILE_NAME),
+            'filename': LOGS_DIR.joinpath(LOGS_DEBUG_FILE_NAME),
             'formatter': 'simple',
         },
         'mail_admins': {
