@@ -25,7 +25,7 @@ class MediaTags(models.Model):
 
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
     user_who_added = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name='media_tags', verbose_name=_('user who added')
+        User, on_delete=models.CASCADE, related_name='media_tags', verbose_name=_('user who added')
     )
 
     def __str__(self):
@@ -68,7 +68,7 @@ class Media(models.Model):
     author = models.CharField(max_length=30, verbose_name=_('author'))
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
     user_who_added = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name='user_who_added_media', verbose_name=_('user who added')
+        User, on_delete=models.CASCADE, related_name='user_who_added_media', verbose_name=_('user who added')
     )
     tags = models.ManyToManyField(MediaTags, related_name='tags_media', verbose_name=_('tags'))
     active = models.PositiveSmallIntegerField(choices=active_choices, default=0, verbose_name=_('active'))
@@ -112,7 +112,7 @@ class MediaDownload(models.Model):
     )
     user_who_added = models.ForeignKey(
         User,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         related_name='user_who_added_media_download',
         verbose_name=_('user who added'),
     )
@@ -163,7 +163,7 @@ class MediaRating(models.Model):
         Media, on_delete=models.CASCADE, related_name='media_media_rating', verbose_name=_('media')
     )
     user_who_added = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name='user_who_added_media_rating', verbose_name=_('user who added')
+        User, on_delete=models.CASCADE, related_name='user_who_added_media_rating', verbose_name=_('user who added')
     )
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
     rating = models.SmallIntegerField(choices=rating_choices, verbose_name=_('rating'))
@@ -193,9 +193,8 @@ class Comment(models.Model):
     target_id = models.PositiveIntegerField(verbose_name=_('target id'))
     user_who_added = models.ForeignKey(
         User,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.CASCADE,
         related_name='comment',
-        default='deleted user',
         verbose_name=_('user who added'),
     )
     pub_date = models.DateTimeField(auto_now_add=True, verbose_name=_('publication date'))
@@ -286,9 +285,8 @@ class CommentRating(models.Model):
     rating = models.SmallIntegerField(choices=rating_choices, verbose_name=_('rating'))
     user_who_added = models.ForeignKey(
         User,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.CASCADE,
         related_name='user_who_added_comment_rating',
-        default=0,
         verbose_name=_('user who added'),
     )
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
@@ -345,7 +343,7 @@ class ReportType(models.Model):
     name_ru = models.CharField(max_length=60, unique=True, verbose_name=_('name ru'))
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
     user_who_added = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, related_name='report_type', verbose_name=_('user who addded')
+        User, on_delete=models.CASCADE, related_name='report_type', verbose_name=_('user who addded')
     )
 
     def __str__(self):
@@ -379,9 +377,8 @@ class Report(models.Model):
     target_id = models.PositiveIntegerField(verbose_name=_('target id'))
     user_who_added = models.ForeignKey(
         User,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.CASCADE,
         related_name='user_who_added_report',
-        default='deleted user',
         verbose_name=_('user who added'),
     )
     pub_date = models.DateTimeField(auto_now_add=True, verbose_name=_('publication date'))
