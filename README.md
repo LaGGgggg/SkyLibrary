@@ -66,6 +66,7 @@ DB_URL=postgres://<username>:<password>@localhost:5432/<database_name>
 ALLOWED_HOSTS=*  # In case of 2 or more, divide with ", "
 INTERNAL_IPS=127.0.0.1  # In case of 2 or more, divide with ", "
 CSRF_TRUSTED_ORIGINS=http://*  # In case of 2 or more, divide with ", "
+ADMINS=Name:email@email.com  # In case of 2 or more, divide with ", "
 
 USE_CACHE=False
 CACHE_LOCAL=True
@@ -86,6 +87,7 @@ DB_URL - argument for [dj_database_url.config(default=)](https://github.com/jazz
 ALLOWED_HOSTS - standard [django allowed hosts](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts).<br>
 INTERNAL_IPS - standard [django internal ips](https://docs.djangoproject.com/en/4.1/ref/settings/#internal-ips).<br>
 CSRF_TRUSTED_ORIGINS - standard [django csrf trusted origins](https://docs.djangoproject.com/en/4.2/ref/settings/#csrf-trusted-origins).<br>
+ADMINS - standard [django admins](https://docs.djangoproject.com/en/4.2/ref/settings/#admins).<br>
 
 USE_CACHE - if False, set [django DummyCache](https://docs.djangoproject.com/en/4.1/topics/cache/#dummy-caching-for-development) = no caching.<br>
 CACHE_LOCAL - if True, set [django DatabaseCache](https://docs.djangoproject.com/en/4.1/topics/cache/#database-caching), else [django RedisCache](https://docs.djangoproject.com/en/4.1/topics/cache/#redis).<br>
@@ -152,6 +154,7 @@ DB_URL=postgres://<username>:<password>@postgres:5432/<database_name>
 ALLOWED_HOSTS=*  # In case of 2 or more, divide with ", "
 INTERNAL_IPS=127.0.0.1  # In case of 2 or more, divide with ", "
 CSRF_TRUSTED_ORIGINS=<your csrf trusted origins>  # In case of 2 or more, divide with ", "
+ADMINS=Name:email@email.com  # In case of 2 or more, divide with ", "
 
 USE_CACHE=False
 CACHE_LOCAL=True
@@ -181,6 +184,7 @@ DB_URL - argument for [dj_database_url.config(default=)](https://github.com/jazz
 ALLOWED_HOSTS - standard [django allowed hosts](https://docs.djangoproject.com/en/4.1/ref/settings/#allowed-hosts).<br>
 INTERNAL_IPS - standard [django internal ips](https://docs.djangoproject.com/en/4.1/ref/settings/#internal-ips).<br>
 CSRF_TRUSTED_ORIGINS - standard [django csrf trusted origins](https://docs.djangoproject.com/en/4.2/ref/settings/#csrf-trusted-origins).<br>
+ADMINS - standard [django admins](https://docs.djangoproject.com/en/4.2/ref/settings/#admins).<br>
 
 USE_CACHE - if False, set [django DummyCache](https://docs.djangoproject.com/en/4.1/topics/cache/#dummy-caching-for-development) = no caching.<br>
 CACHE_LOCAL - if True, set [django DatabaseCache](https://docs.djangoproject.com/en/4.1/topics/cache/#database-caching), else [django RedisCache](https://docs.djangoproject.com/en/4.1/topics/cache/#redis).<br>

@@ -78,6 +78,32 @@ if CSRF_TRUSTED_ORIGINS == ['unset']:
 
     env_var_not_set_handler('CSRF_TRUSTED_ORIGINS', context='not used', error_level='WARNING')
 
+ADMINS = env('ADMINS', default='unset').split(', ')
+
+if ADMINS == ['unset']:
+
+    ADMINS = []
+
+    env_var_not_set_handler('ADMINS', context='not used', error_level='WARNING')
+
+else:
+
+    handled_admins: list[tuple[str, str]] = []
+
+    for admin in ADMINS:
+
+        admin_splitted = admin.split(':')
+
+        if len(admin_splitted) != 2:
+
+            ADMINS = []
+
+            env_var_not_set_handler('ADMINS', context='not used', error_level='WARNING')
+
+        handled_admins.append(tuple(admin_splitted))
+
+    ADMINS = handled_admins
+
 
 # Application definition
 
