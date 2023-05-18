@@ -208,7 +208,7 @@ PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variab
 
 ### 6. Configure nginx.conf
 
-Configure it (_9 and 25 lines in nginx/nginx.conf_):
+Configure it (_23 and 39 lines in nginx/nginx.conf_):
 ```nginx configuration
 server_name www.<domain.site> <domain.site>;
 server_name www.<domain.site> <domain.site>;
