@@ -208,13 +208,10 @@ PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variab
 
 ### 6. Configure nginx.conf
 
-Configure it (_9, 25 and 28 lines in nginx/nginx.conf_):
+Configure it (_9 and 25 lines in nginx/nginx.conf_):
 ```nginx configuration
 server_name www.<domain.site> <domain.site>;
 server_name www.<domain.site> <domain.site>;
-if ($host != "www.<domain.site>" or $host != "<domain.site>") {
-    return 403;
-}
 ```
 
 ### 7. Configure docker-compose-init.sh
