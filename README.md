@@ -206,7 +206,18 @@ POSTGRES_HOST - standard [POSTGRES_HOST](https://hub.docker.com/_/postgres) envi
 POSTGRES_PORT - standard [POSTGRES_PORT](https://hub.docker.com/_/postgres) environment variable.<br>
 PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variable.<br>
 
-### 6. Configure docker-compose-init.sh
+### 6. Configure nginx.conf
+
+Configure it (_9, 25 and 28 lines in nginx/nginx.conf_):
+```nginx configuration
+server_name www.<domain.site> <domain.site>;
+server_name www.<domain.site> <domain.site>;
+if ($host != "www.<domain.site>" or $host != "<domain.site>") {
+    return 403;
+}
+```
+
+### 7. Configure docker-compose-init.sh
 
 Configure it (_3-5 lines in docker-compose-init.sh file_):
 ```bash
@@ -215,14 +226,14 @@ email=""  # example: "example@yandex.ru"
 staging=0  # 1 - staging on, 0 - off
 ```
 
-### 7. Run docker-compose-init.sh
+### 8. Run docker-compose-init.sh
 
 ```bash
 chmod +x docker-compose-init.sh
 sudo ./docker-compose-init.sh
 ```
 
-### 8. Check the server
+### 9. Check the server
 
 ```bash
 docker compose logs -f
