@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-15 18:15+0400\n"
+"POT-Creation-Date: 2023-05-22 09:33+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,6 +71,32 @@ msgstr "Может изменить данные модератора"
 #: .\apps\accounts_app\models.py:50
 msgid "Can change the user active field"
 msgstr "Может изменить поле активности пользователя"
+
+#: .\apps\home_page_app\forms.py:14
+msgid "Text"
+msgstr "Текст"
+
+#: .\apps\home_page_app\forms.py:19
+msgid "Tags"
+msgstr "Тэги"
+
+#: .\apps\home_page_app\forms.py:39 .\apps\home_page_app\forms.py:43
+#: .\apps\home_page_app\views.py:139
+msgid "Please specify any text or tags to search for"
+msgstr "Пожалуйста, укажите текст или тэги для поиска"
+
+#: .\apps\home_page_app\forms.py:55
+msgid "Search"
+msgstr "Искать"
+
+#: .\apps\home_page_app\views.py:42 .\apps\media_app\views.py:82
+#, python-brace-format
+msgid ""
+"Something went wrong with your request, please try again or contact support "
+"(code: {error_code})"
+msgstr ""
+"С вашим запросом что-то пошло не так, пожалуйста, попробуйте ещё раз или "
+"обратитесь в поддержку (код: {error_code})"
 
 #: .\apps\media_app\admin.py:61
 msgid "Current value of the field"
@@ -361,16 +387,7 @@ msgstr "жалоба"
 msgid "reports"
 msgstr "жалобы"
 
-#: .\apps\media_app\views.py:81
-#, python-brace-format
-msgid ""
-"Something went wrong with your request, please try again or contact support "
-"(code: {error_code})"
-msgstr ""
-"С вашим запросом что-то пошло не так, пожалуйста, попробуйте ещё раз или "
-"обратитесь в поддержку (код: {error_code})"
-
-#: .\apps\media_app\views.py:83
+#: .\apps\media_app\views.py:84
 #, python-brace-format
 msgid ""
 "Something went wrong with your comment, please try again or contact support "
@@ -379,7 +396,7 @@ msgstr ""
 "С вашим комментарием что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
-#: .\apps\media_app\views.py:85
+#: .\apps\media_app\views.py:86
 #, python-brace-format
 msgid ""
 "Something went wrong with your report, please try again or contact support "
@@ -388,15 +405,15 @@ msgstr ""
 "С вашей жалобой что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
-#: .\apps\media_app\views.py:87
+#: .\apps\media_app\views.py:88
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:303
+#: .\apps\media_app\views.py:288
 msgid "code"
 msgstr "код"
 
-#: .\apps\media_app\views.py:316 .\templates\media_app\view_media.html:201
+#: .\apps\media_app\views.py:301 .\templates\media_app\view_media.html:201
 msgid "Reply"
 msgstr "Ответить"
 
@@ -437,7 +454,7 @@ msgstr "Главная страница"
 #: .\templates\accounts_app\login.html:21
 #: .\templates\accounts_app\password_reset_complete.html:12
 #: .\templates\django_registration\activation_complete.html:12
-#: .\templates\home_page_app\index.html:25
+#: .\templates\home_page_app\index.html:26
 msgid "Log in"
 msgstr "Войти"
 
@@ -450,7 +467,7 @@ msgid "Logout successful"
 msgstr "Выход из аккаунта произведён успешно"
 
 #: .\templates\accounts_app\password_change.html:13
-#: .\templates\home_page_app\index.html:13
+#: .\templates\home_page_app\index.html:14
 #: .\templates\media_app\create_media.html:11
 #: .\templates\media_app\view_media.html:25
 #: .\templates\staff_app\moderator_page.html:14
@@ -511,7 +528,7 @@ msgid "Check your email"
 msgstr "Проверьте свою почту"
 
 #: .\templates\accounts_app\profile.html:13
-#: .\templates\home_page_app\index.html:16
+#: .\templates\home_page_app\index.html:17
 #: .\templates\media_app\view_media.html:28
 msgid "Add new media"
 msgstr "Добавить новую медиа"
@@ -521,7 +538,7 @@ msgid "Log out"
 msgstr "Выйти"
 
 #: .\templates\accounts_app\profile.html:23
-#: .\templates\home_page_app\index.html:20
+#: .\templates\home_page_app\index.html:21
 #: .\templates\media_app\view_media.html:32
 #: .\templates\staff_app\moderator_page.html:18
 msgid "Moderator page"
@@ -594,7 +611,7 @@ msgstr "Простите, вы не можете зарегистрироват�
 
 #: .\templates\django_registration\registration_form.html:14
 #: .\templates\django_registration\registration_form.html:28
-#: .\templates\home_page_app\index.html:28
+#: .\templates\home_page_app\index.html:29
 msgid "Sign up"
 msgstr "Зарегистрироваться"
 
@@ -621,15 +638,19 @@ msgstr "Уупс, страница не найдена"
 msgid "Oops, server error"
 msgstr "Уупс, ошибка сервера"
 
-#: .\templates\home_page_app\index.html:33
+#: .\templates\home_page_app\index.html:34
 msgid "Hello, there"
 msgstr "Приветствуем"
 
-#: .\templates\home_page_app\index.html:36
+#: .\templates\home_page_app\index.html:45
+msgid "Search media"
+msgstr "Искать медиа"
+
+#: .\templates\home_page_app\index.html:57
 msgid "Best media"
 msgstr "Лучшие медиа"
 
-#: .\templates\home_page_app\index.html:52
+#: .\templates\home_page_app\index.html:73
 msgid "Recent media"
 msgstr "Недавние медиа"
 

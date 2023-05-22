@@ -70,3 +70,15 @@ Description: unknown POST request "target_type" field value.
 
 Location: media_app/views.py/ViewViewMedia/post.
 Description: requested in "target_id" comment does not exist.
+
+# 5:
+
+### 5.1:
+
+Location: home_page_app/views.py/ViewIndex/post.
+Description: unknown POST request "tags" field value(s).
+
+### 5.2:
+
+Location: home_page_app/views.py/ViewIndex/post.
+Description: unexpected get_language() result.

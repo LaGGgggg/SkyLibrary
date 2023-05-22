@@ -21,6 +21,7 @@ from .forms import CreateMediaForm, CreateCommentForm, CreateReplyCommentForm, C
 from staff_app.models import ModeratorTask
 from staff_app.views import ViewModeratorPage
 from home_page_app.views import handler403, handler404
+from utils_app.services import messages_to_json
 
 
 User = get_user_model()
@@ -203,22 +204,6 @@ class ViewViewMedia(View):
 
             return render(request, self.template_name, render_data)
 
-    @staticmethod
-    def messages_to_json(request) -> str:
-
-        result = []
-
-        for message in messages.get_messages(request):
-            result.append(
-                {
-                    'level': message.level,
-                    'message': message.message[0] if isinstance(message.message, list) else message.message,
-                    'tags': message.tags,
-                }
-            )
-
-        return dumps({'messages': result})
-
     def post(self, request, media_id: int):
 
         media = self.get_media(media_id)
@@ -261,7 +246,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, self.error_messages.get('bad_request').format(error_code='1.5'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
             if request_form.is_valid():
 
@@ -282,13 +267,13 @@ class ViewViewMedia(View):
 
                         messages.error(request, self.error_messages.get('bad_request').format(error_code='1.1'))
 
-                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                        return HttpResponse(messages_to_json(request), content_type='application/json')
 
                 else:
 
                     messages.error(request, self.error_messages.get('bad_request').format(error_code='1.2'))
 
-                    return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                    return HttpResponse(messages_to_json(request), content_type='application/json')
 
                 try:
                     comment = Comment.objects.create(
@@ -304,7 +289,7 @@ class ViewViewMedia(View):
 
                     messages.error(request, messages_with_code)
 
-                    return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                    return HttpResponse(messages_to_json(request), content_type='application/json')
 
                 comment_json = {
                     'id': comment.id,
@@ -322,7 +307,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, self.error_messages.get('bad_comment').format(error_code='1.4'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
         elif request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
                 request.POST.get('request_type') == 'add_comment_vote':
@@ -339,7 +324,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, self.error_messages.get('bad_request').format(error_code='2.1'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
             if request.POST.get('vote_type') == target_types['upvote']:
                 vote_type = CommentRating.UPVOTE
@@ -351,7 +336,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, self.error_messages.get('bad_request').format(error_code='2.2'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
             try:
                 CommentRating.objects.create(
@@ -367,7 +352,7 @@ class ViewViewMedia(View):
 
                     messages.error(request, messages_with_code)
 
-                    return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                    return HttpResponse(messages_to_json(request), content_type='application/json')
 
             if request.POST.get('vote_type') == target_types['upvote']:
                 not_target_type = target_types['downvote']
@@ -391,7 +376,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, f'{self.error_messages.get("no_report_type_choice")}')
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
             request_post_mutable = request.POST.copy()
 
@@ -402,7 +387,7 @@ class ViewViewMedia(View):
 
                 messages.error(request, self.error_messages.get('bad_report').format(error_code='4.2'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
             request_form = CreateReportCommentForm(request_post_mutable)
 
@@ -423,7 +408,7 @@ class ViewViewMedia(View):
 
                         messages.error(request, self.error_messages.get('bad_request').format(error_code='4.4'))
 
-                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                        return HttpResponse(messages_to_json(request), content_type='application/json')
 
                     try:
                         report = Report.objects.create(
@@ -438,7 +423,7 @@ class ViewViewMedia(View):
                         if e.messages[0]:  # error message != '', see model clean method for more info
                             messages.error(request, e.messages)
 
-                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                        return HttpResponse(messages_to_json(request), content_type='application/json')
 
                     report.report_type.set(request_form.cleaned_data['report_type'])
 
@@ -464,7 +449,7 @@ class ViewViewMedia(View):
                         if e.messages[0]:  # error message != '', see model clean method for more info
                             messages.error(request, e.messages)
 
-                        return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                        return HttpResponse(messages_to_json(request), content_type='application/json')
 
                     report.report_type.set(request_form.cleaned_data['report_type'])
 
@@ -479,13 +464,13 @@ class ViewViewMedia(View):
 
                     messages.error(request, self.error_messages.get('bad_report').format(error_code='4.3'))
 
-                    return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                    return HttpResponse(messages_to_json(request), content_type='application/json')
 
             else:
 
                 messages.error(request, self.error_messages.get('bad_report').format(error_code='4.1'))
 
-                return HttpResponse(self.messages_to_json(request), content_type='application/json')
+                return HttpResponse(messages_to_json(request), content_type='application/json')
 
         elif 'approve_button' in request.POST:
             return ViewModeratorPage.post_from_view_page(request, self.get_media(media_id))

@@ -4,6 +4,7 @@
 {% load cache %}
 {% load static %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 {% block head_extra %}
     <link rel="stylesheet" href="{% static 'css/rating.css' %}">
 {% endblock head_extra %}
@@ -33,12 +34,15 @@
     {% translate 'Hello, there' %}!
 {% endblock header %}
 {% block content %}
+    <section id="section_for_search_media_form" style="max-width:25%;">
+        <button id="get_search_media_form_button" class="btn btn-primary m-2 mb-3 ms-0">{% translate 'Search media' %}</button>
+    </section>
     {% translate 'Best media' %}:
     <ul>
         {% for media in best_media %}
             <li>
                 <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
-                <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                <section class="d-inline-flex align-items-end rating ms-1" style="font-size: 80%">
                     <section class="position-relative rating__stars_body">
                         <section class="position-absolute rating__stars"></section>
                     </section>
@@ -54,7 +58,7 @@
         {% for media in recent_media %}
             <li>
                 <a href="{% url 'view_media' media_id=media.id %}" class="font-italic">{{ media.title }}</a>
-                <section class="d-inline-flex align-items-end rating ml-1" style="font-size: 80%">
+                <section class="d-inline-flex align-items-end rating ms-1" style="font-size: 80%">
                     <section class="position-relative rating__stars_body">
                         <section class="position-absolute rating__stars"></section>
                     </section>
@@ -68,5 +72,11 @@
 {% endblock content %}
 {% block scripts %}
     <script src="{% static 'js/rating.js' %}"></script>
+    <script>
+        // preparing for the next script
+        const get_full_path = "{{ request.get_full_path }}";
+        const csrf_token = "{{ csrf_token }}";
+    </script>
+    <script src="{% static 'js/index.js' %}"></script>
 {% endblock scripts %}
 </html>
