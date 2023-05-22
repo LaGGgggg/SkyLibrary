@@ -137,5 +137,3 @@ pyproject.toml
 
 staticfiles
 media
-
-pg_data
