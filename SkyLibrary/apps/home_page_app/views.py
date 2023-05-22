@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import get_language
 from django.http import HttpResponse
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count
 from django.urls import reverse_lazy
 
 from crispy_forms.utils import render_crispy_form
@@ -72,13 +72,17 @@ class ViewIndex(View):
     @staticmethod
     def _search_by_tags(tags: QuerySet[MediaTags], query_set: QuerySet[Media] = None) -> QuerySet:
 
-        for tag in tags:
+        tags_list = list(tags)
 
-            if query_set:
-                query_set = query_set.filter(tags=tag)
+        if query_set:
+            query_set = query_set.filter(tags__in=tags_list).annotate(tags_founded=Count('tags')).filter(
+                tags_founded=len(tags_list)
+            )
 
-            else:
-                query_set = Media.objects.filter(tags=tag)
+        else:
+            query_set = Media.objects.filter(tags__in=tags_list).annotate(tags_founded=Count('tags')).filter(
+                tags_founded=len(tags_list)
+            )
 
         return query_set
 
