@@ -4,8 +4,8 @@
 {% load static %}
 {% load cache %}
 {% load i18n %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 moderator_page_top %}
+{% get_current_language as LANGUAGE_CODE %}
+{% cache 31536000 moderator_page_top LANGUAGE_CODE %}
     {% block top_panel %}
         <li class="nav-item active">
             <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>

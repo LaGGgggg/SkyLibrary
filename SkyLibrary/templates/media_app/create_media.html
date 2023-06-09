@@ -4,8 +4,8 @@
 {% load cache %}
 {% load i18n %}
 {% load crispy_forms_tags %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 create_media_page %}
+{% get_current_language as LANGUAGE_CODE %}
+{% cache 31536000 create_media_page LANGUAGE_CODE %}
     {% block top_panel %}
         <li class="nav-item active">
             <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>

@@ -4,8 +4,8 @@
 {% load cache %}
 {% load i18n %}
 {% load crispy_forms_tags %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 create_media_page %}
+{% get_current_language as LANGUAGE_CODE %}
+{% cache 31536000 create_media_page LANGUAGE_CODE %}
     {% block header %}
         {% translate 'Your media has been successfully created and submitted for moderation' %}!
     {% endblock header %}
