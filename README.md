@@ -30,7 +30,7 @@ pipenv shell  # create and activate
 
 ```bash
 python -m venv .venv  # create
-.venv\Scripts\activate.bat   # activate
+.venv\Scripts\activate.bat  # activate
 ```
 
 ### 3. Install python packages
