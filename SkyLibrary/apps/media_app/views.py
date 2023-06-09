@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.views import View
 from django.http import HttpResponse
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
@@ -16,7 +16,7 @@ from crispy_forms.utils import render_crispy_form
 from json import dumps
 
 from .models import Media, MediaDownload, Comment, CommentRating, Report
-from .forms import CreateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm,\
+from .forms import CreateOrUpdateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm,\
     CreateReportMediaForm
 from staff_app.models import ModeratorTask
 from staff_app.views import ViewModeratorPage
@@ -30,7 +30,7 @@ ViewModeratorPage = ViewModeratorPage()
 
 class ViewCreateMedia(LoginRequiredMixin, CreateView):
 
-    form_class = CreateMediaForm
+    form_class = CreateOrUpdateMediaForm
     model = Media
     template_name = 'media_app/create_media.html'
     success_url = reverse_lazy('create_media_successful')
@@ -477,3 +477,26 @@ class ViewViewMedia(View):
 
         else:
             return handler404(request)
+
+
+class ViewUpdateMedia(LoginRequiredMixin, UpdateView):
+
+    form_class = CreateOrUpdateMediaForm
+    model = Media
+    template_name = 'media_app/update_media.html'
+    success_url = reverse_lazy('update_media_successful')
+
+    def get_object(self, queryset=None):
+
+        obj = get_object_or_404(Media, id=self.kwargs.get('media_id'))
+
+        if obj.user_who_added != self.request.user or obj.active != Media.ACTIVE:
+            raise PermissionDenied
+
+        return obj
+
+    def form_valid(self, form):
+
+        form.instance.active = Media.INACTIVE
+
+        return super().form_valid(form)

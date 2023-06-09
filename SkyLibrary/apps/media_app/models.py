@@ -159,6 +159,9 @@ class MediaRating(models.Model):
         (5, 5),
     )
 
+    # example: [1, 2, 3, 4, 5]
+    rating_choices_list: list[int] = [i[0] for i in rating_choices]
+
     media = models.ForeignKey(
         Media, on_delete=models.CASCADE, related_name='media_media_rating', verbose_name=_('media')
     )
@@ -168,6 +171,22 @@ class MediaRating(models.Model):
     pub_date = models.DateField(auto_now_add=True, verbose_name=_('publication date'))
     rating = models.SmallIntegerField(choices=rating_choices, verbose_name=_('rating'))
 
+    def clean(self, *args, **kwargs):
+
+        if self.rating not in self.rating_choices_list:
+            raise ValidationError(
+                {'rating': _('Select a valid choice. That choice is not one of the available choices.')},
+                code='bad_choice',
+            )
+
+        super().clean()
+
+    def save(self, *args, **kwargs):
+
+        self.full_clean()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.media.title} %s ({self.rating})' % _("rating")
 
@@ -176,6 +195,7 @@ class MediaRating(models.Model):
         db_table = 'media_app_media_rating'
         verbose_name = _('media rating')
         verbose_name_plural = _('media ratings')
+        unique_together = ['media', 'user_who_added']
 
 
 class Comment(models.Model):

@@ -11,6 +11,7 @@ from crispy_forms.utils import render_crispy_form
 from PIL import Image
 from shutil import rmtree
 from ast import literal_eval
+from os.path import isfile
 
 from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_cover_upload,\
     get_file_upload, Report, ReportType
@@ -179,6 +180,371 @@ class CreateMediaTestCase(TestCase):
 
         for field, error in duplicate_form_errors.items():
             self.assertFormError(response, 'form', field, error)
+
+        self.client.logout()
+
+    @classmethod
+    def tearDownClass(cls):
+
+        super().tearDownClass()
+
+        rmtree(TEST_MEDIA_ROOT)
+        rmtree(TEST_IMAGES_ROOT)
+
+
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
+class UpdateMediaTestCase(TestCase):
+
+    @staticmethod
+    def _get_test_file(file_content: bytes = b'file_content') -> SimpleUploadedFile:
+        return SimpleUploadedFile('test_file.pdf', file_content, content_type='application/pdf')
+
+    @staticmethod
+    def _get_test_cover(image_colorname: str = 'blue') -> SimpleUploadedFile:
+
+        TEST_IMAGES_ROOT.mkdir(parents=True, exist_ok=True)
+
+        cover_file_path = 'images_for_tests/test_image_good.png'
+
+        if not isfile(cover_file_path):
+            Image.new('RGB', (1, 1), color=image_colorname).save(cover_file_path)
+
+        test_cover = SimpleUploadedFile(
+            name='test_image_good.png',
+            content=open(cover_file_path, 'rb').read(),
+            content_type='image/jpeg',
+        )
+
+        return test_cover
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.client = Client()
+
+        user_credentials = {
+            'username': 'test_user',
+            'password': 'test_password',
+            'email': 'test_email_1@mail.com',
+            'role': 1,
+        }
+        second_user_credentials = {
+            'username': 'test_user_2',
+            'password': 'test_password',
+            'email': 'test_email_2@mail.com',
+            'role': 1,
+        }
+
+        cls.user = User.objects.create_user(**user_credentials)
+        cls.second_user = User.objects.create_user(**second_user_credentials)
+
+        test_file = cls._get_test_file()
+        test_cover = cls._get_test_cover()
+
+        cls.test_tag_1 = MediaTags.objects.create(
+            name_en_us='test tag 1',
+            help_text_en_us='test tag 1 help text',
+            name_ru='test tag 1 ru',
+            help_text_ru='test tag 1 help text ru',
+            user_who_added=cls.user,
+        )
+        test_tag_2 = MediaTags.objects.create(
+            name_en_us='test tag 2',
+            help_text_en_us='test tag 2 help text',
+            name_ru='test tag 2 ru',
+            help_text_ru='test tag 2 help text ru',
+            user_who_added=cls.user,
+        )
+
+        cls.test_tags = (cls.test_tag_1, test_tag_2)
+        cls.test_tags_id_post_format = [f'{cls.test_tag_1.id}', f'{test_tag_2.id}']
+
+        cls.media_data = {
+            'title': 'test_title',
+            'description': 'test_description',
+            'author': 'test_author',
+            'user_who_added': cls.user,
+            'file': test_file,
+            'active': 1,
+            'cover': test_cover,
+        }
+        cls.not_active_media_data = {
+            'title': 'test_title 2',
+            'description': 'test_description 2',
+            'author': 'test_author',
+            'user_who_added': cls.user,
+            'file': test_file,
+            'active': 0,
+            'cover': test_cover,
+        }
+        cls.second_user_media_data = {
+            'title': 'test_title 3',
+            'description': 'test_description 3',
+            'author': 'test_author',
+            'user_who_added': cls.second_user,
+            'file': test_file,
+            'active': 1,
+            'cover': test_cover,
+        }
+
+        cls.media = Media.objects.create(**cls.media_data)
+        cls.not_active_media = Media.objects.create(**cls.not_active_media_data)
+        cls.second_user_media = Media.objects.create(**cls.second_user_media_data)
+
+        cls.media.tags.set(cls.test_tags)
+        cls.not_active_media.tags.set(cls.test_tags)
+        cls.second_user_media.tags.set(cls.test_tags)
+
+    def test_get_without_login(self):
+
+        response = self.client.get(reverse('update_media', kwargs={'media_id': self.media.id}), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/login.html')
+
+    def test_get_not_exist_media(self):
+
+        self.client.force_login(self.user)
+
+        # 0 - object with this id cannot exist
+        response = self.client.get(reverse('update_media', kwargs={'media_id': 0}))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, 'errors/404.html')
+
+        self.client.logout()
+
+    def test_get_not_active_media(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('update_media', kwargs={'media_id': self.not_active_media.id}))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        self.client.logout()
+
+    def test_get_not_user_who_added(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('update_media', kwargs={'media_id': self.second_user_media.id}))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        self.client.logout()
+
+    def test_get(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('update_media', kwargs={'media_id': self.media.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/update_media.html')
+
+        self.client.logout()
+
+    def test_post_without_login(self):
+
+        post_data = self.media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['tags'] = self.test_tags_id_post_format
+        post_data['file'] = self._get_test_file()
+        post_data['cover'] = self._get_test_cover()
+
+        response = \
+            self.client.post(reverse('update_media', kwargs={'media_id': self.media.id}), post_data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/login.html')
+
+    def test_post_not_exist_media(self):
+
+        self.client.force_login(self.user)
+
+        post_data = self.media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['tags'] = self.test_tags_id_post_format
+        post_data['file'] = self._get_test_file()
+        post_data['cover'] = self._get_test_cover()
+
+        # 0 - object with this id cannot exist
+        response = self.client.post(reverse('update_media', kwargs={'media_id': 0}), post_data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, 'errors/404.html')
+
+        self.client.logout()
+
+    def test_post_not_active_media(self):
+
+        self.client.force_login(self.user)
+
+        post_data = self.not_active_media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['tags'] = self.test_tags_id_post_format
+        post_data['file'] = self._get_test_file()
+        post_data['cover'] = self._get_test_cover()
+
+        response = self.client.post(reverse('update_media', kwargs={'media_id': self.not_active_media.id}), post_data)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        self.client.logout()
+
+    def test_post_not_user_who_added(self):
+
+        self.client.force_login(self.user)
+
+        post_data = self.second_user_media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['tags'] = self.test_tags_id_post_format
+        post_data['file'] = self._get_test_file()
+        post_data['cover'] = self._get_test_cover()
+
+        response = self.client.post(reverse('update_media', kwargs={'media_id': self.second_user_media.id}), post_data)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        self.client.logout()
+
+    def test_post_incorrect_data(self):
+
+        self.client.force_login(self.user)
+
+        post_data = self.media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['title'] = self.second_user_media_data['title']
+        post_data['description'] = self.second_user_media_data['description']
+        post_data['author'] = ''
+
+        bad_tags_post_data = 'bad_tags_post_data'
+
+        post_data['tags'] = bad_tags_post_data
+
+        response = self.client.post(reverse('update_media', kwargs={'media_id': self.media.id}), post_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/update_media.html')
+
+        form_errors = {
+            'title': 'Not a unique title, change it.',
+            'description': 'Not a unique description, change it.',
+            'author': 'This field is required.',
+            'tags': f'“{bad_tags_post_data}” is not a valid value.',
+            'file': 'The submitted file is empty.',  # empty because the caret is at the end of the file
+            'cover': 'The submitted file is empty.',  # empty because the caret is at the end of the file
+        }
+
+        for field, error in form_errors.items():
+            self.assertFormError(response, 'form', field, error)
+
+        self.client.logout()
+
+    def test_post_no_changes(self):
+
+        self.client.force_login(self.user)
+
+        post_data = self.media_data.copy()
+
+        del post_data['user_who_added']
+        del post_data['active']
+
+        post_data['tags'] = self.test_tags_id_post_format
+        post_data['file'] = self._get_test_file()
+        post_data['cover'] = self._get_test_cover()
+
+        response = self.client.post(reverse('update_media', kwargs={'media_id': self.media.id}), post_data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/update_media_successful.html')
+
+        self.media.refresh_from_db()
+
+        self.assertEqual(self.media.active, Media.INACTIVE)
+
+        self.assertEqual(self.media.title, post_data['title'])
+        self.assertEqual(self.media.description, post_data['description'])
+        self.assertEqual(self.media.author, post_data['author'])
+        self.assertEqual([str(tag['id']) for tag in self.media.tags.values()], post_data['tags'])
+
+        with self.media.file.open('rb') as media_file:
+            with post_data['file'].open('rb') as post_data_file:
+                self.assertEqual(media_file.read(), post_data_file.read())
+
+        with self.media.cover.open('rb') as media_cover:
+            with post_data['cover'].open('rb') as post_data_cover:
+                self.assertEqual(media_cover.read(), post_data_cover.read())
+
+        self.client.logout()
+
+    def test_post(self):
+
+        self.client.force_login(self.user)
+
+        post_data = {
+            'title': 'test_new_title',
+            'description': 'test_new_description',
+            'author': 'test_new_author',
+            'tags': [str(self.test_tag_1.id)],
+            'file': self._get_test_file(file_content=b'test_new_file_content'),
+            'cover': self._get_test_cover(image_colorname='green'),
+        }
+
+        response = self.client.post(reverse('update_media', kwargs={'media_id': self.media.id}), post_data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'media_app/update_media_successful.html')
+
+        self.media.refresh_from_db()
+
+        self.assertEqual(self.media.active, Media.INACTIVE)
+
+        self.assertEqual(self.media.title, post_data['title'])
+        self.assertEqual(self.media.description, post_data['description'])
+        self.assertEqual(self.media.author, post_data['author'])
+        self.assertEqual([str(tag['id']) for tag in self.media.tags.values()], post_data['tags'])
+
+        with self.media.file.open('rb') as media_file:
+            with post_data['file'].open('rb') as post_data_file:
+                self.assertEqual(media_file.read(), post_data_file.read())
+
+        with self.media.cover.open('rb') as media_cover:
+            with post_data['cover'].open('rb') as post_data_cover:
+                self.assertEqual(media_cover.read(), post_data_cover.read())
+
+        # revert post changes
+        Media.objects.filter(id=self.media.id).update(
+            title=self.media_data['title'],
+            description=self.media_data['description'],
+            author=self.media_data['author'],
+            file=self._get_test_file(),
+            cover=self._get_test_cover(),
+        )
+
+        self.media.tags.set(self.test_tags)
 
         self.client.logout()
 

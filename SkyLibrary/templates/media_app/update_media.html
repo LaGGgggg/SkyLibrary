@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/update_media.css' %}">
+{% endblock head_extra %}
+{% block top_panel %}
+    <li class="nav-item active">
+        <a href="{% url 'profile' %}" class="nav-link">{% translate 'Profile' %}</a>
+    </li>
+    <li class="nav-item active">
+        <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
+    </li>
+{% endblock top_panel %}
+{% block header %}
+    {% translate 'Update your media' %}!
+{% endblock header %}
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">{% translate 'Submit' %}</button>
+    </form>
+{% endblock content %}
+</html>

@@ -11,18 +11,27 @@ from crispy_bootstrap5.bootstrap5 import FloatingField
 from .models import Media, MediaTags, ReportType
 
 
-class CreateMediaForm(forms.ModelForm):
+class CreateOrUpdateMediaForm(forms.ModelForm):
 
     tags = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         queryset=MediaTags.objects.all(),
     )
 
+    def _is_update(self) -> bool:
+        return True if self.instance else False
+
     def clean_title(self):
 
         title = self.cleaned_data['title']
 
-        if Media.objects.filter(title=title):
+        if self._is_update():
+            filtered_media = Media.objects.exclude(id=self.instance.id).filter(title=title)
+
+        else:
+            filtered_media = Media.objects.filter(title=title)
+
+        if filtered_media.exists():
             raise ValidationError(_('Not a unique title, change it.'), code='invalid')
 
         else:
@@ -32,7 +41,13 @@ class CreateMediaForm(forms.ModelForm):
 
         description = self.cleaned_data['description']
 
-        if Media.objects.filter(description=description):
+        if self._is_update():
+            filtered_media = Media.objects.exclude(id=self.instance.id).filter(description=description)
+
+        else:
+            filtered_media = Media.objects.filter(description=description)
+
+        if filtered_media.exists():
             raise ValidationError(_('Not a unique description, change it.'), code='invalid')
 
         else:

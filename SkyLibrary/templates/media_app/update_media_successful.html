@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends 'base.html' %}
+{% load cache %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% get_current_language as LANGUAGE_CODE %}
+{% cache 31536000 create_media_page LANGUAGE_CODE %}
+    {% block header %}
+        {% translate 'Your media has been successfully updated and submitted for moderation' %}!
+    {% endblock header %}
+    {% block content %}
+        <button onclick="location.href='{% url 'profile' %}'" class="btn btn-success">{% translate 'Profile' %}</button>
+    {% endblock content %}
+{% endcache %}
+</html>
