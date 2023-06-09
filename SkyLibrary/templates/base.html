@@ -23,8 +23,8 @@
     <div>{% block content %}{% endblock content %}</div>
     <!-- 31536000 = one year, it doesn't change -->
     {% cache 31536000 footer LANGUAGE_CODE %}
-        <footer class="small mt-4">
-            {% translate 'Support' %}: <address style="display: inline;">TulNik0@yandex.ru</address>
+        <footer class="position-fixed end-0 bottom-0 small mb-3 me-4 p-1 ps-2 pe-2 rounded" style="background: #55FFB1;">
+            {% translate 'Support' %}: <address class="d-inline ms-1">TulNik0@yandex.ru</address>
         </footer>
     {% endcache %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
