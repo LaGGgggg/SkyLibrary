@@ -3,9 +3,14 @@
 {% extends 'base.html' %}
 {% load cache %}
 {% load i18n %}
-<!-- 31536000 = one year, it doesn't change -->
-{% cache 31536000 profile_page %}
-    {% block top_panel %}
+{% load static %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block head_extra %}
+    <link rel="stylesheet" href="{% static 'css/rating.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock head_extra %}
+{% block top_panel %}
+    {% cache 31536000 profile_page_top_panel LANGUAGE_CODE is_user_moderator %}
         <li class="nav-item active">
             <a href="{% url 'index' %}" class="nav-link">{% translate 'Home page' %}</a>
         </li>
@@ -23,12 +28,85 @@
                 <a href="{% url 'moderator_page' get_next_task='False' from_view_media_page='False' %}" class="nav-link">{% translate 'Moderator page' %}</a>
             </li>
         {% endif %}
-    {% endblock top_panel %}
-    {% block header %}
-        Profile header!
-    {% endblock header %}
-    {% block content %}
-        Profile content!
-    {% endblock content %}
-{% endcache %}
+    {% endcache %}
+{% endblock top_panel %}
+{% block content %}
+    <section class="row">
+        <section class="col">
+            <h3>{% translate 'My medias' %}:</h3>
+            <hr>
+            {% for media in media_added_by_user %}
+                {% with media_object=media.media media_active=media.active %}
+                    {% if media.is_user_can_edit %}
+                        <section class="position-relative">
+                            <a class="position-absolute top-0 end-0 small" href="{% url 'update_media' media_id=media_object.id %}">{% translate 'Edit media' %}</a>
+                        </section>
+                    {% endif %}
+                    <section class="mt-2">
+                        <section class="fw-light fst-italic media-active">
+                            {{ media_active }}
+                        </section>
+                        <section class="list-group flex-row align-items-center">
+                            <section class="fs-4">
+                               <a href="{% url 'view_media' media_id=media_object.id %}">{{ media_object.title }}</a>
+                            </section>
+                            <section class="d-inline-flex align-items-end rating ms-1" style="font-size: 80%">
+                                <section class="position-relative rating__stars_body">
+                                    <section class="position-absolute rating__stars"></section>
+                                </section>
+                                <section class="rating__value">{{ media_object.get_rating }}</section>
+                            </section>
+                        </section>
+                        <section class="small fw-light">
+                            {% for tag in media_object.tags.values %}
+                                {% if LANGUAGE_CODE == 'en-us' %}
+                                    <a data-toggle="tooltip" title="{{ tag.help_text_en_us }}" href="">#{{ tag.name_en_us }}</a>
+                                {% elif LANGUAGE_CODE == 'ru' %}
+                                    <a data-toggle="tooltip" title="{{ tag.help_text_ru }}" href="">#{{ tag.name_ru }}</a>
+                                {% endif %}
+                            {% endfor %}
+                        </section>
+                        <hr>
+                    </section>
+                {% endwith %}
+            {% endfor %}
+        </section>
+        <section class="col">
+            <h3>{% translate 'My downloads' %}:</h3>
+            <hr>
+            {% for download in user_downloads %}
+                <section>
+                    <section class="fs-4 d-inline">
+                        <a href="{% url 'view_media' media_id=download.media_id %}">{{ download.media_title }}</a>
+                    </section>
+                    <section class="d-inline-flex align-items-end rating ms-1">
+                        <section class="position-relative rating__stars_body dynamic-rating">
+                            <section class="position-absolute rating__stars"></section>
+                        </section>
+                        <section class="rating__value" data-media-id="{{ download.media_id }}">{{ download.media_rating_by_user }}</section>
+                    </section>
+                    <section class="small fw-light">
+                        {% for tag in download.media_tags.values %}
+                            {% if LANGUAGE_CODE == 'en-us' %}
+                                <a data-toggle="tooltip" title="{{ tag.help_text_en_us }}" href="">#{{ tag.name_en_us }}</a>
+                            {% elif LANGUAGE_CODE == 'ru' %}
+                                <a data-toggle="tooltip" title="{{ tag.help_text_ru }}" href="">#{{ tag.name_ru }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </section>
+                </section>
+                <hr>
+            {% endfor %}
+        </section>
+    </section>
+{% endblock content %}
+{% block scripts %}
+    <script src="{% static 'js/rating.js' %}"></script>
+    <script>
+        // preparing for the next script
+        const get_full_path = "{{ request.get_full_path }}";
+        const csrf_token = "{{ csrf_token }}";
+    </script>
+    <script src="{% static 'js/profile.js' %}"></script>
+{% endblock scripts %}
 </html>

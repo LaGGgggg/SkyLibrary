@@ -6,10 +6,14 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from typing import Generator
+from ast import literal_eval
 
 from django_registration.backends.activation.views import REGISTRATION_SALT
+
+from media_app.models import Media, MediaTags, MediaDownload, MediaRating
 
 User = get_user_model()
 
@@ -42,27 +46,6 @@ class CommonTestCase(TestCase):
         }
 
         cls.user = User.objects.create_user(**cls.user_credentials)
-
-    def test_profile(self):
-
-        # without login:
-
-        response = self.client.get(reverse('profile'), follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        # login.html, because without login --> redirect to login.html
-        self.assertTemplateUsed(response, 'accounts_app/login.html')
-
-        # with login:
-
-        self.client.force_login(self.user)
-
-        response = self.client.get(reverse('profile'))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'accounts_app/profile.html')
-
-        self.client.logout()
 
     def test_login(self):
 
@@ -99,6 +82,332 @@ class CommonTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'accounts_app/logout_successful.html')
         self.assertFalse(response.context['user'].is_authenticated)
+
+
+class ProfileTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super().setUpClass()
+
+        cls.client = Client()
+
+        user_credentials = {
+            'username': 'test_user',
+            'password': 'test_password',
+            'email': 'test_email_1@mail.com',
+            'role': 1,
+        }
+        second_user_credentials = {
+            'username': 'test_user_2',
+            'password': 'test_password',
+            'email': 'test_email_2@mail.com',
+            'role': 1,
+        }
+
+        cls.user = User.objects.create_user(**user_credentials)
+        cls.second_user = User.objects.create_user(**second_user_credentials)
+
+        test_file = SimpleUploadedFile('test_file.pdf', b'file_content', content_type='application/pdf')
+
+        test_tag_1 = MediaTags.objects.create(
+            name_en_us='test tag 1',
+            help_text_en_us='test tag 1 help text',
+            name_ru='test tag 1 ru',
+            help_text_ru='test tag 1 help text ru',
+            user_who_added=cls.user,
+        )
+        test_tag_2 = MediaTags.objects.create(
+            name_en_us='test tag 2',
+            help_text_en_us='test tag 2 help text',
+            name_ru='test tag 2 ru',
+            help_text_ru='test tag 2 help text ru',
+            user_who_added=cls.user,
+        )
+
+        test_tags = (test_tag_1, test_tag_2)
+
+        cls.media_data = {
+            'title': 'test_title',
+            'description': 'test_description',
+            'author': 'test_author',
+            'user_who_added': cls.user,
+            'file': test_file,
+            'active': 1,
+        }
+        cls.not_active_media_data = {
+            'title': 'test_title 2',
+            'description': 'test_description 2',
+            'author': 'test_author',
+            'user_who_added': cls.user,
+            'file': test_file,
+            'active': 0,
+        }
+        cls.second_user_media_data = {
+            'title': 'test_title 3',
+            'description': 'test_description 3',
+            'author': 'test_author',
+            'user_who_added': cls.second_user,
+            'file': test_file,
+            'active': 1,
+        }
+
+        cls.media = Media.objects.create(**cls.media_data)
+        cls.not_active_media = Media.objects.create(**cls.not_active_media_data)
+        cls.second_user_media = Media.objects.create(**cls.second_user_media_data)
+
+        cls.media.tags.set(test_tags)
+        cls.not_active_media.tags.set(test_tags)
+        cls.second_user_media.tags.set(test_tags)
+
+        cls.media_download_data = {
+            'media': cls.media,
+            'user_who_added': cls.user,
+            'download': MediaDownload.DOWNLOADED,
+        }
+        cls.second_user_media_download_by_user_data = {
+            'media': cls.second_user_media,
+            'user_who_added': cls.user,
+            'download': MediaDownload.DOWNLOADED,
+        }
+        cls.media_download_by_second_user_data = {
+            'media': cls.media,
+            'user_who_added': cls.second_user,
+            'download': MediaDownload.DOWNLOADED,
+        }
+
+    def test_get_without_login(self):
+
+        response = self.client.get(reverse('profile'), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/login.html')
+
+    def test_get_media_added_by_user(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/profile.html')
+
+        page_should_contain = [
+            self.media_data['title'],
+            self.not_active_media_data['title'],
+            f"{dict(Media.active_choices)[self.media_data['active']]}",
+            f"{dict(Media.active_choices)[self.not_active_media_data['active']]}",
+            # link to the update media page
+            f"{reverse('update_media', kwargs={'media_id': self.media.id})}",
+        ]
+
+        page_should_not_contain = [
+            self.second_user_media_data['title'],
+            # link to the update media page
+            f"{reverse('update_media', kwargs={'media_id': self.not_active_media.id})}",
+            f"{reverse('update_media', kwargs={'media_id': self.second_user_media.id})}",
+        ]
+
+        for value in page_should_contain:
+            self.assertContains(response, value)
+
+        for value in page_should_not_contain:
+            self.assertNotContains(response, value)
+
+        self.client.logout()
+
+    def test_get_user_downloads(self):
+
+        self.client.force_login(self.user)
+
+        media_download = MediaDownload.objects.create(**self.media_download_data)
+        second_user_media_download_by_user = \
+            MediaDownload.objects.create(**self.second_user_media_download_by_user_data)
+        media_download_by_second_user = MediaDownload.objects.create(**self.media_download_by_second_user_data)
+
+        self.media.user_who_added = self.second_user
+        self.media.save()
+        self.not_active_media.user_who_added = self.second_user
+        self.not_active_media.save()
+
+        response = self.client.get(reverse('profile'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/profile.html')
+
+        page_should_contain = [
+            self.media_data['title'],
+            self.second_user_media_data['title'],
+            # link to the view media page
+            f"{reverse('view_media', kwargs={'media_id': self.media.id})}",
+            f"{reverse('view_media', kwargs={'media_id': self.second_user_media.id})}",
+        ]
+
+        page_should_not_contain = [
+            self.not_active_media_data['title'],
+            # link to the view media page
+            f"{reverse('view_media', kwargs={'media_id': self.not_active_media.id})}",
+        ]
+
+        for value in page_should_contain:
+            self.assertContains(response, value)
+
+        for value in page_should_not_contain:
+            self.assertNotContains(response, value)
+
+        self.media.user_who_added = self.media_data['user_who_added']
+        self.media.save()
+        self.not_active_media.user_who_added = self.not_active_media_data['user_who_added']
+        self.not_active_media.save()
+
+        media_download.delete()
+        second_user_media_download_by_user.delete()
+        media_download_by_second_user.delete()
+
+        self.client.logout()
+
+    def test_post_without_login(self):
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'request_type': 'update_media_rating',
+                'media_id': f'{self.media.id}',
+                'new_rating': '4',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/login.html')
+
+    def test_post_not_exist_media(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'request_type': 'update_media_rating',
+                'media_id': '0',  # 0 - not exist media id
+                'new_rating': '4',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed('errors/404.html')
+
+        self.client.logout()
+
+    def test_post_not_active_media(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'request_type': 'update_media_rating',
+                'media_id': f'{self.not_active_media.id}',
+                'new_rating': '4',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed('errors/404.html')
+
+        self.client.logout()
+
+    def test_post_rating_bad_choice(self):
+
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'request_type': 'update_media_rating',
+                'media_id': f'{self.media.id}',
+                'new_rating': '0',  # valid choices are: 1, 2, 3, 4, 5
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        self.assertFalse(literal_eval(response.content.decode('utf-8'))['result_rating'])
+
+        response = self.client.post(
+            reverse('profile'),
+            {
+                'request_type': 'update_media_rating',
+                'media_id': f'{self.media.id}',
+                'new_rating': '6',  # valid choices are: 1, 2, 3, 4, 5
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        self.assertFalse(literal_eval(response.content.decode('utf-8'))['result_rating'])
+
+        self.client.logout()
+
+    def test_post(self):
+
+        self.client.force_login(self.user)
+
+        post_data = {
+            'request_type': 'update_media_rating',
+            'media_id': f'{self.media.id}',
+            'new_rating': '4',
+        }
+
+        response = self.client.post(reverse('profile'), post_data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.templates)  # because ajax request does not rendering page
+
+        self.assertEqual(literal_eval(response.content.decode('utf-8'))['result_rating'], int(post_data['new_rating']))
+
+        self.assertEqual(
+            MediaRating.objects.filter(
+                media=self.media, user_who_added=self.user, rating=int(post_data['new_rating'])
+            ).count(),
+            1,  # 1 object at database
+        )
+
+        # check for duplicates and database object update
+
+        self.client.post(reverse('profile'), post_data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+
+        new_new_rating_value = '3'
+
+        post_data['new_rating'] = new_new_rating_value
+
+        self.client.post(reverse('profile'), post_data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+
+        self.assertEqual(
+            MediaRating.objects.filter(
+                media=self.media, user_who_added=self.user, rating=int(new_new_rating_value)
+            ).count(),
+            1,  # 1 object at database
+        )
+
+        self.assertEqual(
+            MediaRating.objects.filter(media=self.media, user_who_added=self.user).count(),
+            1,  # 1 object at database
+        )
+
+        MediaRating.objects.filter(media=self.media, user_who_added=self.user).delete()
+
+        self.client.logout()
 
 
 class RegisterTestCase(TestCase):
