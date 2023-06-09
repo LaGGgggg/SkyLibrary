@@ -67,7 +67,7 @@ class ViewIndex(View):
 
     @staticmethod
     def _search_by_text(text: str) -> QuerySet:
-        return Media.objects.filter(title__contains=text)
+        return Media.objects.filter(active=Media.ACTIVE, title__contains=text).order_by('-id')
 
     @staticmethod
     def _search_by_tags(tags: QuerySet[MediaTags], query_set: QuerySet[Media] = None) -> QuerySet:
@@ -75,14 +75,14 @@ class ViewIndex(View):
         tags_list = list(tags)
 
         if query_set:
-            query_set = query_set.filter(tags__in=tags_list).annotate(tags_founded=Count('tags')).filter(
-                tags_founded=len(tags_list)
-            )
+            query_set = query_set.filter(active=Media.ACTIVE, tags__in=tags_list).annotate(
+                tags_founded=Count('tags')
+            ).filter(tags_founded=len(tags_list)).order_by('-id')
 
         else:
-            query_set = Media.objects.filter(tags__in=tags_list).annotate(tags_founded=Count('tags')).filter(
-                tags_founded=len(tags_list)
-            )
+            query_set = Media.objects.filter(active=Media.ACTIVE, tags__in=tags_list).annotate(
+                tags_founded=Count('tags')
+            ).filter(tags_founded=len(tags_list)).order_by('-id')
 
         return query_set
 

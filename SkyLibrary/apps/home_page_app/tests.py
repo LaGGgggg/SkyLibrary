@@ -338,15 +338,15 @@ class SearchMediaTestCase(TestCase):
 
             if i == 0:
 
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
-
-            elif i == 1:
-
                 media = self.media_2
                 media_data = self.media_data_2
                 media_tags = self.media_2_tags
+
+            elif i == 1:
+
+                media = self.media_1
+                media_data = self.media_data_1
+                media_tags = self.media_1_tags
 
             self.assertEqual(media_data['title'], search_result_key)
 
@@ -383,15 +383,15 @@ class SearchMediaTestCase(TestCase):
 
             if i == 0:
 
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
-
-            elif i == 1:
-
                 media = self.media_3
                 media_data = self.media_data_3
                 media_tags = self.media_3_tags
+
+            elif i == 1:
+
+                media = self.media_1
+                media_data = self.media_data_1
+                media_tags = self.media_1_tags
 
             self.assertEqual(media_data['title'], search_result_key)
 
@@ -428,15 +428,15 @@ class SearchMediaTestCase(TestCase):
 
             if i == 0:
 
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
-
-            elif i == 1:
-
                 media = self.media_3
                 media_data = self.media_data_3
                 media_tags = self.media_3_tags
+
+            elif i == 1:
+
+                media = self.media_1
+                media_data = self.media_data_1
+                media_tags = self.media_1_tags
 
             self.assertEqual(media_data['title'], search_result_key)
 
