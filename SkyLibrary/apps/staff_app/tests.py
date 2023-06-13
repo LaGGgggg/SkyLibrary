@@ -276,6 +276,35 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.logout()
 
+    def test_get_redirect_to_moderator_page_without_login(self):
+
+        response = self.client.get(reverse('redirect_to_moderator_page'), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts_app/login.html')
+
+    def test_get_redirect_to_moderator_page_with_visitor_login(self):
+
+        self.client.force_login(self.visitor_user)
+
+        response = self.client.get(reverse('redirect_to_moderator_page'), follow=True)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, 'errors/403.html')
+
+        self.client.logout()
+
+    def test_get_redirect_to_moderator_page(self):
+
+        self.client.force_login(self.moderator_user)
+
+        response = self.client.get(reverse('redirect_to_moderator_page'), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
+
+        self.client.logout()
+
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class ViewMediaPageModeratorContentTestCase(TestCase):

@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, reverse
+from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.db import transaction
+from django.views.generic.base import RedirectView
 
 from json import dumps
 
@@ -125,3 +127,7 @@ class ViewModeratorPage(LoginRequiredMixin, View):
         return redirect(
             reverse('moderator_page', kwargs={'get_next_task': get_next_task, 'from_view_media_page': 'true'})
         )
+
+
+class ViewRedirectToModeratorPage(RedirectView):
+    url = reverse_lazy('moderator_page', kwargs={'get_next_task': 'false', 'from_view_media_page': 'false'})
