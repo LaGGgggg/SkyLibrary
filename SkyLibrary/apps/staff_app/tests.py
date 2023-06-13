@@ -305,6 +305,57 @@ class ModeratorPageTestCase(TestCase):
 
         self.client.logout()
 
+    def test_posts_view_media_page(self):
+
+        user = self.moderator_user
+
+        self.client.force_login(user)
+
+        media = self.not_active_media_now_date
+
+        moderator_task_data = {
+            'media': media,
+            'user_who_added': user,
+        }
+
+        ModeratorTask.objects.create(**moderator_task_data)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': media.id}),
+            {'request_type': 'download_file'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': media.id}),
+            {'request_type': 'create_comment'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': media.id}),
+            {'request_type': 'add_comment_vote'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post(
+            reverse('view_media', kwargs={'media_id': media.id}),
+            {'request_type': 'create_report'},
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+        ModeratorTask.objects.get(**moderator_task_data).delete()
+
+        self.client.logout()
+
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class ViewMediaPageModeratorContentTestCase(TestCase):

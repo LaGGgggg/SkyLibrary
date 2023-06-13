@@ -211,13 +211,22 @@ class ViewViewMedia(View):
         if not media:
             return handler404(request)
 
-        if not self.check_user_can_be_on_page(request, media):
+        if request.user.is_anonymous or not self.check_user_can_be_on_page(request, media):
             return handler403(request)
 
-        if request.user.is_anonymous:
-            return handler403(request)
+        if request.user.role == User.MODERATOR and self.is_moderate(request, media):
 
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
+            if 'approve_button' in request.POST:
+                return ViewModeratorPage.post_from_view_page(request, self.get_media(media_id))
+
+            elif request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
+                    request.POST.get('request_type') == 'download_file':
+                return HttpResponse(dumps({'downloads_number': 0}), content_type='application/json')
+
+            else:
+                return handler404(request)
+
+        elif request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
                 request.POST.get('request_type') == 'download_file':
 
             try:
@@ -471,9 +480,6 @@ class ViewViewMedia(View):
                 messages.error(request, self.error_messages.get('bad_report').format(error_code='4.1'))
 
                 return HttpResponse(messages_to_json(request), content_type='application/json')
-
-        elif 'approve_button' in request.POST:
-            return ViewModeratorPage.post_from_view_page(request, self.get_media(media_id))
 
         else:
             return handler404(request)
