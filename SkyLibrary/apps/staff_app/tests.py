@@ -445,7 +445,7 @@ class ViewMediaPageModeratorContentTestCase(TestCase):
         self.assertTemplateUsed(response, 'media_app/view_media.html')
 
         moderator_content = (
-            '<section class="border border-danger mt-5 d-inline-block pt-1 pb-1 pr-2 pl-2">',
+            '<section class="border border-danger mt-5 d-inline-block pt-1 pb-1 ps-2 pe-2">',
             '<form method="post">',
             '<section class="form-check">',
             '<button class="btn btn-outline-primary m-2" name="approve_button" id="approve_button">Confirm</button>',
