@@ -6,7 +6,36 @@
 # Sky library
 
 Web library on django.
-You can upload and download media files (videos, books, webinars...), add to bookmarks, rate and more!
+You can upload and download media files (videos, books, webinars...), rate them and much more!
+
+### Project includes:
+- [x] Support for Docker compose deployment.
+  - [x] Automatic creation of SSL certificates.
+  - [x] Automatic renewal of SSL certificates.
+  - [x] Automatic rejection of unknown domains (using nginx).
+  - [x] Static and media files support.
+  - [x] Automatic launch of django inside entrypoint. Executed commands:
+    - collectstatic
+    - migrate
+    - createcachetable
+    - clear_cache (custom command, removing all cache)
+    - compilemessages
+    - test
+    - sendtestemail
+    - gunicorn
+- [x] Full translation into 2 languages.
+- [x] Autotest system (by github actions).
+- [x] Big amount of tests (113+).
+- [x] Caching using redis.
+- [x] Registration with confirmation by email.
+- [x] User roles system (4 roles with different permissions).
+- [x] Moderation system.
+- [x] Configured administration system.
+- [x] Configured logs system.
+- [x] Django [email reports](https://docs.djangoproject.com/en/4.2/howto/error-reporting/#email-reports) support.
+- [x] Error codes system.
+- [x] Star rating.
+- [x] [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/).
 
 # How to start the project?
 
@@ -236,54 +265,161 @@ sudo ./docker-compose-init.sh
 docker compose logs -f
 ```
 
-# Current project structure _(in progress)_
+# User roles system
+
+- visitor (default user role, site visitor)
+- moderator (has access to the moderator page)
+  - tasks
+    - Moderate new inactive media (on the "moderator" page)
+- administrator (has access to the administration panel (not all permissions))
+  - tasks
+    - Report processing (ban comment or media if necessary)
+    - Managing moderator accounts (create, edit, block)
+    - Managing media tags (create, edit, delete)
+    - Managing report types (create, edit, delete)
+  - permissions (set manual by a superuser)
+    - accounts_app | user | Can add a new moderator
+    - accounts_app | user | Can add user
+    - accounts_app | user | Can change a moderator data
+    - accounts_app | user | Can change user
+    - accounts_app | user | Can change the user active field
+    - media_app | comment | Can change comment
+    - media_app | comment | Can change the content of the comment to "This comment was banned"
+    - media_app | media | Can change media
+    - media_app | media | Can change the value of the media active field
+    - media_app | media tag | Can add media tags
+    - media_app | media tag | Can change media tags
+    - media_app | media tag | Can delete media tags
+    - media_app | media tag | Can view media tags
+    - media_app | report | Can delete report
+    - media_app | report | Can view report
+    - media_app | report type | Can add report type
+    - media_app | report type | Can change report type
+    - media_app | report type | Can delete report type
+    - media_app | report type | Can view report type
+    - staff_app | moderator task | Can delete moderator task
+    - staff_app | moderator task | Can view moderator task
+- superuser (django vanilla superuser)
+
+# Project structure
 
 - Home page
   - Navigation bar
     - User is authenticated
-      - "Profile" link
-      - "Add new media" link
+      - Link to the "profile" page
+      - Link to the "add new media" page
+      - User is moderator
+        - Link to the "moderator" page
     - User is not authenticated
-      - "Login" link
-      - "Sign-up" link
-  - Best media
-    - Media title (link to the media page)
-    - Media stars rating
-  - Recent media
-    - Media title (link to the media page)
-    - Media stars rating
-- Profile page
+      - Link to the "login" page
+      - Link to the "registration" page
+  - "Search media" button (you can search for media by tags and/or title text. Returns links to media with star ratings and tags)
+  - "Best media" compilation (by media rating. Links to media with star ratings)
+  - "Recent media" compilation (by publication date. Links to media with star ratings)
+- Login page
   - Navigation bar
-    - "Home page" link
-    - "Add new media" link
-    - "Change password" link
-    - "Logout" link
-- Add new media page
+    - Link to the "home" page
+  - Login form (with support for field errors)
+    - username field
+    - password field
+  - Link to the "password reset" page
+- Password reset page
   - Navigation bar
-    - "Profile" link
-    - "Home page" link
-  - Add new media form
-    - Fields
-      - Title
-      - Description
-      - Author
-      - Tags (checkboxes)
-      - File (file input)
-      - Cover (optional)
+    - Link to the "home" page
+  - Password reset form (with support for field errors)
+    - email field
+- Register page
+  - Navigation bar
+    - Link to the "home" page
+  - Registration form (with support for field errors. Registration created partially with [django-registration](https://django-registration.readthedocs.io/en/latest/))
+    - username field
+    - email field
+    - password field
+    - confirm password field
 - View media page
   - Navigation bar
-    - "Home page" link
-    - "Profile" link
-    - "Add new media" link
-  - Media content
-    - Title
-    - Cover (if exists)
-    - Rating
-    - Description
-    - Download button (become green if download)
-    - Author
-    - Added by
-    - Publication date
+    - Link to the "home" page
+    - User is authenticated
+      - Link to the "profile" page
+      - Link to the "add new media" page
+      - User is moderator
+        - Link to the "moderator" page
+  - Media title
+  - Media star rating
+  - Media tags
+  - Media description
+  - Media cover (if exists)
+  - Download media file button (with a download counter. The user must be authenticated)
+  - Report media button (receives report media form (with support for field errors), after confirming create media report. The user must be authenticated)
+  - Media author
+  - Media user who added username
+  - Media publication date
+  - Create media comment form (with support for field errors. The user must be authenticated)
+  - Media comments
+    - Comment data
+      - user who added username
+      - publication date
+      - comment content
+      - comment rating
+      - comment upvote and downvote buttons (the user must be authenticated)
+      - reply button (receives create comment reply form (with support for field errors), after confirming create comment reply. The user must be authenticated)
+      - report button (receives report comment form (with support for field errors), after confirming create comment report. The user must be authenticated)
+      - pin button (adds a link to the comment (by url fragment))
+  - The user is the moderator and the media is the moderator's task (in this case, the user cannot add comments, reports and comment ratings)
+    - Validate media form
+      - Approve/disapprove radio buttons
+      - Auto new task/no auto new task radio buttons (if the value is set to "auto new task", a new moderator task is automatically created after media validation)
+- Profile page
+  - Navigation bar
+    - Link to the "home" page
+    - Link to the "add new media" page
+    - Link to the "change password" page
+    - Link to the "logout" page
+    - User is moderator
+      - Link to the "moderator" page
+  - My medias (a list of media added by the user, with media statuses, star ratings, tags and links to the "change media" pages (for each active media))
+  - My downloads (a list of media downloaded by the user, with media tags and star ratings (user ratings, not average across all user ratings, the user can add a new rating to the media by clicking on the star))
+- Change password page
+  - Navigation bar
+    - Link to the "home" page
+    - Link to the "profile" page
+  - Change password form (with support for field errors)
+    - old password field
+    - new password field
+    - confirm new password field
+- Add new media page
+  - Navigation bar
+    - Link to the "home" page
+    - Link to the "profile" page
+  - Add new media form (with support for field errors)
+    - title field
+    - description field
+    - author field
+    - tags field (checkboxes)
+    - file field
+    - cover field (optional)
+- Change media page
+  - Navigation bar
+    - Link to the "home" page
+    - Link to the "profile" page
+  - Change media form (with support for field errors)
+    - title field
+    - description field
+    - author field
+    - tags field (checkboxes)
+    - file field
+    - cover field (optional)
+- Logout page
+- Error pages
+  - 400 (with the link to the "home" page)
+  - 403 (with the link to the "home" page)
+  - 404 (with the link to the "home" page)
+  - 500 (with the link to the "home" page)
+- Moderator page
+  - Navigation bar
+    - Link to the "home" page
+    - Link to the "profile" page
+  - Get task button or link to the moderator task
 
 # Contacts
 
