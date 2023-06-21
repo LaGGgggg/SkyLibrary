@@ -6,7 +6,7 @@ services:
     image: redis:alpine
     restart: always
     networks:
-      backend:
+      - backend
     volumes:
       - redis_data:/data
     expose:
