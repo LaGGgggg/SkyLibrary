@@ -237,10 +237,14 @@ PGDATA - standard [PGDATA](https://hub.docker.com/_/postgres) environment variab
 
 ### 6. Configure nginx.conf
 
-Configure it (_23 and 39 lines in nginx/nginx.conf_):
+Configure it (_nginx/nginx.conf_):
 ```nginx configuration
-server_name www.<domain.site> <domain.site>;
-server_name www.<domain.site> <domain.site>;
+ssl_certificate /etc/letsencrypt/live/<domain.site>/fullchain.pem;  # 11 line
+ssl_certificate_key /etc/letsencrypt/live/<domain.site>/privkey.pem;  # 12 line
+server_name www.<domain.site> <domain.site>;  # 23 line
+server_name www.<domain.site> <domain.site>;  # 39 line
+ssl_certificate /etc/letsencrypt/live/<domain.site>/fullchain.pem;  # 44 line
+ssl_certificate_key /etc/letsencrypt/live/<domain.site>/privkey.pem;  # 45 line
 ```
 
 ### 7. Configure docker-compose-init.sh
