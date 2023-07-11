@@ -60,18 +60,24 @@ class CreateOrUpdateMediaForm(forms.ModelForm):
         if checking_object:
 
             if checking_object.size > max_object_size:
-                max_cover_size_in_megabytes = int(max_object_size / 1024 / 1024)
+
+                max_size_in_megabytes = int(max_object_size / 1024 / 1024)
+
+                validation_error_message = \
+                    _('{checking_object_name} - is too big (more than {max_size_in_megabytes}Mb)')
 
                 raise ValidationError(
-                    _(f'{checking_object.name} - is too big (more than {max_cover_size_in_megabytes}Mb)'),
+                    validation_error_message.format(
+                        checking_object_name=checking_object.name, max_size_in_megabytes=max_size_in_megabytes
+                    ),
                     code='invalid',
                 )
 
         return checking_object
 
     def clean_file(self):
-        # 419430400 = 1024 * 1024 * 400 = 400Mb (Mb value should be integer, not 7.5Mb)
-        return self._check_object_size('file', 419430400)
+        # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value should be integer, not 7.5Mb)
+        return self._check_object_size('file', 3221225472)
 
     def clean_cover(self):
         # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value should be integer, not 7.5Mb)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-09 19:34+0400\n"
+"POT-Creation-Date: 2023-07-11 22:01+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -126,36 +126,33 @@ msgstr "Не уникальное название, измените его."
 msgid "Not a unique description, change it."
 msgstr "Не уникальное описание, измените его."
 
-#: .\apps\media_app\forms.py:66
-#, python-brace-format
+#: .\apps\media_app\forms.py:67
 msgid ""
-"{checking_object.name} - is too big (more than {max_cover_size_in_megabytes}"
-"Mb)"
+"{checking_object_name} - is too big (more than {max_size_in_megabytes}Mb)"
 msgstr ""
-"{checking_object.name} - слишком большой (больше чем "
-"{max_cover_size_in_megabytes}Мб)"
+"{checking_object_name} - слишком большой (больше чем {max_size_in_megabytes}Мб)"
 
-#: .\apps\media_app\forms.py:89
+#: .\apps\media_app\forms.py:95
 msgid "Comment text"
 msgstr "Текст комментария"
 
-#: .\apps\media_app\forms.py:100
+#: .\apps\media_app\forms.py:106
 msgid "Add comment"
 msgstr "Добавить комментарий"
 
-#: .\apps\media_app\forms.py:117
+#: .\apps\media_app\forms.py:123
 msgid "Reply text"
 msgstr "Текст ответа"
 
-#: .\apps\media_app\forms.py:128
+#: .\apps\media_app\forms.py:134
 msgid "Add reply"
 msgstr "Добавить ответ"
 
-#: .\apps\media_app\forms.py:162 .\apps\media_app\forms.py:204
+#: .\apps\media_app\forms.py:168 .\apps\media_app\forms.py:210
 msgid "Send report"
 msgstr "Отправить жалобу"
 
-#: .\apps\media_app\forms.py:187
+#: .\apps\media_app\forms.py:193
 msgid "Select the correct report reason choice."
 msgstr "Выберите корректный вариант причины жалобы."
 
@@ -413,11 +410,11 @@ msgstr ""
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:288
+#: .\apps\media_app\views.py:297
 msgid "code"
 msgstr "код"
 
-#: .\apps\media_app\views.py:301 .\templates\media_app\view_media.html:201
+#: .\apps\media_app\views.py:310 .\templates\media_app\view_media.html:201
 msgid "Reply"
 msgstr "Ответить"
 
