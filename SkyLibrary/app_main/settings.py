@@ -105,15 +105,15 @@ MEDIA_STORAGE_BUCKET_NAME = env('MEDIA_STORAGE_BUCKET_NAME', default=None)
 if not MEDIA_STORAGE_BUCKET_NAME:
     env_var_not_set_handler('MEDIA_STORAGE_BUCKET_NAME', context='site is not running', error_level='ERROR')
 
-AWS_S3_ACCESS_KEY_ID = env('AWS_S3_ACCESS_KEY_ID', default=None)
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
 
-if not AWS_S3_ACCESS_KEY_ID:
-    env_var_not_set_handler('AWS_S3_ACCESS_KEY_ID', context='site is not running', error_level='ERROR')
+if not AWS_ACCESS_KEY_ID:
+    env_var_not_set_handler('AWS_ACCESS_KEY_ID', context='site is not running', error_level='ERROR')
 
-AWS_S3_SECRET_ACCESS_KEY = env('AWS_S3_SECRET_ACCESS_KEY', default=None)
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
 
-if not AWS_S3_SECRET_ACCESS_KEY:
-    env_var_not_set_handler('AWS_S3_SECRET_ACCESS_KEY', context='site is not running', error_level='ERROR')
+if not AWS_SECRET_ACCESS_KEY:
+    env_var_not_set_handler('AWS_SECRET_ACCESS_KEY', context='site is not running', error_level='ERROR')
 
 
 # Application definition
@@ -414,3 +414,4 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 DEFAULT_FILE_STORAGE = 'app_main.s3_storage.MediaStorage'
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
 AWS_QUERYSTRING_AUTH = False
+AWS_S3_REGION_NAME = 'storage'

@@ -9,6 +9,8 @@ from django.urls import reverse
 from datetime import datetime, timedelta
 from logging import getLogger
 
+from app_main.s3_storage import MediaStorage
+
 
 logger = getLogger(__name__)
 
@@ -72,7 +74,7 @@ class Media(models.Model):
     )
     tags = models.ManyToManyField(MediaTags, related_name='tags_media', verbose_name=_('tags'))
     active = models.PositiveSmallIntegerField(choices=active_choices, default=0, verbose_name=_('active'))
-    file = models.FileField(upload_to=get_file_upload, verbose_name=_('file'))
+    file = models.FileField(upload_to=get_file_upload, verbose_name=_('file'), storage=MediaStorage())
     cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True, verbose_name=_('cover'))
 
     def __str__(self):
