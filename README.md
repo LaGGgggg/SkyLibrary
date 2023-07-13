@@ -105,6 +105,10 @@ CACHE_REDIS_LOCATIONS=
 EMAIL_HOST_USER=<your email adress>
 EMAIL_HOST_PASSWORD=<your email password>
 
+MEDIA_STORAGE_BUCKET_NAME=<your media storage bucket name>
+AWS_S3_ACCESS_KEY_ID=<your bucket access key id>
+AWS_S3_SECRET_ACCESS_KEY=<your bucket secret access key>
+
 LANGUAGE_CODE=en-us
 ```
 _**Do not forget to set the DB_URL variable!**_
@@ -128,6 +132,11 @@ can be empty if you are not using Redis caching, can take more than one location
 **Warning!** The project uses **yandex smtp** as [email host variable](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host).<br>
 EMAIL_HOST_USER - standard [django email host user](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-user).<br>
 EMAIL_HOST_PASSWORD - standard [django email host password](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-password).<br>
+
+**Warning!** The project uses **yandexcloud** for s3 storage (implemented using [django-storages](https://pypi.org/project/django-storages/) and [boto3](https://pypi.org/project/boto3/)).<br>
+MEDIA_STORAGE_BUCKET_NAME - standard [S3Boto3Storage bucket_name](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=bucket_name#overriding-the-default-storage-class).<br>
+AWS_S3_ACCESS_KEY_ID - standard [AWS_S3_ACCESS_KEY_ID](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_S3_ACCESS_KEY_ID#settings).<br>
+AWS_S3_SECRET_ACCESS_KEY - standard [AWS_S3_SECRET_ACCESS_KEY](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_S3_SECRET_ACCESS_KEY#settings).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 
@@ -193,6 +202,10 @@ CACHE_REDIS_LOCATIONS=
 EMAIL_HOST_USER=<your email adress>
 EMAIL_HOST_PASSWORD=<your email password>
 
+MEDIA_STORAGE_BUCKET_NAME=<your media storage bucket name>
+AWS_S3_ACCESS_KEY_ID=<your bucket access key id>
+AWS_S3_SECRET_ACCESS_KEY=<your bucket secret access key>
+
 LANGUAGE_CODE=en-us
 
 # docker-compose section
@@ -225,6 +238,11 @@ can be empty if you are not using Redis caching, can take more than one location
 **Warning!** The project uses **yandex smtp** as [email host variable](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host).<br>
 EMAIL_HOST_USER - standard [django email host user](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-user).<br>
 EMAIL_HOST_PASSWORD - standard [django email host password](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-password).<br>
+
+**Warning!** The project uses **yandexcloud** for s3 storage (implemented using [django-storages](https://pypi.org/project/django-storages/) and [boto3](https://pypi.org/project/boto3/)).<br>
+MEDIA_STORAGE_BUCKET_NAME - standard [S3Boto3Storage bucket_name](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=bucket_name#overriding-the-default-storage-class).<br>
+AWS_S3_ACCESS_KEY_ID - standard [AWS_S3_ACCESS_KEY_ID](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_S3_ACCESS_KEY_ID#settings).<br>
+AWS_S3_SECRET_ACCESS_KEY - standard [AWS_S3_SECRET_ACCESS_KEY](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_S3_SECRET_ACCESS_KEY#settings).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 
