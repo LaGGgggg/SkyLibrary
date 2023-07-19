@@ -14,6 +14,8 @@ env:
   EMAIL_HOST_USER: plug@yandex.ru
   EMAIL_HOST_PASSWORD: plug
   MEDIA_STORAGE_BUCKET_NAME: plug
+  AWS_ACCESS_KEY_ID: plug
+  AWS_SECRET_ACCESS_KEY: plug
   LANGUAGE_CODE: en-us
 
 jobs:
