@@ -19,10 +19,20 @@
     {% translate 'Update your media' %}!
 {% endblock header %}
 {% block content %}
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="form">
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit" class="btn btn-primary">{% translate 'Submit' %}</button>
     </form>
 {% endblock content %}
+{% block scripts %}
+    <script>
+        // preparing for the next scripts
+        let waiting_text_translated = '{% translate 'Waiting for a file' %}...';
+        let uploading_text_translated = '{% translate 'Uploading the file' %}...';
+        let uploaded_text_translated = '{% translate 'The file is uploaded, click submit to save' %}.';
+        let error_text_translated = '{% translate 'Error, please try again or contact support' %}.';
+    </script>
+    <script src="{% static 'js/create_or_update_media.js' %}"></script>
+{% endblock scripts %}
 </html>

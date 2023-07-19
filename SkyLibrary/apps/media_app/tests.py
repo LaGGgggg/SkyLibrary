@@ -13,8 +13,8 @@ from shutil import rmtree
 from ast import literal_eval
 from os.path import isfile
 
-from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_cover_upload,\
-    get_file_upload, Report, ReportType
+from media_app.models import Media, MediaTags, MediaDownload, Comment, CommentRating, get_upload,\
+     Report, ReportType
 from media_app.forms import CreateReplyCommentForm, CreateReportCommentForm, CreateReportMediaForm
 
 User = get_user_model()
@@ -109,6 +109,7 @@ class CreateMediaTestCase(TestCase):
             'description': 'test_incorrect_data_description',
             'author': 'test_too_big_author_dataaaaaaaa',
             'tags': (0,),  # "0" database id
+            'file_key': '',
         }
 
         response = self.client.post(reverse('create_media'), incorrect_post_data)
@@ -121,8 +122,9 @@ class CreateMediaTestCase(TestCase):
         incorrect_form_errors = {
             'title': 'Ensure this value has at most 60 characters (it has 61).',
             'author': 'Ensure this value has at most 30 characters (it has 31).',
-            'file': 'This field is required.',
             'tags': 'Select a valid choice. 0 is not one of the available choices.',
+            None:
+                'Something went wrong, you may not have specified the file field, please try again or contact support',
         }
 
         for field, error in incorrect_form_errors.items():
@@ -138,7 +140,7 @@ class CreateMediaTestCase(TestCase):
             'title': 'test_title_data',
             'description': 'test_correct_data_description',
             'author': 'test_author_data',
-            'file': self.test_file,
+            'file_key': f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self.test_file.name)}",
             'cover': self.test_cover,
             'tags': self.test_tag_ids,
         }
@@ -165,6 +167,11 @@ class CreateMediaTestCase(TestCase):
         }
 
         Media.objects.create(**duplicate_media_data)
+
+        # needed for the form:
+        del duplicate_media_data['file']
+        duplicate_media_data['file_key'] = \
+            f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self.test_file.name)}"
 
         response = self.client.post(reverse('create_media'), duplicate_media_data)
 
@@ -355,9 +362,11 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['tags'] = self.test_tags_id_post_format
-        post_data['file'] = self._get_test_file()
+        post_data['file_key'] = \
+            f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self._get_test_file().name)}"
         post_data['cover'] = self._get_test_cover()
 
         response = \
@@ -374,9 +383,11 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['tags'] = self.test_tags_id_post_format
-        post_data['file'] = self._get_test_file()
+        post_data['file_key'] = \
+            f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self._get_test_file().name)}"
         post_data['cover'] = self._get_test_cover()
 
         # 0 - object with this id cannot exist
@@ -395,9 +406,11 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['tags'] = self.test_tags_id_post_format
-        post_data['file'] = self._get_test_file()
+        post_data['file_key'] = \
+            f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self._get_test_file().name)}"
         post_data['cover'] = self._get_test_cover()
 
         response = self.client.post(reverse('update_media', kwargs={'media_id': self.not_active_media.id}), post_data)
@@ -415,9 +428,11 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['tags'] = self.test_tags_id_post_format
-        post_data['file'] = self._get_test_file()
+        post_data['file_key'] = \
+            f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self._get_test_file().name)}"
         post_data['cover'] = self._get_test_cover()
 
         response = self.client.post(reverse('update_media', kwargs={'media_id': self.second_user_media.id}), post_data)
@@ -427,6 +442,7 @@ class UpdateMediaTestCase(TestCase):
 
         self.client.logout()
 
+    @override_settings(IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD=True)
     def test_post_incorrect_data(self):
 
         self.client.force_login(self.user)
@@ -435,6 +451,7 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['title'] = self.second_user_media_data['title']
         post_data['description'] = self.second_user_media_data['description']
@@ -454,8 +471,8 @@ class UpdateMediaTestCase(TestCase):
             'description': 'Not a unique description, change it.',
             'author': 'This field is required.',
             'tags': f'“{bad_tags_post_data}” is not a valid value.',
-            'file': 'The submitted file is empty.',  # empty because the caret is at the end of the file
             'cover': 'The submitted file is empty.',  # empty because the caret is at the end of the file
+            None: 'Something went wrong with your request, please try again or contact support (code: 6.2)',
         }
 
         for field, error in form_errors.items():
@@ -471,9 +488,9 @@ class UpdateMediaTestCase(TestCase):
 
         del post_data['user_who_added']
         del post_data['active']
+        del post_data['file']
 
         post_data['tags'] = self.test_tags_id_post_format
-        post_data['file'] = self._get_test_file()
         post_data['cover'] = self._get_test_cover()
 
         response = self.client.post(reverse('update_media', kwargs={'media_id': self.media.id}), post_data, follow=True)
@@ -490,16 +507,13 @@ class UpdateMediaTestCase(TestCase):
         self.assertEqual(self.media.author, post_data['author'])
         self.assertEqual([str(tag['id']) for tag in self.media.tags.values()], post_data['tags'])
 
-        with self.media.file.open('rb') as media_file:
-            with post_data['file'].open('rb') as post_data_file:
-                self.assertEqual(media_file.read(), post_data_file.read())
-
         with self.media.cover.open('rb') as media_cover:
             with post_data['cover'].open('rb') as post_data_cover:
                 self.assertEqual(media_cover.read(), post_data_cover.read())
 
         self.client.logout()
 
+    @override_settings(IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD=True)
     def test_post(self):
 
         self.client.force_login(self.user)
@@ -509,7 +523,8 @@ class UpdateMediaTestCase(TestCase):
             'description': 'test_new_description',
             'author': 'test_new_author',
             'tags': [str(self.test_tag_1.id)],
-            'file': self._get_test_file(file_content=b'test_new_file_content'),
+            'file_key':
+                f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(self.user.username, self._get_test_file().name)}",
             'cover': self._get_test_cover(image_colorname='green'),
         }
 
@@ -526,10 +541,6 @@ class UpdateMediaTestCase(TestCase):
         self.assertEqual(self.media.description, post_data['description'])
         self.assertEqual(self.media.author, post_data['author'])
         self.assertEqual([str(tag['id']) for tag in self.media.tags.values()], post_data['tags'])
-
-        with self.media.file.open('rb') as media_file:
-            with post_data['file'].open('rb') as post_data_file:
-                self.assertEqual(media_file.read(), post_data_file.read())
 
         with self.media.cover.open('rb') as media_cover:
             with post_data['cover'].open('rb') as post_data_cover:
@@ -726,8 +737,7 @@ class ViewMediaTestCase(TestCase):
 
         # add cover:
         page_should_contain.append(
-            f'<img src="{settings.MEDIA_URL}{get_cover_upload(self.media, self.media_data["cover"].name)}"'
-            f' class="float-end mb-5 me-5 cover_image">'
+            f'<img src="{settings.MEDIA_URL}{self.media.cover}" class="float-end mb-5 me-5 cover_image">'
         )
 
         # add pub date:
@@ -763,8 +773,7 @@ class ViewMediaTestCase(TestCase):
 
         # add cover:
         page_should_contain.append(
-            f'<img src="{settings.MEDIA_URL}{get_cover_upload(self.media, self.media_data["cover"].name)}"'
-            f' class="float-end mb-5 me-5 cover_image">'
+            f'<img src="{settings.MEDIA_URL}{self.media.cover}" class="float-end mb-5 me-5 cover_image">'
         )
 
         # add pub date:
@@ -784,7 +793,7 @@ class ViewMediaTestCase(TestCase):
 
         file_download_button_tag: str = \
             f'<a id="download_link" class="btn btn-primary"' \
-            f' href="{settings.MEDIA_URL}{get_file_upload(self.media, self.media_data["file"].name)}"' \
+            f' href="{settings.MEDIA_URL}{self.media.file}"' \
             f' download>Download file'.replace(' ', '')
 
         self.assertIn(file_download_button_tag, response_content)

@@ -1,31 +1,60 @@
+from json import dumps
+
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.views import View
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db.models import QuerySet
+from django.conf import settings
 
 from crispy_forms.utils import render_crispy_form
 
-from json import dumps
-
-from .models import Media, MediaDownload, Comment, CommentRating, Report
+from .models import Media, MediaDownload, Comment, CommentRating, Report, get_upload
 from .forms import CreateOrUpdateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm,\
     CreateReportMediaForm
 from staff_app.models import ModeratorTask
 from staff_app.views import ViewModeratorPage
 from home_page_app.views import handler403, handler404
 from utils_app.services import messages_to_json
+from app_main.s3_storage import get_s3_connection
 
 
 User = get_user_model()
 ViewModeratorPage = ViewModeratorPage()
+
+
+class S3AuthView(View):
+
+    @staticmethod
+    def get_form_args_to_s3(key):
+
+        s3 = get_s3_connection()
+
+        conditions = [
+            ['content-length-range', 1, max(settings.FILE_UPLOAD_MAX_SIZE, settings.COVER_UPLOAD_MAX_SIZE)],
+        ]
+
+        return s3.generate_presigned_post(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key, Conditions=conditions)
+
+    def get(self, request):
+
+        key = f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(request.user.username, request.GET['file_name'])}"
+
+        form_args = self.get_form_args_to_s3(key)
+
+        fields = {'form_args': {}}
+
+        fields['form_args']['url'] = form_args['url']
+        fields['form_args']['fields'] = {key: value for key, value in form_args['fields'].items()}
+
+        return JsonResponse(fields)
 
 
 class ViewCreateMedia(LoginRequiredMixin, CreateView):

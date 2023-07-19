@@ -100,7 +100,7 @@ else:
 
     ADMINS = handled_admins
 
-MEDIA_STORAGE_BUCKET_NAME = env('MEDIA_STORAGE_BUCKET_NAME', default=None)
+AWS_STORAGE_BUCKET_NAME = MEDIA_STORAGE_BUCKET_NAME = env('MEDIA_STORAGE_BUCKET_NAME', default=None)
 
 if not MEDIA_STORAGE_BUCKET_NAME:
     env_var_not_set_handler('MEDIA_STORAGE_BUCKET_NAME', context='site is not running', error_level='ERROR')
@@ -114,6 +114,30 @@ AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
 
 if not AWS_SECRET_ACCESS_KEY:
     env_var_not_set_handler('AWS_SECRET_ACCESS_KEY', context='site is not running', error_level='ERROR')
+
+
+FILE_UPLOAD_MAX_SIZE = env('FILE_UPLOAD_MAX_SIZE', default=None)
+
+if not FILE_UPLOAD_MAX_SIZE:
+
+    FILE_UPLOAD_MAX_SIZE = 1024 * 1024 * 300  # 300Mb
+
+    env_var_not_set_handler('FILE_UPLOAD_MAX_SIZE', context=f'used {FILE_UPLOAD_MAX_SIZE}', error_level='WARNING')
+
+else:
+    FILE_UPLOAD_MAX_SIZE = int(FILE_UPLOAD_MAX_SIZE)
+
+
+COVER_UPLOAD_MAX_SIZE = env('COVER_UPLOAD_MAX_SIZE', default=None)
+
+if not COVER_UPLOAD_MAX_SIZE:
+
+    COVER_UPLOAD_MAX_SIZE = 1024 * 1024 * 7  # 7Mb
+
+    env_var_not_set_handler('COVER_UPLOAD_MAX_SIZE', context=f'used {COVER_UPLOAD_MAX_SIZE}', error_level='WARNING')
+
+else:
+    COVER_UPLOAD_MAX_SIZE = int(COVER_UPLOAD_MAX_SIZE)
 
 
 # Application definition
@@ -230,7 +254,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
@@ -414,4 +438,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 DEFAULT_FILE_STORAGE = 'app_main.s3_storage.MediaStorage'
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
 AWS_QUERYSTRING_AUTH = False
-AWS_S3_REGION_NAME = 'storage'
+AWS_S3_REGION_NAME = 'ru-central1'
+TEST_RUNNER = 'app_main.test_runner.FastTestRunner'
+
+# VARIABLES FOR TESTS ONLY!!! DO NOT CHANGE!!! SECURITY RISKS!!!
+IS_TEST = False  # must be False, do not change
+IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD = False  # must be False, do not change
