@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
-from .views import ViewCreateMedia, ViewViewMedia, ViewUpdateMedia
+from .views import ViewCreateMedia, ViewViewMedia, ViewUpdateMedia, S3AuthView
 
 urlpatterns = [
     path('create/', ViewCreateMedia.as_view(), name='create_media'),
@@ -17,4 +17,5 @@ urlpatterns = [
         TemplateView.as_view(template_name='media_app/update_media_successful.html'),
         name='update_media_successful',
     ),
+    path('create_or_update/s3auth/', S3AuthView.as_view(), name='s3auth'),
 ]

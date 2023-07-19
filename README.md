@@ -105,6 +105,13 @@ CACHE_REDIS_LOCATIONS=
 EMAIL_HOST_USER=<your email adress>
 EMAIL_HOST_PASSWORD=<your email password>
 
+MEDIA_STORAGE_BUCKET_NAME=<your media storage bucket name>
+AWS_ACCESS_KEY_ID=<your bucket access key id>
+AWS_SECRET_ACCESS_KEY=<your bucket secret access key>
+
+FILE_UPLOAD_MAX_SIZE=3221225472  # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value must be integer, not 7.5Mb)
+COVER_UPLOAD_MAX_SIZE=7340032  # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value must be integer, not 7.5Mb)
+
 LANGUAGE_CODE=en-us
 ```
 _**Do not forget to set the DB_URL variable!**_
@@ -128,6 +135,15 @@ can be empty if you are not using Redis caching, can take more than one location
 **Warning!** The project uses **yandex smtp** as [email host variable](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host).<br>
 EMAIL_HOST_USER - standard [django email host user](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-user).<br>
 EMAIL_HOST_PASSWORD - standard [django email host password](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-password).<br>
+
+**Warning!** The project uses **yandexcloud** for s3 storage (implemented using [django-storages](https://pypi.org/project/django-storages/) and [boto3](https://pypi.org/project/boto3/)).<br>
+MEDIA_STORAGE_BUCKET_NAME - standard [S3Boto3Storage bucket_name](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=bucket_name#overriding-the-default-storage-class).<br>
+AWS_ACCESS_KEY_ID - standard [AWS_ACCESS_KEY_ID](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_ACCESS_KEY_ID#settings).<br>
+AWS_SECRET_ACCESS_KEY - standard [AWS_SECRET_ACCESS_KEY](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_SECRET_ACCESS_KEY#settings).<br>
+
+**Warning!** If you want to change the values of the maximum upload size, change it also in [nginx configuration file](nginx/nginx.conf) (change the value of client_max_body_size).<br>
+FILE_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
+COVER_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 
@@ -193,6 +209,13 @@ CACHE_REDIS_LOCATIONS=
 EMAIL_HOST_USER=<your email adress>
 EMAIL_HOST_PASSWORD=<your email password>
 
+MEDIA_STORAGE_BUCKET_NAME=<your media storage bucket name>
+AWS_ACCESS_KEY_ID=<your bucket access key id>
+AWS_SECRET_ACCESS_KEY=<your bucket secret access key>
+
+FILE_UPLOAD_MAX_SIZE=3221225472  # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value must be integer, not 7.5Mb)
+COVER_UPLOAD_MAX_SIZE=7340032  # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value must be integer, not 7.5Mb)
+
 LANGUAGE_CODE=en-us
 
 # docker-compose section
@@ -225,6 +248,15 @@ can be empty if you are not using Redis caching, can take more than one location
 **Warning!** The project uses **yandex smtp** as [email host variable](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host).<br>
 EMAIL_HOST_USER - standard [django email host user](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-user).<br>
 EMAIL_HOST_PASSWORD - standard [django email host password](https://docs.djangoproject.com/en/4.1/ref/settings/#email-host-password).<br>
+
+**Warning!** The project uses **yandexcloud** for s3 storage (implemented using [django-storages](https://pypi.org/project/django-storages/) and [boto3](https://pypi.org/project/boto3/)).<br>
+MEDIA_STORAGE_BUCKET_NAME - standard [S3Boto3Storage bucket_name](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=bucket_name#overriding-the-default-storage-class).<br>
+AWS_ACCESS_KEY_ID - standard [AWS_ACCESS_KEY_ID](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_ACCESS_KEY_ID#settings).<br>
+AWS_SECRET_ACCESS_KEY - standard [AWS_SECRET_ACCESS_KEY](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html?highlight=AWS_SECRET_ACCESS_KEY#settings).<br>
+
+**Warning!** If you want to change the values of the maximum upload size, change it also in [nginx configuration file](nginx/nginx.conf) (change the value of client_max_body_size).<br>
+FILE_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
+COVER_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 

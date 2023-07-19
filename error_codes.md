@@ -82,3 +82,16 @@ Description: unknown POST request "tags" field value(s).
 
 Location: home_page_app/views.py/ViewIndex/post.
 Description: unexpected get_language() result.
+
+
+# 6:
+
+### 6.1:
+
+Location: media_app/forms.py/CreateOrUpdateMediaForm/clean.
+Description: a media file must not be sent to a django server.
+
+### 6.2:
+
+Location: media_app/forms.py/CreateOrUpdateMediaForm/clean.
+Description: unexpected combination of a file_key and file (in update media).

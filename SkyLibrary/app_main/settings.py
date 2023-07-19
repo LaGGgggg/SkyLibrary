@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
 import sys
 import dj_database_url
 from pathlib import Path
@@ -36,10 +35,7 @@ LOGS_DIR = BASE_DIR.joinpath('logs')
 SECRET_KEY = env('SECRET_KEY', default=None)
 
 if not SECRET_KEY:
-
-    SECRET_KEY = os.urandom(32)
-
-    env_var_not_set_handler('SECRET_KEY', context='used random', error_level='CRITICAL')
+    env_var_not_set_handler('SECRET_KEY', context='site is not running', error_level='CRITICAL')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=None)
@@ -104,6 +100,45 @@ else:
 
     ADMINS = handled_admins
 
+AWS_STORAGE_BUCKET_NAME = MEDIA_STORAGE_BUCKET_NAME = env('MEDIA_STORAGE_BUCKET_NAME', default=None)
+
+if not MEDIA_STORAGE_BUCKET_NAME:
+    env_var_not_set_handler('MEDIA_STORAGE_BUCKET_NAME', context='site is not running', error_level='ERROR')
+
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
+
+if not AWS_ACCESS_KEY_ID:
+    env_var_not_set_handler('AWS_ACCESS_KEY_ID', context='site is not running', error_level='ERROR')
+
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
+
+if not AWS_SECRET_ACCESS_KEY:
+    env_var_not_set_handler('AWS_SECRET_ACCESS_KEY', context='site is not running', error_level='ERROR')
+
+
+FILE_UPLOAD_MAX_SIZE = env('FILE_UPLOAD_MAX_SIZE', default=None)
+
+if not FILE_UPLOAD_MAX_SIZE:
+
+    FILE_UPLOAD_MAX_SIZE = 1024 * 1024 * 300  # 300Mb
+
+    env_var_not_set_handler('FILE_UPLOAD_MAX_SIZE', context=f'used {FILE_UPLOAD_MAX_SIZE}', error_level='WARNING')
+
+else:
+    FILE_UPLOAD_MAX_SIZE = int(FILE_UPLOAD_MAX_SIZE)
+
+
+COVER_UPLOAD_MAX_SIZE = env('COVER_UPLOAD_MAX_SIZE', default=None)
+
+if not COVER_UPLOAD_MAX_SIZE:
+
+    COVER_UPLOAD_MAX_SIZE = 1024 * 1024 * 7  # 7Mb
+
+    env_var_not_set_handler('COVER_UPLOAD_MAX_SIZE', context=f'used {COVER_UPLOAD_MAX_SIZE}', error_level='WARNING')
+
+else:
+    COVER_UPLOAD_MAX_SIZE = int(COVER_UPLOAD_MAX_SIZE)
+
 
 # Application definition
 
@@ -119,6 +154,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'crispy_forms',
     'crispy_bootstrap5',
+    'storages',
 
     'utils_app',
     'accounts_app',
@@ -218,7 +254,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
@@ -303,11 +339,7 @@ if USE_CACHE:
         CACHE_REDIS_LOCATIONS = env('CACHE_REDIS_LOCATIONS', default='unset').split(', ')
 
         if CACHE_REDIS_LOCATIONS == ['unset']:
-            """
-            CACHE_LOCATIONS unset is critical for the project (because it causes an error when loading the template) -->
-            we don't use cache otherwise other parts of the project don't work
-            """
-            env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='not used', error_level='ERROR')
+            env_var_not_set_handler('CACHE_REDIS_LOCATIONS', context='site is not running', error_level='ERROR')
 
         else:
             CACHES = {
@@ -333,10 +365,10 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # needed for not error response
 
     if not EMAIL_HOST_USER:
-        env_var_not_set_handler('EMAIL_HOST_USER', context='not used', error_level='ERROR')
+        env_var_not_set_handler('EMAIL_HOST_USER', context='site is not running', error_level='ERROR')
 
     if not EMAIL_HOST_PASSWORD:
-        env_var_not_set_handler('EMAIL_HOST_PASSWORD', context='not used', error_level='ERROR')
+        env_var_not_set_handler('EMAIL_HOST_PASSWORD', context='site is not running', error_level='ERROR')
 
 else:
 
@@ -403,3 +435,12 @@ LOGOUT_REDIRECT_URL = 'logout_successful'
 ACCOUNT_ACTIVATION_DAYS = 10
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
+DEFAULT_FILE_STORAGE = 'app_main.s3_storage.MediaStorage'
+AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_REGION_NAME = 'ru-central1'
+TEST_RUNNER = 'app_main.test_runner.FastTestRunner'
+
+# VARIABLES FOR TESTS ONLY!!! DO NOT CHANGE!!! SECURITY RISKS!!!
+IS_TEST = False  # must be False, do not change
+IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD = False  # must be False, do not change

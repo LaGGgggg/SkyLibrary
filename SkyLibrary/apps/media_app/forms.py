@@ -1,7 +1,10 @@
+from logging import getLogger
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models import QuerySet
+from django.conf import settings
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field
@@ -9,6 +12,10 @@ from crispy_forms.bootstrap import FormActions
 from crispy_bootstrap5.bootstrap5 import FloatingField
 
 from .models import Media, MediaTags, ReportType
+from app_main.s3_storage import get_s3_connection
+
+
+logger = getLogger(__name__)
 
 
 class CreateOrUpdateMediaForm(forms.ModelForm):
@@ -16,10 +23,13 @@ class CreateOrUpdateMediaForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         queryset=MediaTags.objects.all(),
+        label=_('Tags'),
     )
+    file = forms.FileField(required=False, label=_('File'))
+    file_key = forms.CharField(required=False, max_length=300, widget=forms.HiddenInput())
 
     def _is_update(self) -> bool:
-        return True if self.instance else False
+        return True if self.instance.title else False
 
     def clean_title(self):
 
@@ -75,19 +85,124 @@ class CreateOrUpdateMediaForm(forms.ModelForm):
 
         return checking_object
 
-    def clean_file(self):
-        # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value should be integer, not 7.5Mb)
-        return self._check_object_size('file', 3221225472)
-
     def clean_cover(self):
-        # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value should be integer, not 7.5Mb)
-        return self._check_object_size('cover', 7340032)
+        return self._check_object_size('cover', settings.COVER_UPLOAD_MAX_SIZE)
+
+    def clean_file_key(self) -> None | str:
+
+        error_message = _(
+            'Something went wrong, you may not have specified the file field, please try again or contact support'
+        )
+
+        try:
+
+            file_key = self.cleaned_data['file_key']
+
+            if not file_key:
+
+                if not self._is_update():
+                    self.add_error(None, ValidationError(error_message, code='required'))
+
+                return
+
+            if settings.IS_TEST:  # USED FOR TESTING PURPOSES ONLY!!!
+
+                logger.warning('The IS_TEST variable is used. It can only be used for testing purposes!')
+
+                return file_key  # local storage, not s3
+
+            else:
+
+                s3 = get_s3_connection()
+
+                s3_objects = [i['Key'] for i in s3.list_objects(Bucket=settings.MEDIA_STORAGE_BUCKET_NAME)['Contents']]
+
+                if file_key in s3_objects:
+                    return file_key
+
+                else:
+
+                    self.add_error(None, ValidationError(error_message, code='file_not_exists_in_s3_storage'))
+
+                    return
+
+        except KeyError:
+
+            self.add_error(None, ValidationError(error_message, code='required'))
+
+            return
+
+    def clean(self):
+
+        if settings.IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD:  # USED FOR TESTING PURPOSES ONLY!!!
+
+            logger.warning(
+                'The IS_UPDATE_MEDIA_POST_NEED_CLEAN_FILE_FIELD variable is used.'
+                ' It can only be used for testing purposes!'
+            )
+
+            self.cleaned_data['file'] = None
+
+        if self._is_update():
+
+            try:
+                if file_key := self.cleaned_data['file_key']:
+                    file_key = file_key.replace(settings.MEDIA_URL.replace('/', '', 1), '')
+
+            except KeyError:
+                file_key = None
+
+            try:
+                file = self.cleaned_data['file']
+
+            except KeyError:
+                file = None
+
+            if file_key and not file:
+                # file changed
+                self.cleaned_data['file'] = file_key
+
+            elif not file_key and file:
+                # file has not changed
+                pass
+
+            else:
+
+                error_message = _(
+                    'Something went wrong with your request, please try again or contact support (code: {error_code})'
+                )
+
+                self.add_error(None, ValidationError(error_message.format(error_code='6.2'), code='invalid'))
+
+        else:
+            if file_key := self.cleaned_data['file_key']:
+
+                # media/media_app/vnfuewbfubfjkdkfkfkkdfkfkkfeke/24527bd7-e4f7-4c76-9bc9-2a188fec11cb.txt ->
+                # -> media_app/vnfuewbfubfjkdkfkfkkdfkfkkfeke/24527bd7-e4f7-4c76-9bc9-2a188fec11cb.txt
+                file_key = file_key.replace(settings.MEDIA_URL.replace('/', '', 1), '')
+
+                file = self.cleaned_data['file']
+
+                if not file:
+                    # the file should not be sent to a django server
+                    self.cleaned_data['file'] = file_key  # add the file key (the file already on a storage server)
+
+                else:
+
+                    error_message = _(
+                        'Something went wrong with your request,'
+                        ' please try again or contact support (code: {error_code})'
+                    )
+
+                    self.add_error(None, ValidationError(error_message.format(error_code='6.1'), code='invalid'))
+
+        return super().clean()
 
     class Meta:
 
         model = Media
 
-        fields = ['title', 'description', 'author', 'tags', 'file', 'cover']
+        fields = ['title', 'description', 'author', 'tags', 'file', 'file_key', 'cover']
 
 
 class CreateCommentForm(forms.Form):

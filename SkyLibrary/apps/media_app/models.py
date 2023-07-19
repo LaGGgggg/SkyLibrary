@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+from logging import getLogger
+from uuid import uuid4
+
 from django.db import models
 from django.db.models import Avg, Count, Sum, QuerySet
 from django.contrib.auth import get_user_model
@@ -5,10 +9,6 @@ from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import get_language
 from django.urls import reverse
-
-from datetime import datetime, timedelta
-from logging import getLogger
-
 
 logger = getLogger(__name__)
 
@@ -43,12 +43,28 @@ class MediaTags(models.Model):
         verbose_name_plural = _('media tags')
 
 
-def get_file_upload(instance, filename: str) -> str:
-    return f'media_app/{instance.author}/{instance.title}.{filename.split(".")[-1]}'
+def get_upload(instance_or_username, filename: str) -> str:
+    """
+    instance_or_username: "Media" class instance or username (str)
+    """
 
+    if isinstance(instance_or_username, str):
+        username = instance_or_username
 
-def get_cover_upload(instance, filename: str) -> str:
-    return f'media_app/{instance.author}/{instance.title}_cover.{filename.split(".")[-1]}'
+    else:
+        username = instance_or_username.user_who_added.username
+
+    while True:
+
+        result = f'media_app/{username}/{uuid4()}.{filename.split(".")[-1]}'
+
+        try:
+            Media.objects.get(file=result)  # not unique => regenerate
+
+        except Media.DoesNotExist:
+            break  # unique => all ok
+
+    return result
 
 
 class Media(models.Model):
@@ -72,8 +88,8 @@ class Media(models.Model):
     )
     tags = models.ManyToManyField(MediaTags, related_name='tags_media', verbose_name=_('tags'))
     active = models.PositiveSmallIntegerField(choices=active_choices, default=0, verbose_name=_('active'))
-    file = models.FileField(upload_to=get_file_upload, verbose_name=_('file'))
-    cover = models.ImageField(upload_to=get_cover_upload, null=True, blank=True, verbose_name=_('cover'))
+    file = models.FileField(upload_to=get_upload, verbose_name=_('file'), max_length=300)
+    cover = models.ImageField(upload_to=get_upload, null=True, blank=True, verbose_name=_('cover'), max_length=300)
 
     def __str__(self):
         return self.title

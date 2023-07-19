@@ -1,6 +1,7 @@
+import logging
 from datetime import datetime
 
-import logging
+from django.core.exceptions import ImproperlyConfigured
 
 LOGS_FILE_NAME = 'logs.log'
 ERROR_LEVELS = ('ERROR', 'WARNING', 'CRITICAL')
@@ -33,3 +34,6 @@ def env_var_not_set_handler(variable_name: str, context='no context', error_leve
     # write in logs file:
     with open(LOGS_FILE_NAME, 'a+') as logs_file:
         logs_file.write(error_message)
+
+    if error_level in ['CRITICAL', 'ERROR']:
+        raise ImproperlyConfigured(error_message)
