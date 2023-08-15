@@ -224,12 +224,12 @@
         {% endfor %}
     </section>
     {% if is_moderate %}
-        {% cache 31536000 view_media_page_moderator_content LANGUAGE_CODE %}
-            <section class="border border-danger mt-5 d-inline-block pt-1 pb-1 ps-2 pe-2">
-                <h5 class="text-center">{% translate 'Moderate' %}:</h5>
-                <hr class="mt-2 mb-2 border-danger">
-                <form method="post">
-                    {% csrf_token %}
+        <section class="border border-danger mt-5 d-inline-block pt-1 pb-1 ps-2 pe-2">
+            <h5 class="text-center">{% translate 'Moderate' %}:</h5>
+            <hr class="mt-2 mb-2 border-danger">
+            <form method="post">
+                {% csrf_token %}
+                {% cache 31536000 view_media_page_moderator_content LANGUAGE_CODE %}
                     <section class="form-check">
                         <input class="form-check-input" type="radio" name="is_approve_radio" id="is_approve_radio_approve" value="approve">
                         <label class="form-check-label" for="is_approve_radio_approve">
@@ -256,9 +256,9 @@
                             {% translate 'No auto new task' %}
                         </label>
                     </section>
-                </form>
-            </section>
-        {% endcache %}
+                {% endcache %}
+            </form>
+        </section>
     {% endif %}
 {% endblock content %}
 {% block scripts %}
