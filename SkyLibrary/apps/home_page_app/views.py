@@ -67,7 +67,7 @@ class ViewIndex(View):
 
     @staticmethod
     def _search_by_text(text: str) -> QuerySet:
-        return Media.objects.filter(active=Media.ACTIVE, title__contains=text).order_by('-id')
+        return Media.objects.filter(active=Media.ACTIVE, title__icontains=text).order_by('-id')
 
     @staticmethod
     def _search_by_tags(tags: QuerySet[MediaTags], query_set: QuerySet[Media] = None) -> QuerySet:
