@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models import QuerySet
 from django.conf import settings
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Field
@@ -173,6 +175,36 @@ class CreateOrUpdateMediaForm(forms.ModelForm):
                 )
 
                 self.add_error(None, ValidationError(error_message.format(error_code='6.2'), code='invalid'))
+
+            media_id = self.instance.id
+
+            cache_keys = [
+                make_template_fragment_key('view_media_page_viewer_content_1', [media_id]),
+                make_template_fragment_key('view_media_page_viewer_content_3'),
+                make_template_fragment_key('view_media_page_viewer_content_5', [media_id]),
+            ]
+
+            for language in settings.LANGUAGES:
+
+                language_code = language[0]
+
+                cache_keys.append(
+                    make_template_fragment_key('view_media_page_header', [media_id, language_code])
+                )
+
+                cache_keys.append(
+                    make_template_fragment_key('view_media_page_viewer_content_2', [media_id, language_code])
+                )
+
+                cache_keys.append(
+                    make_template_fragment_key('view_media_page_viewer_content_4', [language_code])
+                )
+
+                cache_keys.append(
+                    make_template_fragment_key('view_media_page_viewer_content_6', [media_id, language_code])
+                )
+
+            cache.delete_many(cache_keys)
 
         else:
             if file_key := self.cleaned_data['file_key']:
