@@ -792,7 +792,7 @@ class ViewMediaTestCase(TestCase):
         self.assertIn(downloads_number_tag, response_content)
 
         file_download_button_tag: str = \
-            f'<a id="download_link" class="btn btn-primary"' \
+            f'<a id="download_link" class="btn btn-outline-primary"' \
             f' href="{settings.MEDIA_URL}{self.media.file}"' \
             f' download>Download file'.replace(' ', '')
 

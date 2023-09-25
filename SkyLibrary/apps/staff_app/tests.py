@@ -157,7 +157,7 @@ class ModeratorPageTestCase(TestCase):
         self.assertTemplateUsed(response, 'staff_app/moderator_page.html')
 
         get_new_moderator_task_button_tag: str = \
-            f'<button type="submit" class="btn btn-primary mt-1" id="receive_task_button">Receive task</button>'
+            f'<button type="submit" class="btn btn-outline-primary mt-1" id="receive_task_button">Receive task</button>'
 
         self.assertContains(response, get_new_moderator_task_button_tag)
 
