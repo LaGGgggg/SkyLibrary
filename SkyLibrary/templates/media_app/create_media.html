@@ -22,7 +22,7 @@
         <form method="post" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             {{ form|crispy }}
-            <button type="submit" class="btn btn-primary">{% translate 'Submit' %}</button>
+            <button type="submit" class="btn btn-outline-primary">{% translate 'Submit' %}</button>
         </form>
     {% endblock content %}
 {% endcache %}

@@ -18,7 +18,7 @@
         <form method="post" class="mb-2">
             {% csrf_token %}
             {{ form|crispy }}
-            <button type="submit" class="btn btn-primary">{% translate 'Log in' %}</button>
+            <button type="submit" class="btn btn-outline-primary">{% translate 'Log in' %}</button>
         </form>
         <a href="{% url 'password_reset' %}">{% translate 'password recovery' %}</a>
     {% endblock content %}

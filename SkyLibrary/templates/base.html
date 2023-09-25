@@ -16,14 +16,14 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="collapse navbar-collapse">
-            <ul class="navbar-nav">{% block top_panel %}{% endblock top_panel %}</ul>
+            <ul class="navbar-nav fw-bold">{% block top_panel %}{% endblock top_panel %}</ul>
         </div>
     </nav>
     <h1>{% block header %}{% endblock header %}</h1>
     <div>{% block content %}{% endblock content %}</div>
     <!-- 31536000 = one year, it doesn't change -->
     {% cache 31536000 footer LANGUAGE_CODE %}
-        <footer class="position-fixed end-0 bottom-0 small mb-3 me-4 p-1 ps-2 pe-2 rounded" style="background: #55FFB1;">
+        <footer class="position-fixed end-0 bottom-0 small mb-3 me-4 p-1 ps-2 pe-2 rounded support-footer">
             {% translate 'Support' %}: <address class="d-inline ms-1">TulNik0@yandex.ru</address>
         </footer>
     {% endcache %}

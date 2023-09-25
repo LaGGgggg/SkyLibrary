@@ -1,8 +1,9 @@
 .rating {
+    color: #358aff;
     font-size: 120%;
 }
 .rating__stars_body::before {
-    color: #4F80E8;
+    color: #7fb5ff;
     content: '★★★★★';
 }
 .rating__stars {

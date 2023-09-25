@@ -8,23 +8,26 @@
 .dot {
     height: 8px;
     width: 8px;
-    background-color: #00DCFF;
+    background-color: #53a9ff;
     border-radius: 50%;
     display: inline-block;
 }
+.dot-gray {
+    background-color: #7d93b2;
+}
 .vote-button {
-    color: #00C7FF;
+    color: #53a9ff;
     height: 1em;
     cursor: pointer;
 }
 .vote-button:hover {
-    color: #002AFF;
+    color: #358aff;
 }
 .vote-button-active {
-    color: #002AFF;
+    color: #358aff;
 }
 .reply-button {
-    color: #002AFF;
+    color: #358aff;
 }
 .reply-button:hover {
     font-weight: 400!important;
@@ -33,8 +36,11 @@ ion-icon {
     pointer-events: none;
 }
 .report-button {
-    color: #002AFF;
+    color: #358aff;
 }
 .media-report-button {
-    color: #002AFF;
+    color: #358aff;
+}
+.dynamic-data-text {
+    color: #7d93b2;
 }

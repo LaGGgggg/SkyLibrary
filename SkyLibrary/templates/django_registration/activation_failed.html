@@ -10,7 +10,7 @@
     {% endblock header %}
     {% block content %}
         {{ activation_error.message }}<br>
-        <button onclick="location.href='{% url 'index' %}'" class="btn btn-primary">{% translate 'Home page' %}</button>
+        <button onclick="location.href='{% url 'index' %}'" class="btn btn-outline-primary">{% translate 'Home page' %}</button>
     {% endblock content %}
 {% endcache %}
 </html>

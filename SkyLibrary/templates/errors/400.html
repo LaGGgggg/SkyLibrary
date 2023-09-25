@@ -13,7 +13,7 @@
     {% endblock header %}
     {% block content %}
         {% translate 'Oops, invalid url' %}
-        <h2><button onclick="location.href='{% url 'index' %}'" class="btn btn-primary">{% translate 'Home page' %}</button></h2>
+        <h2><button onclick="location.href='{% url 'index' %}'" class="btn btn-outline-primary">{% translate 'Home page' %}</button></h2>
     {% endblock content %}
 {% endcache %}
 </html>

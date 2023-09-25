@@ -90,7 +90,7 @@
     {% endcache %}
     {% if user.is_authenticated %}
         <section class="mt-3">
-            <a id="download_link" class="btn btn-primary" href="{{ media.file.url }}" download>
+            <a id="download_link" class="btn btn-outline-primary" href="{{ media.file.url }}" download>
                 {% translate 'Download file' %}
                 <span class="small" id="downloads_number">
                     {{ media.get_downloads_number }}
@@ -144,7 +144,7 @@
                         <span class="fw-bold me-1">{{ comment_dict.comment.user_who_added }}</span>
                     {% endcache %}
                     {% cache 31536000 view_media_page_comment_or_reply_3 %}
-                        <span class="dot"></span>
+                        <span class="dot dot-gray"></span>
                     {% endcache %}
                     <span class="fw-light ms-1">{{ comment_dict.comment.pub_date|naturaltime }}</span>
                 </section>
@@ -191,7 +191,7 @@
                             </section>
                         {% endcache %}
                     {% endif %}
-                    <section class="ms-2 mt-1" data-vote-rating-section-target-id="{{ comment_dict.comment.id }}">
+                    <section class="ms-2 mt-1 dynamic-data-text" data-vote-rating-section-target-id="{{ comment_dict.comment.id }}">
                         {{ comment_dict.comment.get_rating }}
                     </section>
                     <span class="dot ms-2 mt-1"></span>

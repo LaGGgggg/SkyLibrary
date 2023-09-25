@@ -13,7 +13,7 @@ $(document).ready(function() {
                 let messages_ul = '<ul class="mt-2 text-danger" id="search_media_form_messages"></ul>';
 
                 let section_for_search_media_form_tag = $('#section_for_search_media_form');
-                section_for_search_media_form_tag.addClass('border border-info mb-2');
+                section_for_search_media_form_tag.addClass('border border-secondary-0 mb-2');
 
                 let section_for_search_results = '<section id="section_for_search_results" class="m-2"></section>';
 

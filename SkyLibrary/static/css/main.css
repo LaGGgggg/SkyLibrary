@@ -1,7 +1,7 @@
 body {
     margin: 14px;
-    background: #55FFB1;
-    color: #002AFF;
+    background: #f7fbff;
+    color: #7d93b2;
     min-height: 100vh;
 }
 div {
@@ -11,13 +11,22 @@ h1 {
     margin-top: 10px;
 }
 .navbar {
-    background: #34ECFB;
+    background: #ffffff;
     border-radius: 30px;
-    border: 1px solid #00C4FF;
+    border: 1px solid #7d93b2;
 }
 .navbar a {
-    color: #002AFF;
+    color: #7fb5ff;
+}
+.navbar a:hover {
+    color: #358aff;
 }
 .navbar-nav {
     font-size: 1.1em;
+}
+a {
+    color: #358aff;
+}
+.support-footer {
+    background: #f7fbff;
 }
