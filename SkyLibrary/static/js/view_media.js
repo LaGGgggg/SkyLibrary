@@ -15,8 +15,8 @@ $(document).ready(function () {
 
                 let download_link_element = $('#download_link');
 
-                download_link_element.addClass('btn-success');
-                download_link_element.removeClass('btn-primary');
+                download_link_element.addClass('btn-outline-success');
+                download_link_element.removeClass('btn-outline-primary');
             },
         });
     });
