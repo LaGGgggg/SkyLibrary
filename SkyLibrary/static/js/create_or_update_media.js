@@ -1,19 +1,21 @@
-$(document).ready(function () {
+$(document).ready(async function () {
 
     let form = $('#form');
 
     let file_input = form.find('#id_file');
 
-    file_input.before(`<section class="file-status mb-1">${waiting_text_translated}</section>`);
+    file_input.before(`<section class="d-inline file-status">${waiting_text_translated}</section>`);
+    file_input.before(`<section id="file-status-percents" class="d-inline ms-2"></section>`);
 
     let file_key_input = form.find('#id_file_key');
 
     file_key_input.val(undefined);
 
-    $(document).on('change', '#id_file', function () {
+    await $(document).on('change', '#id_file', async function () {
 
         let submit_button = form.find('button[type="submit"]');
         let status = form.find('.file-status');
+        let status_percents = form.find('#file-status-percents');
 
         if ($(this).prop('files').length === 0) {
 
@@ -27,50 +29,116 @@ $(document).ready(function () {
 
         let file = $(this).prop('files')[0];
 
-        let filename = file.name;
+        await $.ajax(`/en-us/media/create_or_update/s3auth/get_data_for_upload/${file.name}/`).done(async function (multipart_upload_data) {
 
-        $.ajax('/en-us/media/create_or_update/s3auth/?' + 'file_name=' + filename).done(function (data) {
+            const upload_id = multipart_upload_data.upload_id;
+            const file_key = multipart_upload_data.file_key;
+            const chunk_size = multipart_upload_data.chunk_size;
 
-            let form_data = new FormData();
+            const status_percents_step = Math.ceil(100 / (file.size / chunk_size));
 
-            for (let key in data.form_args.fields) {
-                if (data.form_args.fields.hasOwnProperty(key)) {
-                    form_data.append(key, data.form_args.fields[key]);
-                }
-            }
+            let chunk_number = 0;
 
-            form_data.append('file', file);
+            let chunk_start = -chunk_size;
+            let chunk_end = 0;
+
+            let chunks_numbers_with_etags = [];
+
+            let current_status_percents_value = 0;
 
             status.text(uploading_text_translated);
+            status_percents.text(`${current_status_percents_value}%`);
 
             file_input.prop('disabled', true);
             submit_button.prop('disabled', true);
 
-            $.ajax({
-                method: 'POST',
-                url: data.form_args.url,
-                data: form_data,
-                processData: false,
-                contentType: false,
-                success: function() {
+            function upload_parts() {
 
-                    status.text(uploaded_text_translated);
+                chunk_start += chunk_size;
 
-                    file_key_input.val(this.data.get('key'));
-                },
-                error: function() {
+                chunk_end = Math.min(chunk_end + chunk_size, file.size);
 
-                    status.text(error_text_translated);
+                chunk_number++;
 
-                    file_input.val('');
-                    file_key_input.val('');
-                },
-                complete: function () {
+                const chunk = file.slice(chunk_start, chunk_end);
 
-                    file_input.prop('disabled', false);
-                    submit_button.prop('disabled', false);
-                }
-            });
+                let is_break = false;
+                let is_complete_successful = true;
+
+                $.ajax(`/en-us/media/create_or_update/s3auth/get_upload_part_presigned_url/${upload_id}/${chunk_number}/${file_key}/`).done(function (upload_url) {
+                    $.when($.ajax({
+                        method: 'PUT',
+                        url: upload_url.upload_url,
+                        data: chunk,
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        success: function (data, textStatus, jqXHR) {
+
+                            current_status_percents_value += status_percents_step;
+
+                            if (current_status_percents_value >= 100) {
+                                current_status_percents_value = 99;
+                            }
+
+                            status_percents.text(`${current_status_percents_value}%`);
+
+                            chunks_numbers_with_etags.push(
+                                {'PartNumber': chunk_number, 'ETag': jqXHR.getResponseHeader('Etag').replace(new RegExp('"', 'g'), '')}
+                            );
+                        },
+                        error: function () {
+                            is_break = true;
+                            is_complete_successful = false;
+                        },
+                    })).done(function () {
+
+                        if (!is_break && (chunk_start + chunk_size >= file.size)) {
+
+                            file_input.prop('disabled', false);
+                            submit_button.prop('disabled', false);
+
+                            status_percents.text('100%');
+
+                            if (is_complete_successful) {
+
+                                status.text(uploaded_text_translated);
+
+                                file_key_input.val(file_key);
+
+                                $.ajax({
+                                    method: 'POST',
+                                    url: `/en-us/media/create_or_update/s3auth/do_complete/${upload_id}/${file_key}/`,
+                                    dataType: 'json',
+                                    data: {
+                                        'csrfmiddlewaretoken': csrf_token,
+                                        'upload_parts': JSON.stringify(chunks_numbers_with_etags),
+                                    },
+                                });
+                            } else {
+
+                                status.text(error_text_translated);
+
+                                file_input.val('');
+                                file_key_input.val('');
+
+                                $.ajax({
+                                    method: 'POST',
+                                    url: `/en-us/media/create_or_update/s3auth/do_abort/${upload_id}/${file_key}/`,
+                                    dataType: 'json',
+                                    data: {
+                                        'csrfmiddlewaretoken': csrf_token,
+                                    },
+                                });
+                            }
+                        } else {
+                            upload_parts();
+                        }
+                    });
+                });
+            }
+
+            upload_parts();
         });
     });
 

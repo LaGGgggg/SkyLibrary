@@ -32,6 +32,7 @@
         let uploading_text_translated = '{% translate 'Uploading the file' %}...';
         let uploaded_text_translated = '{% translate 'The file is uploaded, click submit to save' %}.';
         let error_text_translated = '{% translate 'Error, please try again or contact support' %}.';
+        const csrf_token = "{{ csrf_token }}";
     </script>
     <script src="{% static 'js/create_or_update_media.js' %}"></script>
 {% endblock scripts %}

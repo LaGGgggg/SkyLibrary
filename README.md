@@ -111,6 +111,7 @@ AWS_SECRET_ACCESS_KEY=<your bucket secret access key>
 
 FILE_UPLOAD_MAX_SIZE=3221225472  # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value must be integer, not 7.5Mb)
 COVER_UPLOAD_MAX_SIZE=7340032  # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value must be integer, not 7.5Mb)
+FILE_UPLOAD_CHUNK_SIZE=1073741824  # 1073741824 = 1024 * 1024 * 1024 = 1024Mb = 1Gb (value in bytes must be integer)
 
 LANGUAGE_CODE=en-us
 ```
@@ -144,6 +145,7 @@ AWS_SECRET_ACCESS_KEY - standard [AWS_SECRET_ACCESS_KEY](https://django-storages
 **Warning!** If you want to change the values of the maximum upload size, change it also in [nginx configuration file](nginx/nginx.conf) (change the value of client_max_body_size).<br>
 FILE_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
 COVER_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
+FILE_UPLOAD_CHUNK_SIZE - part size for uploading a file on the s3 server using multipart upload (the bytes value must be an integer).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 
@@ -215,6 +217,7 @@ AWS_SECRET_ACCESS_KEY=<your bucket secret access key>
 
 FILE_UPLOAD_MAX_SIZE=3221225472  # 3221225472 = 1024 * 1024 * 1024 * 3 = 3 * 1024Mb = 3072Mb (Mb value must be integer, not 7.5Mb)
 COVER_UPLOAD_MAX_SIZE=7340032  # 7340032 = 1024 * 1024 * 7 = 7Mb (Mb value must be integer, not 7.5Mb)
+FILE_UPLOAD_CHUNK_SIZE=1073741824  # 1073741824 = 1024 * 1024 * 1024 = 1024Mb = 1Gb (value in bytes must be integer)
 
 LANGUAGE_CODE=en-us
 
@@ -257,6 +260,7 @@ AWS_SECRET_ACCESS_KEY - standard [AWS_SECRET_ACCESS_KEY](https://django-storages
 **Warning!** If you want to change the values of the maximum upload size, change it also in [nginx configuration file](nginx/nginx.conf) (change the value of client_max_body_size).<br>
 FILE_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
 COVER_UPLOAD_MAX_SIZE - a maximum size of an upload file in megabytes converted to bytes (the megabytes value must be an integer).<br>
+FILE_UPLOAD_CHUNK_SIZE - part size for uploading a file on the s3 server using multipart upload (the bytes value must be an integer).<br>
 
 LANGUAGE_CODE - standard [django language code](https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-LANGUAGE_CODE).<br>
 

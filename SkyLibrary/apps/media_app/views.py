@@ -1,4 +1,5 @@
 from json import dumps
+from ast import literal_eval
 
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,11 +18,11 @@ from django.conf import settings
 from crispy_forms.utils import render_crispy_form
 
 from .models import Media, MediaDownload, Comment, CommentRating, Report, get_upload
-from .forms import CreateOrUpdateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm,\
+from .forms import CreateOrUpdateMediaForm, CreateCommentForm, CreateReplyCommentForm, CreateReportCommentForm, \
     CreateReportMediaForm
 from staff_app.models import ModeratorTask
 from staff_app.views import ViewModeratorPage
-from home_page_app.views import handler403, handler404
+from home_page_app.views import handler403, handler404, handler400
 from utils_app.services import messages_to_json
 from app_main.s3_storage import get_s3_connection
 
@@ -30,31 +31,150 @@ User = get_user_model()
 ViewModeratorPage = ViewModeratorPage()
 
 
-class S3AuthView(View):
+class S3AuthMultipartGetDataForUploadView(View):
 
     @staticmethod
-    def get_form_args_to_s3(key):
+    def get_multipart_upload_id(key: str) -> str:
 
         s3 = get_s3_connection()
 
-        conditions = [
-            ['content-length-range', 1, max(settings.FILE_UPLOAD_MAX_SIZE, settings.COVER_UPLOAD_MAX_SIZE)],
-        ]
+        return s3.create_multipart_upload(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key)['UploadId']
 
-        return s3.generate_presigned_post(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key, Conditions=conditions)
+    def get(self, request, file_name: str):
 
-    def get(self, request):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
 
-        key = f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(request.user.username, request.GET['file_name'])}"
+            file_key = f"{settings.MEDIA_URL.replace('/', '')}/{get_upload(request.user.username, file_name)}"
 
-        form_args = self.get_form_args_to_s3(key)
+            return JsonResponse({
+                'upload_id': self.get_multipart_upload_id(file_key),
+                'file_key': file_key,
+                'chunk_size': settings.FILE_UPLOAD_CHUNK_SIZE,
+            })
 
-        fields = {'form_args': {}}
+        else:
+            return handler400(request)
 
-        fields['form_args']['url'] = form_args['url']
-        fields['form_args']['fields'] = {key: value for key, value in form_args['fields'].items()}
 
-        return JsonResponse(fields)
+class S3AuthMultipartGetUploadPartPresignedUrlView(View):
+
+    @staticmethod
+    def get_presigned_upload_url(key: str, upload_id: str, part_number: int) -> str:
+
+        s3 = get_s3_connection()
+
+        return s3.generate_presigned_url(
+            'upload_part',
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': key,
+                'UploadId': upload_id,
+                'PartNumber': part_number,
+            },
+        )
+
+    def get(self, request, upload_id: str, part_number: int, file_key: str):
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'upload_url': self.get_presigned_upload_url(file_key, upload_id, part_number)})
+
+        else:
+            return handler400(request)
+
+
+class S3AuthMultipartDoCompleteView(View):
+
+    @staticmethod
+    def do_complete_multipart_upload(
+            key: str,
+            upload_id: str,
+            parts: dict[str: list[dict[str: int | str], ...]],
+    ) -> bool:
+
+        s3 = get_s3_connection()
+
+        try:
+
+            s3.complete_multipart_upload(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key, UploadId=upload_id, MultipartUpload=parts
+            )
+
+            return True
+
+        except (s3.exceptions.NoSuchUpload, s3.exceptions.InvalidPart, s3.exceptions.InvalidPartOrder):
+            return False
+
+    def post(self, request, upload_id: str, file_key: str):
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+            upload_parts = request.POST.get('upload_parts', None)
+
+            if upload_parts:
+
+                try:
+                    upload_parts = literal_eval(upload_parts)
+
+                except SyntaxError:
+                    return handler400(request)
+
+                if type(upload_parts) == list and (len(upload_parts) and type(upload_parts[0]) == dict):
+
+                    try:
+
+                        if (upload_parts[0]['PartNumber'] and type(upload_parts[0]['PartNumber']) == int) and \
+                                (upload_parts[0]['ETag'] and type(upload_parts[0]['ETag']) == str):
+
+                            if self.do_complete_multipart_upload(file_key, upload_id, {'Parts': upload_parts}):
+                                return JsonResponse({})
+
+                            else:
+                                return handler400(request)
+
+                        else:
+                            return handler400(request)
+
+                    except KeyError:
+                        return handler400(request)
+
+                else:
+                    return handler400(request)
+
+            else:
+                return handler400(request)
+
+        else:
+            return handler400(request)
+
+
+class S3AuthMultipartDoAbortView(View):
+
+    @staticmethod
+    def do_abort_multipart_upload(key: str, upload_id: str) -> bool:
+
+        s3 = get_s3_connection()
+
+        try:
+
+            s3.abort_multipart_upload(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key, UploadId=upload_id)
+
+            return True
+
+        except s3.exceptions.NoSuchUpload:
+            return False
+
+    def post(self, request, upload_id: str, file_key: str):
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+            if self.do_abort_multipart_upload(file_key, upload_id):
+                return JsonResponse({})
+
+            else:
+                return handler400(request)
+
+        else:
+            return handler400(request)
 
 
 class ViewCreateMedia(LoginRequiredMixin, CreateView):

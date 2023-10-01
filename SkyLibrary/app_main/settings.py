@@ -140,6 +140,18 @@ else:
     COVER_UPLOAD_MAX_SIZE = int(COVER_UPLOAD_MAX_SIZE)
 
 
+FILE_UPLOAD_CHUNK_SIZE = env('FILE_UPLOAD_CHUNK_SIZE', default=None)
+
+if not FILE_UPLOAD_CHUNK_SIZE:
+
+    FILE_UPLOAD_CHUNK_SIZE = 1024 * 1024 * 1024 * 1  # 1Gb
+
+    env_var_not_set_handler('FILE_UPLOAD_CHUNK_SIZE', context=f'used {FILE_UPLOAD_CHUNK_SIZE}', error_level='WARNING')
+
+else:
+    FILE_UPLOAD_CHUNK_SIZE = int(FILE_UPLOAD_CHUNK_SIZE)
+
+
 # Application definition
 
 INSTALLED_APPS = [
