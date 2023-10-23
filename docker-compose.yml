@@ -17,12 +17,25 @@ services:
     restart: always
     networks:
       - backend
+      - postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - ./SkyLibrary/app_main/.env
     expose:
       - 5432
+
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    volumes:
+      - pgbackups:/backups
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+    env_file:
+      - ./SkyLibrary/app_main/.env
 
   web:
     build:
@@ -63,6 +76,7 @@ services:
 
   certbot:
     image: certbot/certbot:latest
+    restart: always
     networks:
       - backend
     depends_on:
@@ -75,10 +89,13 @@ services:
 volumes:
   redis_data:
   postgres_data:
+  pgbackups:
   web_media:
   web_staticfiles:
   web_logs:
 
 networks:
   backend:
+    driver: bridge
+  postgres:
     driver: bridge
