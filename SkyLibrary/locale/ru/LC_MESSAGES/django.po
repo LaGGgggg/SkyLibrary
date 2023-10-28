@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-19 11:37+0400\n"
+"POT-Creation-Date: 2023-10-28 17:31+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr "Может изменить поле активности пользов
 msgid "Text"
 msgstr "Текст"
 
-#: .\apps\home_page_app\forms.py:19 .\apps\media_app\forms.py:26
+#: .\apps\home_page_app\forms.py:19 .\apps\media_app\forms.py:28
 msgid "Tags"
 msgstr "Тэги"
 
@@ -93,8 +93,8 @@ msgstr "Пожалуйста, укажите текст или тэги для �
 msgid "Search"
 msgstr "Искать"
 
-#: .\apps\home_page_app\views.py:42 .\apps\media_app\forms.py:172
-#: .\apps\media_app\forms.py:193 .\apps\media_app\views.py:111
+#: .\apps\home_page_app\views.py:42 .\apps\media_app\forms.py:174
+#: .\apps\media_app\forms.py:225 .\apps\media_app\views.py:231
 #, python-brace-format
 msgid ""
 "Something went wrong with your request, please try again or contact support "
@@ -119,19 +119,19 @@ msgstr "Значение заблокированного поля"
 msgid "Link to the target of the report"
 msgstr "Ссылка на цель жалобы"
 
-#: .\apps\media_app\forms.py:28
+#: .\apps\media_app\forms.py:30
 msgid "File"
 msgstr "Файл"
 
-#: .\apps\media_app\forms.py:45
+#: .\apps\media_app\forms.py:47
 msgid "Not a unique title, change it."
 msgstr "Не уникальное название, измените его."
 
-#: .\apps\media_app\forms.py:61
+#: .\apps\media_app\forms.py:63
 msgid "Not a unique description, change it."
 msgstr "Не уникальное описание, измените его."
 
-#: .\apps\media_app\forms.py:77
+#: .\apps\media_app\forms.py:79
 #, python-brace-format
 msgid ""
 "{checking_object_name} - is too big (more than {max_size_in_megabytes}Mb)"
@@ -139,7 +139,7 @@ msgstr ""
 "{checking_object_name} - слишком большой (больше чем {max_size_in_megabytes}"
 "Мб)"
 
-#: .\apps\media_app\forms.py:94
+#: .\apps\media_app\forms.py:96
 msgid ""
 "Something went wrong, you may not have specified the file field, please try "
 "again or contact support"
@@ -147,27 +147,31 @@ msgstr ""
 "Что-то пошло не так, возможно, вы не указали поле файла, попробуйте еще раз "
 "или обратитесь в службу поддержки"
 
-#: .\apps\media_app\forms.py:210
+#: .\apps\media_app\forms.py:242
 msgid "Comment text"
 msgstr "Текст комментария"
 
-#: .\apps\media_app\forms.py:221
+#: .\apps\media_app\forms.py:253
 msgid "Add comment"
 msgstr "Добавить комментарий"
 
-#: .\apps\media_app\forms.py:238
+#: .\apps\media_app\forms.py:270
 msgid "Reply text"
 msgstr "Текст ответа"
 
-#: .\apps\media_app\forms.py:249
+#: .\apps\media_app\forms.py:281
 msgid "Add reply"
 msgstr "Добавить ответ"
 
-#: .\apps\media_app\forms.py:283 .\apps\media_app\forms.py:325
+#: .\apps\media_app\forms.py:302
+msgid "What is happened"
+msgstr "Что случилось"
+
+#: .\apps\media_app\forms.py:314 .\apps\media_app\forms.py:356
 msgid "Send report"
 msgstr "Отправить жалобу"
 
-#: .\apps\media_app\forms.py:308
+#: .\apps\media_app\forms.py:339
 msgid "Select the correct report reason choice."
 msgstr "Выберите корректный вариант причины жалобы."
 
@@ -403,7 +407,7 @@ msgstr "жалоба"
 msgid "reports"
 msgstr "жалобы"
 
-#: .\apps\media_app\views.py:113
+#: .\apps\media_app\views.py:233
 #, python-brace-format
 msgid ""
 "Something went wrong with your comment, please try again or contact support "
@@ -412,7 +416,7 @@ msgstr ""
 "С вашим комментарием что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
-#: .\apps\media_app\views.py:115
+#: .\apps\media_app\views.py:235
 #, python-brace-format
 msgid ""
 "Something went wrong with your report, please try again or contact support "
@@ -421,15 +425,15 @@ msgstr ""
 "С вашей жалобой что-то пошло не так, пожалуйста, попробуйте ещё раз или "
 "обратитесь в поддержку (код: {error_code})"
 
-#: .\apps\media_app\views.py:117
+#: .\apps\media_app\views.py:237
 msgid "Please select a reason for the report."
 msgstr "Пожалуйста, выберите причину жалобы."
 
-#: .\apps\media_app\views.py:326
+#: .\apps\media_app\views.py:446
 msgid "code"
 msgstr "код"
 
-#: .\apps\media_app\views.py:339 .\templates\media_app\view_media.html:201
+#: .\apps\media_app\views.py:459 .\templates\media_app\view_media.html:199
 msgid "Reply"
 msgstr "Ответить"
 
@@ -462,7 +466,7 @@ msgstr "задачи модератора"
 #: .\templates\media_app\create_media.html:15
 #: .\templates\media_app\create_media_successful.html:13
 #: .\templates\media_app\update_media.html:15
-#: .\templates\media_app\view_media.html:19
+#: .\templates\media_app\view_media.html:18
 #: .\templates\staff_app\moderator_page.html:11
 msgid "Home page"
 msgstr "Главная страница"
@@ -488,7 +492,7 @@ msgstr "Выход из аккаунта произведён успешно"
 #: .\templates\media_app\create_media.html:12
 #: .\templates\media_app\update_media.html:12
 #: .\templates\media_app\update_media_successful.html:13
-#: .\templates\media_app\view_media.html:25
+#: .\templates\media_app\view_media.html:24
 #: .\templates\staff_app\moderator_page.html:14
 msgid "Profile"
 msgstr "Профиль"
@@ -548,7 +552,7 @@ msgstr "Проверьте свою почту"
 
 #: .\templates\accounts_app\profile.html:18
 #: .\templates\home_page_app\index.html:16
-#: .\templates\media_app\view_media.html:28
+#: .\templates\media_app\view_media.html:27
 msgid "Add new media"
 msgstr "Добавить новую медиа"
 
@@ -558,7 +562,7 @@ msgstr "Выйти"
 
 #: .\templates\accounts_app\profile.html:28
 #: .\templates\home_page_app\index.html:20
-#: .\templates\media_app\view_media.html:32
+#: .\templates\media_app\view_media.html:31
 #: .\templates\staff_app\moderator_page.html:18
 msgid "Moderator page"
 msgstr "Страница модератора"
@@ -726,47 +730,47 @@ msgstr "Измените своё медиа"
 msgid "Your media has been successfully updated and submitted for moderation"
 msgstr "Ваше медиа успешно изменено и отправлено на модерацию"
 
-#: .\templates\media_app\view_media.html:94
+#: .\templates\media_app\view_media.html:93
 msgid "Download file"
 msgstr "Скачать файл"
 
-#: .\templates\media_app\view_media.html:102
+#: .\templates\media_app\view_media.html:101
 msgid "Downloads"
 msgstr "Скачиваний"
 
-#: .\templates\media_app\view_media.html:107
+#: .\templates\media_app\view_media.html:106
 msgid "Author"
 msgstr "Автор"
 
-#: .\templates\media_app\view_media.html:108
+#: .\templates\media_app\view_media.html:107
 msgid "Added by"
 msgstr "Добавлено"
 
-#: .\templates\media_app\view_media.html:116
+#: .\templates\media_app\view_media.html:114
 msgid "Leave a comment"
 msgstr "Оставить комментарий"
 
-#: .\templates\media_app\view_media.html:229
+#: .\templates\media_app\view_media.html:226
 msgid "Moderate"
 msgstr "Модерация"
 
-#: .\templates\media_app\view_media.html:236
+#: .\templates\media_app\view_media.html:234
 msgid "Approve"
 msgstr "Одобрить"
 
-#: .\templates\media_app\view_media.html:242
+#: .\templates\media_app\view_media.html:240
 msgid "Disapprove"
 msgstr "Не одобрять"
 
-#: .\templates\media_app\view_media.html:245
+#: .\templates\media_app\view_media.html:243
 msgid "Confirm"
 msgstr "Подтвердить"
 
-#: .\templates\media_app\view_media.html:250
+#: .\templates\media_app\view_media.html:248
 msgid "Auto new task"
 msgstr "Автоматически новую задачу"
 
-#: .\templates\media_app\view_media.html:256
+#: .\templates\media_app\view_media.html:254
 msgid "No auto new task"
 msgstr "Нет автоматически новой задачи"
 

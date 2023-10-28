@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- 31536000 = one year, it doesn't change -->
 {% extends 'base.html' %}
 {% load static %}
 {% load cache %}
@@ -80,7 +79,7 @@
     </section>
     {% if user.is_authenticated %}
         {% cache 31536000 view_media_page_viewer_content_4 LANGUAGE_CODE %}
-            <section class="m-3" style="max-width: 60%;" id="section_for_media_report_form"></section>
+            <section style="max-width: 60%;" id="section_for_media_report_form"></section>
         {% endcache %}
     {% endif %}
     {% cache 31536000 view_media_page_viewer_content_5 media.id %}
@@ -111,7 +110,6 @@
     {% endcache %}
     {% if user.is_authenticated %}
         <section class="mt-4">
-            <!-- 31536000 = one year, it doesn't change -->
             {% cache 31536000 view_media_page_add_media_comment_1 LANGUAGE_CODE %}
                 <span class="fs-5">{% translate 'Leave a comment' %}:</span>
             {% endcache %}

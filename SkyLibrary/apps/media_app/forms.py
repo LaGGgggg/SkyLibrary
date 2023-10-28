@@ -298,9 +298,8 @@ class CreateReportCommentForm(forms.Form):
     report_type = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         queryset=ReportType.objects.all(),
-        label=f'{_("Report reason")}:',
     )
-    content = forms.CharField(max_length=300, label=f'{_("What is happened")}?')
+    content = forms.CharField(max_length=300, label='%s?' % _('What is happened'))
 
     @property
     def helper(self):
@@ -308,7 +307,7 @@ class CreateReportCommentForm(forms.Form):
         helper = FormHelper()
 
         helper.form_id = 'under_comment_form'
-        helper.form_class = 'border border-info'
+        helper.form_show_labels = False
         helper.attrs['data-request-type'] = 'create_report'
 
         custom_form_actions_submit_button = \
@@ -350,7 +349,7 @@ class CreateReportMediaForm(CreateReportCommentForm):
         helper = FormHelper()
 
         helper.form_id = 'media_report_form'
-        helper.form_class = 'border border-info'
+        helper.form_show_labels = False
         helper.attrs['data-request-type'] = 'create_report'
 
         custom_form_actions_submit_button = \
