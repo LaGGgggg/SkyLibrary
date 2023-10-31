@@ -13,7 +13,7 @@ You can upload and download media files (videos, books, webinars...), rate them 
   - [x] Automatic creation of SSL certificates.
   - [x] Automatic renewal of SSL certificates.
   - [x] Automatic rejection of unknown domains (using nginx).
-  - [x] Static and media files support.
+  - [x] Static and media files support (media files are stored in s3 storage (yandex cloud by default)).
   - [x] Automatic launch of django inside entrypoint. Executed commands:
     - collectstatic
     - migrate
@@ -25,7 +25,7 @@ You can upload and download media files (videos, books, webinars...), rate them 
     - gunicorn
 - [x] Full translation into 2 languages.
 - [x] Autotest system (by github actions).
-- [x] Big amount of tests (113+).
+- [x] Big amount of tests (121+).
 - [x] Caching using redis.
 - [x] Registration with confirmation by email.
 - [x] User roles system (4 roles with different permissions).
@@ -353,9 +353,7 @@ docker compose logs -f
     - User is not authenticated
       - Link to the "login" page
       - Link to the "registration" page
-  - "Search media" button (you can search for media by tags and/or title text. Returns links to media with star ratings and tags)
-  - "Best media" compilation (by media rating. Links to media with star ratings)
-  - "Recent media" compilation (by publication date. Links to media with star ratings)
+  - Media filters (you can filter media by title, author, user who added, tags, rating issue procedure, rating maximum and minimum values. Returns links to media with star ratings and tags)
 - Login page
   - Navigation bar
     - Link to the "home" page

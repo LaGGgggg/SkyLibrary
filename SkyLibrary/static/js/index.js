@@ -1,127 +1,82 @@
 $(document).ready(function() {
-
-    $(document).on('click', '#get_search_media_form_button', function () {
-        $.ajax({
-            url: get_full_path,
-            type: 'GET',
-            dataType: 'json',
-            data: {
-                'request_type': 'get_search_media_form',
-            },
-            success: function (response) {
-
-                let messages_ul = '<ul class="mt-2 text-danger" id="search_media_form_messages"></ul>';
-
-                let section_for_search_media_form_tag = $('#section_for_search_media_form');
-                section_for_search_media_form_tag.addClass('border border-secondary-0 mb-2');
-
-                let section_for_search_results = '<section id="section_for_search_results" class="m-2"></section>';
-
-                section_for_search_media_form_tag.html(
-                    messages_ul + response.search_media_form + section_for_search_results
-                );
-            },
-        });
-    });
-
-    $(document).on('submit', '#search_media_form', function () {
+    $(document).on('submit', '#filter_media_form', function () {
         $.ajax({
             url: get_full_path,
             type: 'POST',
             dataType: 'json',
             data: {
                 'csrfmiddlewaretoken': csrf_token,
-                'request_type': 'search_media',
-                'text': $('#search_media_form_text_field').val(),
-                'tags': `${$.map($('[name="tags"]'), function (element) {
-                    if (element.checked) {
-                        return element.value;
-                    }
-                })}`  // into a string for the correct operation of the backend
+                'request_type': 'filter_media',
+                'title': $('#filter_media_form_title_field').val(),
+                'author': $('#filter_media_form_author_field').val(),
+                'tags': `${$('#id_tags').val()}`,
+                'rating_direction': $('#id_rating_direction').val(),
+                'rating_minimum_value': $('#id_rating_minimum_value').val(),
+                'rating_maximum_value': $('#id_rating_maximum_value').val(),
+                'user_who_added': $('#filter_media_form_user_who_added_field').val(),
             },
             success: function (response) {
+                if (response.filter_results && Object.keys(response.filter_results).length !== 0) {
 
-                if (response.search_results) {
+                    let filter_results_html = '<hr>';
 
-                    let search_results_html = '';
+                    for (const media_data of response.filter_results) {
 
-                    for (const [title, data] of Object.entries(response.search_results)) {
-
-                        search_results_html += '<section class="mt-2">';
+                        filter_results_html += '<section class="mt-2">';
 
                         // open flex-row section
-                        search_results_html += '<section class="list-group flex-row align-items-center">';
+                        filter_results_html += '<section class="list-group flex-row align-items-center">';
 
                         // link part
 
-                        search_results_html += '<section class="fs-4">';
+                        filter_results_html += '<section class="fs-4">';
 
-                        search_results_html += `<a href="${data.link}">${title}</a>`;
+                        filter_results_html += `<a href="${media_data.link}">${media_data.title}</a>`;
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
                         // rating part
 
-                        search_results_html += '<section class="d-inline-flex align-items-end rating ms-1" style="font-size: 80%">';
+                        filter_results_html += '<section class="d-inline-flex align-items-end rating ms-1" style="font-size: 80%">';
 
-                        search_results_html += '<section class="position-relative rating__stars_body">';
+                        filter_results_html += '<section class="position-relative rating__stars_body">';
 
-                        search_results_html += '<section class="position-absolute rating__stars"></section>';
+                        filter_results_html += '<section class="position-absolute rating__stars"></section>';
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
-                        search_results_html += '<section class="rating__value">';
+                        filter_results_html += '<section class="rating__value">';
 
-                        search_results_html += data.rating;
+                        filter_results_html += media_data.rating;
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
                         // close flex-rpw section
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
                         // tags part
-                        search_results_html += '<section class="small fw-light">';
+                        filter_results_html += '<section class="small fw-light">';
 
-                        for (const tag of data.tags) {
-                            search_results_html += `<a data-toggle="tooltip" title="${tag.help_text}" href="">#${tag.name}</a>  `;
+                        for (const tag of media_data.tags) {
+                            filter_results_html += `<a data-toggle="tooltip" title="${tag.help_text}" href="">#${tag.name}</a>  `;
                         }
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
 
-                        search_results_html += '</section>';
+                        filter_results_html += '</section>';
+
+                        filter_results_html += '<hr>';
                     }
 
-                    $('#section_for_search_results').html(search_results_html);
+                    $('#section_for_filter_results').html(filter_results_html);
 
                     updateRatings();
+
+                } else {
+                    $('#section_for_filter_results').html(`<hr><section>${nothing_found_translated}</section>`);
                 }
-
-                $('#search_media_form_messages').text('');
-
-                if (response.messages) {
-
-                    let messages = '';
-
-                    for (let message of response.messages) {
-                        messages += `<li class="${message.tags}">${message.message}</li>`;
-                    }
-
-                    $('#search_media_form_messages').html(messages);
-                }
-            },
-            error: function (response) {
-
-                $('#search_media_form_messages').text('');
-
-                let messages = '';
-
-                for (let message of response.messages) {
-                    messages += `<li class="${message.tags}">${message.message}</li>`;
-                }
-
-                $('#search_media_form_messages').html(messages);
             },
         });
         return false;

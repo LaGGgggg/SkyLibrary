@@ -1,3 +1,6 @@
+from ast import literal_eval
+from re import sub
+
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
 from django.contrib.auth import get_user_model
@@ -5,11 +8,10 @@ from django.urls import reverse
 
 from crispy_forms.utils import render_crispy_form
 
-from ast import literal_eval
-
 from .views import handler400, handler403, handler404, handler500
-from .forms import SearchMediaForm
-from media_app.models import Media, MediaTags
+from .forms import FilterMediaForm
+from media_app.models import Media, MediaTags, MediaRating
+from .services import _ASCENDING, _DESCENDING
 
 User = get_user_model()
 
@@ -65,17 +67,14 @@ class CommonTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home_page_app/index.html')
 
-        page_should_contain = (
-            f'<a href="/en-us/media/view/{self.media_1.id}/" class="font-italic">{self.media_1.title}</a>',
-            f'<a href="/en-us/media/view/{self.media_2.id}/" class="font-italic">{self.media_2.title}</a>',
+        page_should_contain = render_crispy_form(FilterMediaForm())
+
+        # removing csrf token:
+        response_content = (
+            sub(r' <input type="hidden" name="csrfmiddlewaretoken" value=".+">', '', response.content.decode())
         )
 
-        for item in page_should_contain:
-            self.assertContains(response, item)
-
-        self.assertNotContains(
-            response, f'<a href="/en-us/media/view/{self.not_active_media.id}/">{self.not_active_media.title}</a>'
-        )
+        self.assertIn(page_should_contain, response_content)
 
 
 class ErrorsTestCase(TestCase):
@@ -124,7 +123,7 @@ class ErrorsTestCase(TestCase):
         self.assertContains(response, 'Oops, server error', status_code=500)
 
 
-class SearchMediaTestCase(TestCase):
+class FilterMediaTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -133,28 +132,36 @@ class SearchMediaTestCase(TestCase):
 
         cls.client = Client()
 
-        user_credentials = {
-            'username': 'test_user',
+        user_credentials_1 = {
+            'username': 'test_user_1',
             'password': 'test_password',
             'email': 'test_email_1@mail.com',
             'role': 1,
         }
 
-        user = User.objects.create_user(**user_credentials)
+        user_credentials_2 = {
+            'username': 'test_user_2',
+            'password': 'test_password',
+            'email': 'test_email_2@mail.com',
+            'role': 1,
+        }
+
+        user_1 = User.objects.create_user(**user_credentials_1)
+        cls.user_2 = User.objects.create_user(**user_credentials_2)
 
         test_tag_1 = MediaTags.objects.create(
             name_en_us='test tag 1',
             help_text_en_us='test tag 1 help text',
             name_ru='test tag 1 ru',
             help_text_ru='test tag 1 help text ru',
-            user_who_added=user,
+            user_who_added=user_1,
         )
         test_tag_2 = MediaTags.objects.create(
             name_en_us='test tag 2',
             help_text_en_us='test tag 2 help text',
             name_ru='test tag 2 ru',
             help_text_ru='test tag 2 help text ru',
-            user_who_added=user,
+            user_who_added=user_1,
         )
 
         cls.media_1_tags = (test_tag_1,)
@@ -163,29 +170,29 @@ class SearchMediaTestCase(TestCase):
 
         cls.media_1_and_3_tags_ids = f"{test_tag_1.id}"
 
-        cls.media_search_1_and_2_medias_title_key = 'key1'
-        cls.media_search_1_and_3_medias_title_key = 'key2'
+        cls.media_filter_1_and_2_medias_title_key = 'key1'
+        cls.media_filter_1_and_3_medias_title_key = 'key2'
 
         cls.media_data_1 = {
             'title':
-                f'test_title_1_{cls.media_search_1_and_2_medias_title_key}_{cls.media_search_1_and_3_medias_title_key}',
+                f'test_title_1_{cls.media_filter_1_and_2_medias_title_key}_{cls.media_filter_1_and_3_medias_title_key}',
             'description': 'test_description_1',
             'author': 'test_author',
-            'user_who_added': user,
+            'user_who_added': user_1,
             'active': 1,
         }
         cls.media_data_2 = {
-            'title': f'test_title_2_{cls.media_search_1_and_2_medias_title_key}',
+            'title': f'test_title_2_{cls.media_filter_1_and_2_medias_title_key}',
             'description': 'test_description_2',
             'author': 'test_author',
-            'user_who_added': user,
+            'user_who_added': user_1,
             'active': 1,
         }
         cls.media_data_3 = {
-            'title': f'test_title_3_{cls.media_search_1_and_3_medias_title_key}',
+            'title': f'test_title_3_{cls.media_filter_1_and_3_medias_title_key}',
             'description': 'test_description_3',
-            'author': 'test_author',
-            'user_who_added': user,
+            'author': 'test_author_2',
+            'user_who_added': cls.user_2,
             'active': 1,
         }
 
@@ -197,130 +204,38 @@ class SearchMediaTestCase(TestCase):
         cls.media_2.tags.set(cls.media_2_tags)
         cls.media_3.tags.set(cls.media_3_tags)
 
-    def test_get_search_button(self):
-
-        response = self.client.get(reverse('index'))
-
-        self.assertContains(response, '<button id="get_search_media_form_button"')
-
-    def test_get_search_media_form_incorrect_data(self):
-
-        response = self.client.get(
-            reverse('index'),
-            {'request_type': 'bad_data'},
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        # minimum rating
+        cls.media_1_rating = MediaRating.objects.create(
+            media=cls.media_1,
+            user_who_added=user_1,
+            rating=MediaRating.rating_choices_list[0],
+        )
+        # medium rating
+        cls.media_2_rating = MediaRating.objects.create(
+            media=cls.media_2,
+            user_who_added=user_1,
+            rating=MediaRating.rating_choices_list[2],
+        )
+        # maximum rating
+        cls.media_3_rating = MediaRating.objects.create(
+            media=cls.media_3,
+            user_who_added=user_1,
+            rating=MediaRating.rating_choices_list[-1],
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home_page_app/index.html')
-
-    def test_get_search_media_form(self):
-
-        response = self.client.get(
-            reverse('index'),
-            {'request_type': 'get_search_media_form'},
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'django/forms/widgets/input.html')  # response returns form
-
-        page_should_contain: str = render_crispy_form(SearchMediaForm())
-
-        page_content: str = literal_eval(response.content.decode('utf-8'))['search_media_form']
-
-        self.assertEqual(page_content, page_should_contain)
-
-    def test_post_search_media_form_empty_data(self):
+    def test_post_filter_media_form_empty_data(self):
 
         response = self.client.post(
             reverse('index'),
             {
-                'request_type': 'search_media',
-                'text': '',
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
                 'tags': '',
-            },
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        page_should_contain: str = 'Please specify any text or tags to search for'
-
-        # response content example:
-        # {'messages': [{'level': 40, 'message': 'Please specify any text or tags to search for', 'tags': 'error'}]}
-        page_content = literal_eval(response.content.decode('utf-8'))['messages']
-
-        # page_content example:
-        # [{'level': 40, 'message': 'Please specify any text or tags to search for', 'tags': 'error'}]
-        self.assertEqual(len(page_content), 1)
-
-        page_content = page_content[0]['message']
-
-        self.assertEqual(page_content, page_should_contain)
-
-    def test_post_search_media_form_tags_incorrect_data(self):
-
-        response = self.client.post(
-            reverse('index'),
-            {
-                'request_type': 'search_media',
-                'text': '',
-                'tags': '998,999',  # not exist tag ids
-            },
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        page_should_contain: str = \
-            'Something went wrong with your request, please try again or contact support (code: 5.1)'
-
-        # response content example:
-        # {'messages': [{'level': 40, 'message': 'Please specify any text or tags to search for', 'tags': 'error'}]}
-        page_content: str = literal_eval(response.content.decode('utf-8'))['messages'][0]['message']
-
-        self.assertEqual(page_content, page_should_contain)
-
-    def test_post_search_media_form_text_incorrect_data(self):
-
-        too_long_text = 'too_looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo' \
-                        'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong'
-
-        response = self.client.post(
-            reverse('index'),
-            {
-                'request_type': 'search_media',
-                'text': too_long_text,
-                'tags': '',
-            },
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        page_should_contain: str = 'Ensure this value has at most 100 characters (it has 186).'
-
-        # response content example:
-        # {'messages': [{'level': 40, 'message': 'Please specify any text or tags to search for', 'tags': 'error'}]}
-        page_content = literal_eval(response.content.decode('utf-8'))['messages']
-
-        # page_content example:
-        # [{'level': 40, 'message': 'Please specify any text or tags to search for', 'tags': 'error'}]
-        self.assertEqual(len(page_content), 1)
-
-        page_content = page_content[0]['message']
-
-        self.assertEqual(page_content, page_should_contain)
-
-    def test_post_search_media_form_text(self):
-
-        response = self.client.post(
-            reverse('index'),
-            {
-                'request_type': 'search_media',
-                'text': f"{self.media_search_1_and_2_medias_title_key}",
-                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': '',
             },
             **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
         )
@@ -328,89 +243,305 @@ class SearchMediaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # response content example:
-        # {'search_results': {'test_title_1': {'tags': [{'name': 'test tag 1 ru',
-        # 'help_text': 'test tag 1 help text ru'}], 'rating': 0, 'link': '/en-us/media/view/4/'}}}
-        page_content = literal_eval(response.content.decode('utf-8'))['search_results']
+        # [{'title': 'test_title_1_key1_key2', 'rating': 0, 'link': '/en-us/media/view/7/',
+        # 'tags': [{'name': 'test tag 1', 'help_text': 'test tag 1 help text'}]}]
+        page_content = literal_eval(response.content.decode('utf-8'))['filter_results']
 
-        self.assertEqual(len(page_content), 2)
+        expected_result_data = (
+            (self.media_1, self.media_data_1, self.media_1_tags),
+            (self.media_2, self.media_data_2, self.media_2_tags),
+            (self.media_3, self.media_data_3, self.media_3_tags),
+        )
 
-        for i, (search_result_key, search_result_value) in enumerate(page_content.items()):
+        self.assertEqual(len(page_content), len(expected_result_data))
 
-            if i == 0:
+        for i in range(len(expected_result_data)):
 
-                media = self.media_2
-                media_data = self.media_data_2
-                media_tags = self.media_2_tags
+            media, media_data, media_tags = expected_result_data[i]
+            filter_result = page_content[i]
 
-            elif i == 1:
+            self.assertEqual(media_data['title'], filter_result['title'])
 
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
+            self.assertEqual(filter_result['rating'], media.get_rating())
+            self.assertEqual(filter_result['link'], reverse('view_media', kwargs={'media_id': media.id}))
 
-            self.assertEqual(media_data['title'], search_result_key)
-
-            self.assertEqual(search_result_value['rating'], media.get_rating())
-            self.assertEqual(search_result_value['link'], reverse('view_media', kwargs={'media_id': media.id}))
-
-            for response_tag, media_tag in zip(search_result_value['tags'], media_tags):
+            for response_tag, media_tag in zip(filter_result['tags'], media_tags):
 
                 self.assertEqual(response_tag['name'], media_tag.name_en_us)
                 self.assertEqual(response_tag['help_text'], media_tag.help_text_en_us)
+
+    def test_post_filter_media_form_tags_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
+                'tags': '998,999',  # not exist tag ids
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_title_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': 'f' * 301,
+                'author': '',
+                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_author_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': 'f' * 301,
+                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_user_who_added_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
+                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': 'f' * 301,
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_rating_direction_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
+                'tags': '',
+                'rating_direction': 'bad_direction_value',
+                'rating_minimum_value': '',
+                'rating_maximum_value': '',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_rating_minimum_value_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
+                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': 'bad_minimum_value',
+                'rating_maximum_value': '',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_post_filter_media_form_rating_maximum_value_incorrect_data(self):
+
+        response = self.client.post(
+            reverse('index'),
+            {
+                'request_type': 'filter_media',
+                'title': '',
+                'author': '',
+                'tags': '',
+                'rating_direction': '',
+                'rating_minimum_value': '',
+                'rating_maximum_value': 'bad_maximum_value',
+                'user_who_added': '',
+            },
+            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def _test_post_filter_media_form_field(
+            self,
+            field_name: str,
+            field_text: str,
+            expected_result_data: tuple[tuple[Media, dict, tuple[MediaTags, ...]], ...],
+    ) -> None:
+
+        post_data = {
+            'request_type': 'filter_media',
+            'title': '',
+            'author': '',
+            'tags': '',
+            'rating_direction': '',
+            'rating_minimum_value': '',
+            'rating_maximum_value': '',
+            'user_who_added': '',
+        }
+
+        post_data[field_name] = field_text
+
+        response = self.client.post(reverse('index'), post_data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+
+        self.assertEqual(response.status_code, 200)
+
+        # response content example:
+        # [{'title': 'test_title_1_key1_key2', 'rating': 0, 'link': '/en-us/media/view/7/',
+        # 'tags': [{'name': 'test tag 1', 'help_text': 'test tag 1 help text'}]}]
+        page_content = literal_eval(response.content.decode('utf-8'))['filter_results']
+
+        self.assertEqual(len(page_content), len(expected_result_data))
+
+        for i in range(len(expected_result_data)):
+
+            media, media_data, media_tags = expected_result_data[i]
+            filter_result = page_content[i]
+
+            self.assertEqual(media_data['title'], filter_result['title'])
+
+            self.assertEqual(filter_result['rating'], media.get_rating())
+            self.assertEqual(filter_result['link'], reverse('view_media', kwargs={'media_id': media.id}))
+
+            for response_tag, media_tag in zip(filter_result['tags'], media_tags):
+
+                self.assertEqual(response_tag['name'], media_tag.name_en_us)
+                self.assertEqual(response_tag['help_text'], media_tag.help_text_en_us)
+
+    def test_post_filter_media_form_title(self):
+        self._test_post_filter_media_form_field(
+            'title',
+            f"{self.media_filter_1_and_2_medias_title_key}",
+            (
+                (self.media_1, self.media_data_1, self.media_1_tags),
+                (self.media_2, self.media_data_2, self.media_2_tags),
+            ),
+        )
+
+    def test_post_filter_media_form_author(self):
+        self._test_post_filter_media_form_field(
+            'author',
+            f"{self.media_data_3['author']}",
+            (
+                (self.media_3, self.media_data_3, self.media_3_tags),
+            ),
+        )
+
+    def test_post_filter_media_form_user_who_added(self):
+        self._test_post_filter_media_form_field(
+            'user_who_added',
+            f"{self.user_2.username}",
+            (
+                (self.media_3, self.media_data_3, self.media_3_tags),
+            ),
+        )
 
     def test_post_search_media_form_tags(self):
-
-        response = self.client.post(
-            reverse('index'),
-            {
-                'request_type': 'search_media',
-                'text': '',
-                'tags': f"{self.media_1_and_3_tags_ids}",
-            },
-            **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
+        self._test_post_filter_media_form_field(
+            'tags',
+            f"{self.media_1_and_3_tags_ids}",
+            (
+                (self.media_1, self.media_data_1, self.media_1_tags),
+                (self.media_3, self.media_data_3, self.media_3_tags),
+            ),
         )
 
-        self.assertEqual(response.status_code, 200)
+    def test_post_search_media_form_rating_direction_ascending(self):
+        self._test_post_filter_media_form_field(
+            'rating_direction',
+            f'{_ASCENDING}',
+            (
+                (self.media_1, self.media_data_1, self.media_1_tags),
+                (self.media_2, self.media_data_2, self.media_2_tags),
+                (self.media_3, self.media_data_3, self.media_3_tags),
+            ),
+        )
 
-        # response content example:
-        # {'search_results': {'test_title_1': {'tags': [{'name': 'test tag 1 ru',
-        # 'help_text': 'test tag 1 help text ru'}], 'rating': 0, 'link': '/en-us/media/view/4/'}}}
-        page_content = literal_eval(response.content.decode('utf-8'))['search_results']
+    def test_post_search_media_form_rating_direction_descending(self):
+        self._test_post_filter_media_form_field(
+            'rating_direction',
+            f'{_DESCENDING}',
+            (
+                (self.media_3, self.media_data_3, self.media_3_tags),
+                (self.media_2, self.media_data_2, self.media_2_tags),
+                (self.media_1, self.media_data_1, self.media_1_tags),
+            ),
+        )
 
-        self.assertEqual(len(page_content), 2)
+    def test_post_search_media_form_rating_minimum_value(self):
+        self._test_post_filter_media_form_field(
+            'rating_minimum_value',
+            f'{self.media_2_rating.rating}',
+            (
+                (self.media_3, self.media_data_3, self.media_3_tags),
+                (self.media_2, self.media_data_2, self.media_2_tags),
+            ),
+        )
 
-        for i, (search_result_key, search_result_value) in enumerate(page_content.items()):
-
-            if i == 0:
-
-                media = self.media_3
-                media_data = self.media_data_3
-                media_tags = self.media_3_tags
-
-            elif i == 1:
-
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
-
-            self.assertEqual(media_data['title'], search_result_key)
-
-            self.assertEqual(search_result_value['rating'], media.get_rating())
-            self.assertEqual(search_result_value['link'], reverse('view_media', kwargs={'media_id': media.id}))
-
-            for response_tag, media_tag in zip(search_result_value['tags'], media_tags):
-
-                self.assertEqual(response_tag['name'], media_tag.name_en_us)
-                self.assertEqual(response_tag['help_text'], media_tag.help_text_en_us)
+    def test_post_search_media_form_rating_maximum_value(self):
+        self._test_post_filter_media_form_field(
+            'rating_maximum_value',
+            f'{self.media_2_rating.rating}',
+            (
+                (self.media_2, self.media_data_2, self.media_2_tags),
+                (self.media_1, self.media_data_1, self.media_1_tags),
+            ),
+        )
 
     def test_post_search_media_form_all(self):
 
         response = self.client.post(
             reverse('index'),
             {
-                'request_type': 'search_media',
-                'text': f"{self.media_search_1_and_3_medias_title_key}",
-                'tags': f"{self.media_1_and_3_tags_ids}",
+                'request_type': 'filter_media',
+                'title': self.media_1.title,
+                'author': self.media_1.author,
+                'tags': f"{self.media_1_tags[0].id}",
+                'rating_direction': _ASCENDING,
+                'rating_minimum_value': self.media_1_rating.rating,
+                'rating_maximum_value': self.media_1_rating.rating,
+                'user_who_added': self.media_1.user_who_added.username,
             },
             **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'},
         )
@@ -418,32 +549,27 @@ class SearchMediaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # response content example:
-        # {'search_results': {'test_title_1': {'tags': [{'name': 'test tag 1 ru',
-        # 'help_text': 'test tag 1 help text ru'}], 'rating': 0, 'link': '/en-us/media/view/4/'}}}
-        page_content = literal_eval(response.content.decode('utf-8'))['search_results']
+        # [{'title': 'test_title_1_key1_key2', 'rating': 0, 'link': '/en-us/media/view/7/',
+        # 'tags': [{'name': 'test tag 1', 'help_text': 'test tag 1 help text'}]}]
+        page_content = literal_eval(response.content.decode('utf-8'))['filter_results']
 
-        self.assertEqual(len(page_content), 2)
+        expected_result_data = (
+            (self.media_1, self.media_data_1, self.media_1_tags),
+        )
 
-        for i, (search_result_key, search_result_value) in enumerate(page_content.items()):
+        self.assertEqual(len(page_content), len(expected_result_data))
 
-            if i == 0:
+        for i in range(len(expected_result_data)):
 
-                media = self.media_3
-                media_data = self.media_data_3
-                media_tags = self.media_3_tags
+            media, media_data, media_tags = expected_result_data[i]
+            filter_result = page_content[i]
 
-            elif i == 1:
+            self.assertEqual(media_data['title'], filter_result['title'])
 
-                media = self.media_1
-                media_data = self.media_data_1
-                media_tags = self.media_1_tags
+            self.assertEqual(filter_result['rating'], media.get_rating())
+            self.assertEqual(filter_result['link'], reverse('view_media', kwargs={'media_id': media.id}))
 
-            self.assertEqual(media_data['title'], search_result_key)
-
-            self.assertEqual(search_result_value['rating'], media.get_rating())
-            self.assertEqual(search_result_value['link'], reverse('view_media', kwargs={'media_id': media.id}))
-
-            for response_tag, media_tag in zip(search_result_value['tags'], media_tags):
+            for response_tag, media_tag in zip(filter_result['tags'], media_tags):
 
                 self.assertEqual(response_tag['name'], media_tag.name_en_us)
                 self.assertEqual(response_tag['help_text'], media_tag.help_text_en_us)

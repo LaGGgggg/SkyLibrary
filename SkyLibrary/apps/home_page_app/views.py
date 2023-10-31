@@ -1,20 +1,18 @@
+from json import dumps
+
 from django.shortcuts import render
 from django.views import View
-from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import get_language
 from django.http import HttpResponse
-from django.db.models import QuerySet, Count
 from django.urls import reverse_lazy
 
 from crispy_forms.utils import render_crispy_form
 
-from json import dumps
-
-from media_app.models import Media, MediaTags, get_best_active_media
 from accounts_app.models import User
-from .forms import SearchMediaForm
-from utils_app.services import messages_to_json
+from .forms import FilterMediaForm
+from .services import RATING_DIRECTION_CHOICES_LIST, MediaFilter
+from media_app.models import MediaRating
 
 
 def handler400(request, exception=None):
@@ -44,147 +42,143 @@ class ViewIndex(View):
 
     def get(self, request):
 
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
-                request.GET.get('request_type') == 'get_search_media_form':
+        media_filter = MediaFilter()
 
-            return HttpResponse(
-                dumps({'search_media_form': render_crispy_form(form=SearchMediaForm())}),
-                content_type='application/json',
-            )
+        media_filter.filter_by_rating()
 
-        else:
+        best_media = media_filter.get(20)
 
-            recent_media = Media.objects.filter(active=1).order_by('pub_date')[:5]
-            best_media = get_best_active_media(amount=5)
+        response_data: dict = {
+            'best_media': best_media,
+            'is_user_moderator': request.user.role == User.MODERATOR if request.user.is_authenticated else 0,
+            'filter_form': FilterMediaForm(),
+        }
 
-            response_data: dict = {
-                'recent_media': recent_media,
-                'best_media': best_media,
-                'is_user_moderator': request.user.role == User.MODERATOR if request.user.is_authenticated else 0,
-            }
-
-            return render(request, self.template_name, response_data)
+        return render(request, self.template_name, response_data)
 
     @staticmethod
-    def _search_by_text(text: str) -> QuerySet:
-        return Media.objects.filter(active=Media.ACTIVE, title__icontains=text).order_by('-id')
+    def _filter_media_by_text_safe(
+            filter_media_form: FilterMediaForm,
+            media_filter: MediaFilter,
+            post_field_name: str,
+            filter_function_name: str,
+    ) -> None:
 
-    @staticmethod
-    def _search_by_tags(tags: QuerySet[MediaTags], query_set: QuerySet[Media] = None) -> QuerySet:
+        field_value = filter_media_form.cleaned_data.get(post_field_name, None)
 
-        tags_list = list(tags)
-
-        if query_set:
-            query_set = query_set.filter(active=Media.ACTIVE, tags__in=tags_list).annotate(
-                tags_founded=Count('tags')
-            ).filter(tags_founded=len(tags_list)).order_by('-id')
-
-        else:
-            query_set = Media.objects.filter(active=Media.ACTIVE, tags__in=tags_list).annotate(
-                tags_founded=Count('tags')
-            ).filter(tags_founded=len(tags_list)).order_by('-id')
-
-        return query_set
+        if field_value:
+            getattr(media_filter, filter_function_name)(field_value)
 
     def post(self, request):
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest' and \
-                request.POST.get('request_type') == 'search_media':
+                request.POST.get('request_type') == 'filter_media':
 
-            if request.POST.get('tags'):
+            # needed for correct work with the frontend:
 
-                request_post_mutable = request.POST.copy()
+            request_post_mutable = request.POST.copy()
 
-                request_post_mutable.setlist('tags', request_post_mutable['tags'].split(','))
-
-                form = SearchMediaForm(request_post_mutable)
+            if tags := request_post_mutable['tags']:
+                tags = tags.split(',')
 
             else:
-                form = SearchMediaForm(request.POST)
+                tags = []
 
-            form_valid = False
+            request_post_mutable.setlist('tags', tags)
 
-            # if no tags selected => validation error, but we can search only by text => if it is "no tags selected"
-            # error, we allowed to use this "invalid" form
-            # (and set cleaned_data['tags'] value to empty string for compatibility and safety).
-            if not request.POST.get('tags') and len(form.errors.keys()) == 1 and form.has_error('tags'):
+            filter_media_form = FilterMediaForm(request_post_mutable)
 
-                form.cleaned_data['tags'] = ''
-                form_valid = True
+            if filter_media_form.is_valid():
 
-            if form.is_valid() or form_valid:
+                media_filter = MediaFilter()
 
-                if form.cleaned_data['text'] and form.cleaned_data['tags']:
+                # rating part:
 
-                    search_results = self._search_by_text(form.cleaned_data['text'])  # filter by text
-                    search_results = self._search_by_tags(form.cleaned_data['tags'], search_results)  # filter by tags
+                rating_filters = {
+                    'minimum_value': filter_media_form.cleaned_data.get('rating_minimum_value', None),
+                    'maximum_value': filter_media_form.cleaned_data.get('rating_maximum_value', None),
+                    'direction': filter_media_form.cleaned_data.get('rating_direction', None),
+                }
 
-                elif form.cleaned_data['text']:
-                    search_results = self._search_by_text(form.cleaned_data['text'])
+                # convert numbers in strings to numbers ('1' -> 1)
+                for key, value in rating_filters.items():
+                    if value and value.isdigit():
+                        rating_filters[key] = int(value)
 
-                elif form.cleaned_data['tags']:
-                    search_results = self._search_by_tags(form.cleaned_data['tags'])
+                # removing unavailable filters:
 
-                else:
+                if rating_filters['minimum_value'] not in MediaRating.rating_choices_list:
+                    del rating_filters['minimum_value']
 
-                    messages.error(request, _('Please specify any text or tags to search for'))
+                if rating_filters['maximum_value'] not in MediaRating.rating_choices_list:
+                    del rating_filters['maximum_value']
 
-                    return HttpResponse(messages_to_json(request), content_type='application/json')
+                if rating_filters['direction'] not in RATING_DIRECTION_CHOICES_LIST:
+                    del rating_filters['direction']
 
-                search_results_json = {}
+                if rating_filters:
+                    media_filter.filter_by_rating(**rating_filters)
 
-                language = get_language()
+                # tags part:
 
-                for result in search_results:
+                tags_filter = filter_media_form.cleaned_data.get('tags', [])
 
-                    tags = []
+                if any(tags_filter):
+                    media_filter.filter_by_tags(tags_filter)
+
+                # user_who_added, title and author part:
+
+                text_filters = (
+                    ('user_who_added', 'filter_by_user_who_added'),
+                    ('title', 'filter_by_title'),
+                    ('author', 'filter_by_author'),
+                )
+
+                for post_field_name, filter_function_name in text_filters:
+                    self._filter_media_by_text_safe(
+                        filter_media_form, media_filter, post_field_name, filter_function_name
+                    )
+
+                # return part:
+
+                page_media_data = []
+
+                if media_filter_result := media_filter.get(20):
+
+                    language = get_language()
 
                     if language == 'en-us':
-                        for tag in result.tags.values():
-                            tags.append(
-                                {
-                                    'name': tag['name_en_us'],
-                                    'help_text': tag['help_text_en_us'],
-                                }
-                            )
+                        language_suffix = 'en_us'
 
                     elif language == 'ru':
-                        for tag in result.tags.values():
-                            tags.append(
-                                {
-                                    'name': tag['name_ru'],
-                                    'help_text': tag['help_text_ru'],
-                                }
-                            )
+                        language_suffix = 'ru'
 
                     else:
+                        return handler500(request)
 
-                        messages.error(request, self.error_messages.get('bad_request').format(error_code='5.2'))
+                    for page_media_object in media_filter_result:
 
-                        return HttpResponse(messages_to_json(request), content_type='application/json')
+                        page_media_object_tags = []
 
-                    link = f"{reverse_lazy('view_media', kwargs={'media_id': result.id})}"
+                        for tag in page_media_object.tags.values():
+                            page_media_object_tags.append({
+                                'name': tag[f'name_{language_suffix}'],
+                                'help_text': tag[f'help_text_{language_suffix}'],
+                            })
 
-                    search_results_json[result.title] = {
-                        'tags': tags,
-                        'rating': result.get_rating(),
-                        'link': link,
-                    }
+                        page_media_data.append({
+                            'title': page_media_object.title,
+                            'rating': page_media_object.get_rating(),
+                            'link': f"{reverse_lazy('view_media', kwargs={'media_id': page_media_object.id})}",
+                            'tags': page_media_object_tags,
+                        })
 
-                return HttpResponse(dumps({'search_results': search_results_json}), content_type='application/json')
+                return HttpResponse(
+                    dumps({'filter_results': page_media_data}), content_type='application/json'
+                )
 
             else:
-
-                if request.POST.get('tags') and form.has_error('tags'):
-                    messages.error(request, self.error_messages.get('bad_request').format(error_code='5.1'))
-
-                if form.has_error('text'):
-                    messages.error(request, form.errors['text'])
-
-                for error in form.non_field_errors():
-                    messages.error(request, error)
-
-                return HttpResponse(messages_to_json(request), content_type='application/json')
+                return handler400(request)
 
         else:
             return handler404(request)

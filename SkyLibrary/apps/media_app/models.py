@@ -109,10 +109,6 @@ class Media(models.Model):
         verbose_name_plural = _('medias')
 
 
-def get_best_active_media(amount: int) -> list[Media]:
-    return sorted(Media.objects.filter(active=1), key=lambda media: media.get_rating(), reverse=True)[:amount]
-
-
 class MediaDownload(models.Model):
 
     NOT_DOWNLOADED = 0
