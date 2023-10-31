@@ -45,8 +45,8 @@ class MediaFilter:
 
     def _filter_by_text(self, text: str, media_field_name: str) -> None:
         # filtering by text in a given media field name
-        # full chain after substitution example: self._media = self._media.filter(title__contains=text)
-        self._media = self._media.filter(**{f'{media_field_name}__contains': text})
+        # full chain after substitution example: self._media = self._media.filter(title__icontains=text)
+        self._media = self._media.filter(**{f'{media_field_name}__icontains': text})
 
     def filter_by_title(self, text: str) -> None:
         self._filter_by_text(text, 'title')
@@ -55,7 +55,7 @@ class MediaFilter:
         self._filter_by_text(text, 'author')
 
     def filter_by_user_who_added(self, text: str) -> None:
-        self._media = self._media.filter(user_who_added__username__contains=text)
+        self._media = self._media.filter(user_who_added__username__icontains=text)
 
     def filter_by_tags(self, tags: QuerySet[MediaTags]) -> None:
 
