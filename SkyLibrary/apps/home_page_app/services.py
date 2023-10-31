@@ -23,7 +23,7 @@ class MediaFilter:
     def filter_by_rating(
             self,
             direction: RATING_DIRECTION_CHOICES_LITERAL = _DESCENDING,
-            minimum_value: int = min(MediaRating.rating_choices_list),
+            minimum_value: int = 0,
             maximum_value: int = max(MediaRating.rating_choices_list),
     ) -> None:
 
