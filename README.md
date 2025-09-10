@@ -3,6 +3,9 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/LaGGgggg/SkyLibrary)
 [![wakatime](https://wakatime.com/badge/user/824414bb-4135-4fbc-abbd-0d007987e855/project/c5bb279e-2962-4a25-b98b-9b09e581de4c.svg)](https://wakatime.com/badge/user/824414bb-4135-4fbc-abbd-0d007987e855/project/c5bb279e-2962-4a25-b98b-9b09e581de4c)
 
+> [!WARNING]  
+> This repository has been **archived** and is no longer maintained
+
 # Sky library
 
 Web library on django.
